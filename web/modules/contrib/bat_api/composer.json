@@ -1,0 +1,16 @@
+{
+  "name": "drupal/bat_api",
+  "type": "drupal-module",
+  "description": "BAT API",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "http://drupal.org/project/bat_api",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "http://drupal.org/project/issues/bat_api",
+    "source": "http://cgit.drupalcode.org/bat_api"
+  },
+  "require": {
+    "drupal/restui": "^1.2"
+  }
+}

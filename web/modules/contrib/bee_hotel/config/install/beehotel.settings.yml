@@ -1,0 +1,18 @@
+_core:
+  default_config_hash: ReohfVhMxGLG5S8ykbdhRc105DW01Cl93nd6i8xqja4
+beehotel:
+  setup_mode: 1
+  beehotel_unit:
+    field_cover_image: field_cover_image
+  off_value: 0
+  off_text: ''
+  calendar_from: '0'
+  book_this_unit_header: Book
+  book_this_unit_submit: Book
+  book_this_unit_position: top
+  units_search_header: Search
+  units_search_submit: Search
+  units_search_position: none
+  chain_chart: null
+reservation_paused_1: 1745930015
+unit_reservation_form_disabled: false

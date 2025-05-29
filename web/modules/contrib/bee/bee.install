@@ -1,0 +1,154 @@
+<?php
+
+use Drupal\Core\Config\FileStorage;
+use Drupal\node\Entity\NodeType;
+use Drupal\user\RoleInterface;
+
+/**
+ * Implements hook_install().
+ */
+function bee_install() {
+
+  bee_create_require_bat_states();
+
+  user_role_change_permissions(RoleInterface::ANONYMOUS_ID, [
+    'view calendar data for any availability_daily event' => TRUE,
+    'view calendar data for any availability_hourly event' => TRUE,
+  ]);
+
+  user_role_change_permissions(RoleInterface::AUTHENTICATED_ID, [
+    'view calendar data for any availability_daily event' => TRUE,
+    'view calendar data for any availability_hourly event' => TRUE,
+  ]);
+
+  bee_event_series_types_add_fields();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function bee_uninstall() {
+  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+  $entityFieldManager = Drupal::service('entity_field.manager');
+
+  $field_names = [
+    'field_availability_daily',
+    'field_availability_hourly',
+    'field_open_hours',
+    'field_use_open_hours',
+    'field_product',
+    'field_price',
+    'field_price_frequency',
+  ];
+
+  foreach ($node_types as $node_type) {
+    assert($node_type instanceof NodeType);
+    $fields = $entityFieldManager->getFieldDefinitions('node', $node_type->id());
+
+    foreach ($field_names as $field_name) {
+      if (isset($fields[$field_name])) {
+        $fields[$field_name]->delete();
+      }
+    }
+
+    $node_type->unsetThirdPartySetting('bee', 'bee')->save();
+  }
+
+  // Delete bat states related to BEE.
+  $storage = \Drupal::entityTypeManager()->getStorage('state');
+  $sids = $storage->getQuery()
+    ->accessCheck(FALSE)
+    ->execute();
+  $states = $storage->loadMultiple($sids);
+  foreach ($states as $state) {
+    if (!empty($state->get("machine_name")->value)) {
+      if (substr($state->get("machine_name")->value, 0, 4) == 'bee_') {
+        $state->delete();
+      }
+    }
+  }
+
+  bat_event_delete_event_type_schema('availability_daily');
+  bat_event_delete_event_type_schema('availability_hourly');
+}
+
+/**
+ * Add booking "Capacity" field.
+ */
+function bee_update_8001() {
+  if (bat_booking_type_load('bee') !== NULL) {
+    bee_create_booking_capacity_field();
+  }
+}
+
+/**
+ * Set cardinality as unlimited for the "booking_event_reference" field.
+ */
+function bee_update_8002() {
+  if (bat_booking_type_load('bee') !== NULL) {
+    bee_set_booking_event_reference_field_cardinality();
+  }
+}
+
+/**
+ * Enable module "BAT Event Series"
+ */
+function bee_update_8003() {
+  \Drupal::service('module_installer')->install(['bat_event_series']);
+}
+
+/**
+ * Import BAT Event series Types.
+ */
+function bee_update_8004() {
+  $configs = [
+    'bat_event_series.event_series_type.availability_daily',
+    'bat_event_series.event_series_type.availability_hourly',
+  ];
+
+  $path = \Drupal::service('extension.list.module')->getPath('bee') . '/config/install';
+  $source = new FileStorage($path);
+  $config_storage = \Drupal::service('config.storage');
+  foreach ($configs as $config) {
+    $config_storage->write($config, $source->read($config));
+  }
+
+  bee_event_series_types_add_fields();
+}
+
+/**
+ * Add booking fields "Repeat frequency" and "Repeat until".
+ */
+function bee_update_8005() {
+  if (bat_booking_type_load('bee') !== NULL) {
+    bee_create_booking_repeat_frequency_field();
+    bee_create_booking_repeat_until_field();
+  }
+}
+
+/**
+ * Add booking "Event series" field.
+ */
+function bee_update_8006() {
+  if (bat_booking_type_load('bee') !== NULL) {
+    bee_create_booking_event_series_reference_field();
+  }
+}
+
+/**
+ * Make sure all config settings for content types are in third party config
+ * storage.
+ */
+function bee_update_8007() {
+  $node_types = \Drupal::entityTypeManager()->getStorage('node_type')->loadMultiple();
+  foreach ($node_types as $node_type) {
+    assert($node_type instanceof NodeType);
+    $bee_settings = Drupal::configFactory()->get('node.type.' . $node_type->id())->get('bee');
+    if (empty($node_type->getThirdPartySetting('bee', 'bee')) && !empty($bee_settings)) {
+      $node_type->setThirdPartySetting('bee', 'bee', $bee_settings)->save();
+    }
+    if (!empty($bee_settings)) {
+      Drupal::configFactory()->getEditable('node.type.' . $node_type->id())->clear('bee')->save();
+    }
+  }
+}

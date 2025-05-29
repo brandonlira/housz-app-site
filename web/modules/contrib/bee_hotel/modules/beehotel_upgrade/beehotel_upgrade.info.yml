@@ -1,0 +1,12 @@
+name: Bee Hotel Upgrade
+type: module
+description: BEE Hotel upgrde fix from previous releases
+package: 'BEE Hotel'
+core_version_requirement: ^9.4 || ^10  || ^11
+dependencies:
+  - drupal:bee_hotel
+
+# Information added by Drupal.org packaging script on 2025-05-10
+version: '2.24.6'
+project: 'bee_hotel'
+datestamp: 1746864358

@@ -1,0 +1,23 @@
+langcode: en
+status: true
+id: bat_event.event_state_reference
+field_name: field_event_state_reference
+entity_type: bat_event
+label: 'BAT Event State Reference'
+required: true
+description: ''
+type: entity_reference
+settings:
+  target_type: state
+module: core
+locked: true
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
+default_value: {  }
+default_value_callback: ''
+dependencies:
+  module:
+    - bat_event

@@ -1,0 +1,63 @@
+drupal.beehotel.toolbar:
+  version: VERSION
+  css:
+    theme:
+      assets/css/beehotel.icons.css: {}
+
+main:
+  version: 1.x
+  css:
+    layout:
+      assets/css/main-layout.css: {}
+    theme:
+      assets/css/main-theme.css: {}
+      assets/css/beehotel.inbox.css: {}
+  js:
+    assets/js/alter.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+
+admin:
+  version: 1.x
+  css:
+    layout:
+      assets/css/admin-layout.css: {}
+    theme:
+      assets/css/admin-theme.css: {}
+
+extra:
+  version: 1.x
+  css:
+    layout:
+      assets/css/main-layout-extra.css: {}
+    theme:
+      assets/css/main-theme-extra.css: {}
+
+
+book-this-unit:
+  version: 1.x
+  css:
+    theme:
+      assets/css/book-this-unit.css: {}
+
+beehotel-litepicker:
+  js:
+    /libraries/litepicker/litepicker.js: {}
+    assets/js/beehotel_litepicker.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+
+beehotel-guestmessages:
+  # header: true
+  js:
+    assets/js/guestmessages.js: {}
+  css:
+    layout:
+      assets/css/guestmessages.css: {}
+
+  dependencies:
+    - core/drupal
+    - core/drupalSettings

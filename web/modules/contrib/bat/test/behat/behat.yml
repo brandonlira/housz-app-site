@@ -1,0 +1,33 @@
+default:
+  suites:
+    default:
+      paths:
+        - '%paths.base%/features'
+      contexts:
+        - BatFeatureContext
+        - Drupal\DrupalExtension\Context\MinkContext
+        - Drupal\DrupalExtension\Context\MessageContext
+        - Drupal\DrupalExtension\Context\DrushContext
+        - Roomify\RoomifyExtension\Context\RoomifyContext
+  extensions:
+    Behat\MinkExtension:
+      base_url:  'http://127.0.0.1:8888'
+      files_path:  '%paths.base%/testing_files'
+      selenium2:
+        capabilities: { "browser": "chrome", "version": "*", "marionette": true, "extra_capabilities": { "chromeOptions": { "w3c": false } } }
+      javascript_session: 'selenium2'
+    Drupal\DrupalExtension:
+      blackbox: ~
+      api_driver: 'drupal'
+      drush_driver: 'drush'
+      drush:
+        root: ../..
+    Bex\Behat\ScreenshotExtension:
+      screenshot_taking_mode: all_scenarios
+      active_image_drivers: local
+      image_drivers:
+        local:
+          screenshot_directory: /tmp
+
+imports:
+  - behat.local.yml

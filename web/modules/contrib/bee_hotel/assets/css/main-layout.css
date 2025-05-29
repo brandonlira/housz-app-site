@@ -1,0 +1,35 @@
+body.main-layout {
+  color: inherit;
+}
+
+span.mandatory {
+  color: red;
+}
+
+span.enabled {
+  color: green;
+  font-weight: bold;
+}
+
+span.disabled {
+  color: grey;
+  font-style: italic;
+}
+
+#block-gestionebeehotel-2 {
+  display: none;
+}
+
+/* Move this into _pricealterator  */
+.form-item-increase,
+.form-type-range-slider {
+  border: lightgrey solid 2px;
+  padding: 24px;
+}
+
+.form-type-range-slider output {
+  display: block;
+  font-size: 2.6em;
+  text-align: center;
+  width: auto;
+}

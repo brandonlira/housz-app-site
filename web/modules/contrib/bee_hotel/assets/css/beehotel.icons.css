@@ -1,0 +1,16 @@
+/**
+ * @file
+ * Styling for the beehotel module icons.
+ */
+
+/**
+ * Toolbar tab icon.
+ */
+.toolbar-bar .toolbar-icon-beehotel-admin:before {
+  background-image: url(../../icons/787878/bee.svg);
+}
+
+.toolbar-bar .toolbar-icon-beehotel-admin:active:before,
+.toolbar-bar .toolbar-icon-beehotel-admin.is-active:before {
+  background-image: url(../../icons/ffffff/bee.svg);
+}

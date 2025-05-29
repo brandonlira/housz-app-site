@@ -1,0 +1,281 @@
+<?php
+
+/**
+ * @file
+ * Contains global features for beehotel_pricealterator.
+ */
+
+use Drupal\Core\Breadcrumb\Breadcrumb;
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Render\Markup;
+use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
+
+/**
+ * Alterators config prefix.
+ */
+const BEEHOTEL_PRICEALTERATOR_ROUTE_BASE = 'beehotel_pricealterator.pricealterator.';
+
+/**
+ * Implements hook_theme().
+ */
+function beehotel_pricealterator_theme($existing, $type, $theme, $path) {
+
+  return [
+    'beehotel_pricealterator_current_value' => [
+      'template' => 'beehotel-pricealterator-current-value',
+      'variables' => [
+        'class' => NULL,
+        'description' => NULL,
+        'string' => NULL,
+        'type' => NULL,
+      ],
+    ],
+
+    'beehotel_pricealterators_default_chart' => [
+      'template' => 'beehotel-pricealterators-default-chart',
+      'variables' => [],
+    ],
+
+    'beehotel_pricealterator_seasons' => [
+      'template' => 'beehotel-pricealterator-seasons',
+      'variables' => [
+        'low' => [],
+        'high' => [],
+        'peak' => [],
+      ],
+    ],
+
+    'beehotel_pricealterator_alterator_info' => [
+      'template' => 'beehotel-pricealterator-alterator-info',
+      'variables' => [
+        'concept' => NULL,
+        'examples' => NULL,
+        'howto' => NULL,
+        'tips' => NULL,
+        'title' => t("Info"),
+        'usecases' => NULL,
+      ],
+    ],
+
+    'beehotel_pricealterator_pricechain_block' => [
+      'template' => 'beehotel-pricealterator-pricechain-block',
+      'variables' => [
+        'title' => NULL,
+        'as' => [],
+        'description' => NULL,
+      ],
+    ],
+
+  ];
+
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function beehotel_pricealterator_menu_local_tasks_alter(&$data, $route_name, RefinableCacheableDependencyInterface $cacheability) {
+  if ($route_name === 'entity.node.canonical') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+
+    $isBeehotel = \Drupal::service('beehotel_utils.beehotelunit')->isThisNodeBeeHotel($node);
+
+    if ($isBeehotel == 1) {
+      // @todo more granular permission.
+      if (\Drupal::currentUser()->hasPermission('administer bee_hotel')) {
+        $data['tabs'][0]['node.add_page'] = [
+          '#theme' => 'menu_local_task',
+          '#link' => [
+            'title' => t('Base Table'),
+            'url' => Url::fromUserInput('/node/' . $node->Id() . '/basepricetable'),
+            'localized_options' => [
+              'attributes' => [
+                'title' => t('Insert prices on a weekly table'),
+              ],
+            ],
+          ],
+        ];
+      }
+    }
+    // The tab we're adding is dependent on a user's access to add content.
+    $cacheability->addCacheContexts(['user.permissions']);
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function beehotel_pricealterator_page_attachments(array &$page) {
+  $route = \Drupal::routeMatch()->getRouteName();
+  if ($route == 'beehotel_pricealterator.info.chain') {
+    $page['#attached']['library'][] = 'beehotel_pricealterator/main';
+  }
+  // Can we move this info PriceAlteratorDebugBlock?
+  elseif ($route == 'commerce_cart.page') {
+    $page['#attached']['library'][] = 'beehotel_pricealterator/charts';
+    $page['#attached']['library'][] = 'beehotel_pricealterator/chart-chain';
+  }
+}
+
+/**
+ * Clean configuration values.
+ */
+function beehotel_pricealterator_clean_config() {
+  $beehotel_pricealterator_config = [];
+
+  // Special Night content type.
+  $beehotel_pricealterator_config[] = 'node.type.special_night';
+  $beehotel_pricealterator_config[] = 'field.storage.node.field_type';
+  $beehotel_pricealterator_config[] = 'field.storage.node.field_polarity';
+  $beehotel_pricealterator_config[] = 'field.storage.node.field_nights';
+  $beehotel_pricealterator_config[] = 'field.storage.node.field_alteration';
+  $beehotel_pricealterator_config[] = 'field.field.node.special_night.field_type';
+  $beehotel_pricealterator_config[] = 'field.field.node.special_night.field_polarity';
+  $beehotel_pricealterator_config[] = 'field.field.node.special_night.field_nights';
+  $beehotel_pricealterator_config[] = 'field.field.node.special_night.field_alteration';
+
+  foreach ($beehotel_pricealterator_config as $item) {
+    \Drupal::configFactory()->getEditable($item)->delete();
+  }
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function beehotel_pricealterator_preprocess_html(&$variables) {
+
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  $p = explode(".", $route_name);
+
+  // Add edit class.
+  if ($p[0] == 'beehotel_pricealterator') {
+    $variables['attributes']['class'][] = 'beehotel-pricealterator';
+  }
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function beehotel_pricealterator_preprocess(&$variables) {
+
+  $data = [];
+  $data = beehotel_pricealterator_current_seasons($data);
+
+  $df = \Drupal::service('date.formatter');
+
+  if (isset($data['seasons']['array']['seasons']['range'])) {
+    foreach ($data['seasons']['array']['seasons']['range'] as $season => $ranges) {
+      foreach ($ranges as $range) {
+        if (isset($range['from'])) {
+          $data['seasons']['pieces'][] = [
+            'season' => $season,
+            'from' => [
+              "Y" => $df->format(strtotime($range['from']), 'custom', 'Y'),
+              "m" => $df->format(strtotime($range['from']), 'custom', 'm'),
+              "d" => $df->format(strtotime($range['from']), 'custom', 'd'),
+            ],
+            'to' => [
+              "Y" => $df->format(strtotime($range['to']), 'custom', 'Y'),
+              "m" => $df->format(strtotime($range['to']), 'custom', 'm'),
+              "d" => $df->format(strtotime($range['to']), 'custom', 'd'),
+            ],
+            'fromto' => t("from: @from to: @to", [
+              "@from" => $df->format(strtotime($range['from']), 'custom', 'd m Y'),
+              "@to" => $df->format(strtotime($range['to']), 'custom', 'd m Y'),
+            ]),
+          ];
+        }
+      }
+    }
+
+    $session = \Drupal::request()->getSession();
+    $alterators = $session->get('alterators_current_stack');
+
+    if (isset($alterators)) {
+      $variables['#attached']['drupalSettings']['beehotel_pricealterator']['alterators'] = $alterators;
+    }
+
+    if (isset($data['seasons']['pieces'])) {
+      $variables['#attached']['drupalSettings']['beehotel_pricealterator']['seasons'] = $data['seasons']['pieces'];
+    }
+  }
+  else {
+    // @todo Test this "if".
+    if (\Drupal::currentUser()->hasPermission('admin pricealterator')) {
+      // @todo use proper code.
+      $tmp = "Please check json your setting at <a href='/admin/beehotel/pricealterator/alterators/getseason'>Season input</a>";
+      \Drupal::messenger()->addWarning(Markup::create($tmp));
+    }
+  }
+  $variables['#attached']['library'][] = 'beehotel_pricealterator/main';
+}
+
+/**
+ * Implements hook_system_breadcrumb_alter().
+ */
+function beehotel_pricealterator_system_breadcrumb_alter(Breadcrumb &$breadcrumb, RouteMatchInterface $route_match, array $context) {
+  if ($route_match->getRouteName() === 'entity.node.canonical') {
+    $node = $route_match->getParameter('node');
+    if ($node instanceof Node && $node->getType() === 'special_night') {
+      $data['route']['price_alterators'] = Url::fromRoute('beehotel_pricealterator.info.chain');
+      $data['route']['specialnights'] = Url::fromUserInput('/admin/beehotel/pricealterator/alterators/specialnights');
+      $cacheability = CacheableMetadata::createFromObject($breadcrumb);
+      $breadcrumb = new Breadcrumb();
+      // @todo Keep first link in breadbcrumb.
+      $breadcrumb->addLink(Link::fromTextAndUrl(t('Special Nights'), $data['route']['price_alterators']));
+      $breadcrumb->addLink(Link::fromTextAndUrl(t('Price Alterators'), $data['route']['price_alterators']));
+      $breadcrumb->addLink(Link::fromTextAndUrl(t('Special Nights'), $data['route']['specialnights']));
+      $breadcrumb->addCacheableDependency($cacheability);
+    }
+  }
+}
+
+/**
+ * Current value.
+ *
+ * Get json input from config.
+ */
+function beehotel_pricealterator_current_seasons($data) {
+  // Old name function currentSeasons($data) {.
+  $config = \Drupal::config('beehotel_pricealterator.pricealterator.GetSeason.settings');
+  $data['seasons']['json'] = $config->get("seasons");
+  if ($data['seasons']['json']) {
+    $data['seasons']['array'] = json_decode($data['seasons']['json'], TRUE);
+  }
+  return $data;
+}
+
+/**
+ * Implements hook_beehotel_pricealterator_season().
+ *
+ * Hooks can be implemented by both the module that invokes them like we are
+ * doing here, as well as by any other enabled module. Do we still need this?
+ */
+function beehotel_pricealterator_beehotel_pricealterator_season($data) {
+  // March 24, deprecated on behalf of json seasons.
+}
+
+/**
+ * Get Config.
+ *
+ * Get config from json input.
+ * This data comes from Bee Hotel Admin input.
+ *
+ * @todo move into GetSeason class.
+ *
+ * @return array
+ *   An array of data related to season.
+ */
+function beehotel_pricealterator_get_config($data) {
+  $config = \Drupal::config('beehotel_pricealterator.pricealterator.GetSeason.settings');
+
+  $data['seasons']['json'] = $config->get("seasons");
+
+  if ($data['seasons']['json']) {
+    $data['seasons']['array'] = json_decode($data['seasons']['json'], TRUE);
+  }
+  return $data;
+}

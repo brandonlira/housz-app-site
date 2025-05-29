@@ -1,0 +1,28 @@
+<div class="vertical-order-item">
+
+  {# extra info as today events? #}
+  {{ extra }}
+
+  {% if hidden_text == TRUE %}
+    <div>
+      <a href='/admin/commerce/orders/{{ order_id }}'>{{ mail }} </a>
+      <a href='/admin/commerce/orders/{{ order_id }}' class='small'>{{order_number}}</a>
+      <span>{{ name }}</span><span>{{ surname }}</span>
+
+      <div class='payments'>
+        {% for key, payment in payments %}
+          <div><span class='bee_hotel_vertical payment small' title='Paid on {{ payment.date|e  }}'><span class='amount'>{{ payment.amount|e }}€</span></span></div>
+        {% endfor %}
+
+        {% if balance > 0 %}
+          <div><span class='bee_hotel_vertical balance small' title='Balance' ><span class=''>{{ balance|e }}€</span></span></div>
+        {% else %}
+          <div><span class='bee_hotel_vertical balanced small' title='Balanced' >&#10004; </span></div>
+        {% endif %}
+      </div>
+    </div>
+    <div class='comments'>{{ comments }}</div>
+    <div class='extra'>{{ extra }}</div>
+  {% endif %}
+</div>
+

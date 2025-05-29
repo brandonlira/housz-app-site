@@ -1,0 +1,18 @@
+administer bee settings:
+  title: 'Administer bee settings'
+  description: 'Administer bee settings'
+
+create bee reservation:
+  title: 'Create bee reservation'
+  description: 'Create bee reservation'
+  
+view calendar data for any availability_daily event:
+  title: 'View calendar data for any availability_daily event'
+  description: 'View calendar data for any availability_daily event'
+
+view calendar data for any availability_hourly event:
+  title: 'View calendar data for any availability_hourly event'
+  description: 'View calendar data for any availability_hourly event'
+
+permission_callbacks:
+  - Drupal\bee\BeePermissions::permissions

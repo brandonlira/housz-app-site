@@ -1,0 +1,9 @@
+services:
+  beehotel_utils.dates:
+    class: Drupal\beehotel_utils\Dates
+  beehotel_utils.beehotelcommerce:
+    class: Drupal\beehotel_utils\BeeHotelCommerce
+    arguments: ['@entity_type.manager', '@messenger']
+  beehotel_utils.beehotelunit:
+    class: Drupal\beehotel_utils\BeeHotelUnit
+    arguments: ['@current_user', '@entity_type.manager', '@messenger', '@config.factory', '@beehotel_utils.dates', '@request_stack', '@renderer']

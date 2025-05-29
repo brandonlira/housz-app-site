@@ -1,0 +1,20 @@
+beehotel_ical.icalavailability:
+  path: '/beehotel_ical/availability/{node}'
+  defaults:
+    _controller: '\Drupal\beehotel_ical\Controller\BeeHotelICal::availability'
+    _title: 'Availability'
+  options:
+    parameters:
+      node:
+        type: entity:node    
+  requirements:
+    _permission: 'access content'
+
+    
+beehotel_ical.admin_settings:
+  path: '/admin/config/services/beehotel_ical/settings'
+  defaults:
+    _form: '\Drupal\beehotel_ical\Form\BeeeHotelIcalSettingsForm'
+    _title: 'Bee Hotel ICal'
+  requirements:
+    _permission: 'administer bee_hotel'

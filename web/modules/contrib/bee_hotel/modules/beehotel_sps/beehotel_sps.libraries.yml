@@ -1,0 +1,5 @@
+beehotel-sps-slicer:
+  version: 1.x
+  css:
+    layout:
+      assets/css/beehotel_sps_slicer.css: {}

@@ -1,0 +1,44 @@
+main:
+  version: 1.x
+  css:
+    layout:
+      assets/css/main.css: {}
+
+pricealterators:
+  version: 1.x
+  css:
+    layout:
+      assets/css/pricealterators.css: {}
+
+pricealterator:
+  version: 1.x
+  css:
+    layout:
+      assets/css/pricealterator.css: {}
+
+charts:
+  version: 1.x
+  js:
+    https://ajax.googleapis.com/ajax/libs/angularjs/1.4.4/angular.min.js: { type: external, minified: true,  weight: -1 }
+    https://www.gstatic.com/charts/loader.js: { type: external, minified: true,  weight: -1 }
+    # assets/js/pricealterator-seasons.js: {}
+    # assets/js/pricealterator-pricechain.js: {}
+  dependencies:
+    - core/drupalSettings
+    - core/drupal
+    - core/jquery
+    - core/once
+
+chart-seasons:
+  version: 1.x
+  js:
+    assets/js/pricealterator-seasons.js: {}
+  dependencies:
+    - beehotel_pricealterators/charts
+
+chart-chain:
+  version: 1.x
+  js:
+    assets/js/pricealterator-pricechain.js: {}
+  dependencies:
+    - beehotel_pricealterators/charts

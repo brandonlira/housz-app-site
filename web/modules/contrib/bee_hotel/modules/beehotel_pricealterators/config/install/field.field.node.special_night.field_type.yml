@@ -1,0 +1,21 @@
+uuid: 1f4c3169-c968-47e5-89b7-987c96541d1f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_type
+    - node.type.special_night
+  module:
+    - options
+id: node.special_night.field_type
+field_name: field_type
+entity_type: node
+bundle: special_night
+label: Type
+description: "<ul>\r\n<li>Percentage: alter the price in  percentage\r\n<li>Integer: alter the price with a integer number\r\n<li>Fixed: replace previous price by weight with a fixed value. This has no polarity\r\n</ul>"
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

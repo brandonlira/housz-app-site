@@ -1,0 +1,34 @@
+entity.bat_unit.top:
+  title: 'Unit'
+  route_name: entity.bat_unit.top
+  description: 'Unit Settings'
+  parent: bat.admin
+  weight: 0
+
+entity.bat_type_bundle.collection:
+  title: 'Type Bundles'
+  route_name: entity.bat_type_bundle.collection
+  description: 'List of Type Bundles'
+  parent: entity.bat_unit.top
+  weight: 40
+
+entity.bat_unit_type.collection:
+  title: 'Types'
+  route_name: entity.bat_unit_type.collection
+  description: 'List of Types'
+  parent: entity.bat_unit.top
+  weight: 30
+
+entity.bat_unit_bundle.collection:
+  title: 'Unit Bundles'
+  route_name: entity.bat_unit_bundle.collection
+  description: 'List of Unit Bundles'
+  parent: entity.bat_unit.top
+  weight: 20
+
+entity.bat_unit.collection:
+  title: 'Units'
+  route_name: entity.bat_unit.collection
+  description: 'List of Units'
+  parent: entity.bat_unit.top
+  weight: 10

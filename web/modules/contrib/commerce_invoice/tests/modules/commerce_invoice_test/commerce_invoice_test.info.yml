@@ -1,0 +1,11 @@
+name: Commerce Invoice Test
+type: module
+description: Contains various non-specific things needed in invoice tests.
+package: Testing
+dependencies:
+  - commerce_invoice:commerce_invoice
+
+# Information added by Drupal.org packaging script on 2025-05-05
+version: '8.x-2.2'
+project: 'commerce_invoice'
+datestamp: 1746433048

@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Contains ......
+ */
+
+use Drupal\beehotel_samplehotel\SampleHotelInstall;
+
+/**
+ * Implements hook_install().
+ */
+function beehotel_samplehotel_install() {
+
+  $installer = new SampleHotelInstall([], [], []);
+  $res = $installer->install();
+
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function beehotel_samplehotel_uninstall() {
+
+  $installer = new SampleHotelInstall();
+  $res = $installer->uninstall();
+
+}

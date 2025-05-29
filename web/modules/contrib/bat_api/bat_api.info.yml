@@ -1,0 +1,19 @@
+name: Booking and Availability Management API
+type: module
+description: API access to BAT Booking and Availability Data for Drupal
+core_version_requirement: ^10.2 || ^11
+package: bat
+dependencies:
+  - bat:bat_event
+  - bat:bat_fullcalendar
+  - drupal:restui
+
+# Information added by Drupal.org packaging script on 2025-03-21
+# version: '11.1.0-beta1'
+# project: 'bat_api'
+# datestamp: 1742558721
+
+# Information added by Drupal.org packaging script on 2025-04-29
+version: '11.1.0-rc1'
+project: 'bat_api'
+datestamp: 1745956393

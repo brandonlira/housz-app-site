@@ -1,0 +1,12 @@
+name: Bee Hotel Utils
+type: module
+description: 'Indipent Bee Hotel sub-module providing Utilities to other  BEEHotel modules'
+package: 'BEE Hotel'
+core_version_requirement: ^10.2 || ^11
+dependencies:
+  # this module will never have dependencied inside bee_hotel
+
+# Information added by Drupal.org packaging script on 2025-05-10
+version: '2.24.6'
+project: 'bee_hotel'
+datestamp: 1746864358

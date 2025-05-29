@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * BeeHotel SPS - ??? Price slider.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_alter().
+ */
+function beehotel_sps_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  $path = \Drupal::service('path.current')->getPath();
+  if (\Drupal::service('path.matcher')->matchPath($path, '/store/*/edit')) {
+    $form['#attached']['library'][] = 'beehotel_sps/beehotel-sps-slicer';
+  }
+  return $form;
+}

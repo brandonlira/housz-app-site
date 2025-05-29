@@ -1,0 +1,9 @@
+*~
+*gz
+*sql
+DEPLOY.sh
+PRENDI_DA_DEVEL.sh
+src/Commands
+modules/beehotel_alternatives
+*patch
+devel/*

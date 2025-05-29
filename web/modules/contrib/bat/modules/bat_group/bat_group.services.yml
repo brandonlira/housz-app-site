@@ -1,0 +1,5 @@
+services:
+  bat_group.service:
+    class: \Drupal\bat_group\Service\Group
+    arguments:
+      - '@entity_type.manager'

@@ -1,0 +1,64 @@
+beehotel_pricealterator.pricealterator.sundaycheckin_settings:
+  path: '/admin/beehotel/pricealterator/alterators/sundaycheckin'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterators\Form\SundayCheckin'
+    _title: 'Sunday Checkin'
+  requirements:
+    _permission: 'administer bee_hotel'
+
+beehotel_pricealterator.pricealterator.onenightonly_settings:
+  path: '/admin/beehotel/pricealterator/alterators/onenightonly'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterators\Form\OneNightOnly'
+    _title: 'One night only'
+  requirements:
+    _permission: 'administer bee_hotel'
+
+beehotel_pricealterator.pricealterator.saturdaynightonly_settings:
+  path: '/admin/beehotel/pricealterator/alterators/saturdaynightonly'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterators\Form\SaturdayNightOnly'
+    _title: 'Only sleeps on Saturday night'
+  requirements:
+    _permission: 'administer bee_hotel'
+
+beehotel_pricealterator.pricealterator.globalslider_settings:
+  path: '/admin/beehotel/pricealterator/alterators/globalslider'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterators\Form\GlobalSlider'
+    _title: 'Global Slider'
+  requirements:
+    _permission: 'administer bee_hotel'
+
+beehotel_pricealterator.pricealterator.occupants_settings:
+  path: '/admin/beehotel/pricealterator/alterators/occupants'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterators\Form\Occupants'
+    _title: 'Occupants Alterator'
+  requirements:
+    _permission: 'administer bee_hotel'
+
+beehotel_pricealterator.pricealterator.consecutivenights_settings:
+  path: '/admin/beehotel/pricealterator/alterators/consecutivenights'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterators\Form\ConsecutiveNights'
+    _title: 'Consecutive Nights'
+  requirements:
+    _permission: 'administer bee_hotel'
+
+
+beehotel_pricealterator.pricealterator.daysbeforecheckin_settings:
+  path: '/admin/beehotel/pricealterator/alterators/daysbeforecheckin'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterators\Form\DaysBeforeCheckin'
+    _title: 'Days Before Checkin'
+  requirements:
+    _permission: 'administer bee_hotel'
+
+beehotel_pricealterator.pricealterator.specialnights_settings:
+  path: '/admin/beehotel/pricealterator/alterators/specialnights'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterators\Form\SpecialNights'
+    _title: 'Special Nights'
+  requirements:
+    _permission: 'administer bee_hotel'

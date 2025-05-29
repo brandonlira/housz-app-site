@@ -1,0 +1,25 @@
+body.beehotel.beehotel-pricealterator  h1.page-title {
+  background-image: url(images/price-alterator.png);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 38px;
+  padding: 4px 60px;
+}
+
+form > * {
+  margin: 96px auto;
+}
+
+/* Info */
+form details {
+  overflow: hidden;
+  max-height: 90px;
+  transition: max-height 1s ease-in-out;
+  &[open] {
+    max-height: 360px;
+  }
+}
+
+form details {
+  display: list-item;
+  margin-top: 0;
+}

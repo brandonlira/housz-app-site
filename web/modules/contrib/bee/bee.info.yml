@@ -1,0 +1,28 @@
+name: "BEE: Bookable Entities Everywhere"
+type: module
+description: Bookable Entities Everywhere - Bookable content types via BAT module.
+core_version_requirement: ^10.2 || ^11
+package: bat
+dependencies:
+  - bat:bat_booking
+  - bat:bat_event_series
+  - bat:bat_event_ui
+  - office_hours:office_hours
+  - commerce:commerce_order
+  - commerce:commerce_product
+  - commerce:commerce_store
+
+# Information added by Drupal.org packaging script on 2025-03-14
+# version: '11.1.0-alpha3'
+# project: 'bee'
+# datestamp: 1741952693
+
+# Information added by Drupal.org packaging script on 2025-03-21
+# version: '11.1.0-beta1'
+# project: 'bee'
+# datestamp: 1742558092
+
+# Information added by Drupal.org packaging script on 2025-04-29
+version: '11.1.0-rc1'
+project: 'bee'
+datestamp: 1745955642

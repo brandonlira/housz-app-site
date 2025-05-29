@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Contains global features for Beehotel Event.
+ */
+
+use Drupal\beehotel_event\Util\EventMaintenance;
+
+/**
+ * Implements hook_cron().
+ */
+function beehotel_event_cron() {
+  // Purge old bat_events.
+  $eventMaintenance = new EventMaintenance();
+  $eventMaintenance->deleteOldBatEvents([]);
+}

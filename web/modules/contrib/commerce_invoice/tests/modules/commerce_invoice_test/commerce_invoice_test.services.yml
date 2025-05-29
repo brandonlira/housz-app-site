@@ -1,0 +1,10 @@
+services:
+  commerce_invoice_test.invoice_filename_subscriber:
+    class: Drupal\commerce_invoice_test\EventSubscriber\InvoiceFilenameSubscriber
+    tags:
+      - { name: event_subscriber }
+
+  commerce_invoice_test.order_paid_subscriber:
+    class: Drupal\commerce_invoice_test\EventSubscriber\InvoicePaidSubscriber
+    tags:
+      - { name: event_subscriber }

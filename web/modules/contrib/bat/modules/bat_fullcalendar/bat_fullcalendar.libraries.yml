@@ -1,0 +1,41 @@
+bat-fullcalendar-cdn:
+  remote: https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js
+  version: 6.1.16
+  license:
+    name: MIT
+    url: https://github.com/fullcalendar/fullcalendar/blob/main/LICENSE.md
+    gpl-compatible: true
+  js:
+    https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js: { type: external, minified: true }
+
+bat-fullcalendar:
+  version: 1.x
+  js:
+    assets/js/bat_fullcalendar.js: {}
+  dependencies:
+    - core/jquery.once
+    - core/drupal.dialog.ajax # Required for dialogs
+    - core/jquery.form # If you also want to use Ajax for form operations
+    - bat_fullcalendar/bat-fullcalendar-cdn
+
+# Timeline
+bat-fullcalendar-cdn-scheduler:
+  remote: https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.15/index.global.min.js
+  version: 6.1.16
+  license:
+    name: MIT
+    url: https://github.com/fullcalendar/fullcalendar/blob/main/LICENSE.md
+    gpl-compatible: true
+  js:
+    https://cdn.jsdelivr.net/npm/fullcalendar-scheduler@6.1.15/index.global.min.js: { type: external, minified: true }
+
+bat-fullcalendar-scheduler:
+  version: 1.x
+  js:
+    assets/js/bat_fullcalendar_scheduler.js: {}
+  dependencies:
+    - core/jquery.once
+    - core/drupal.dialog.ajax # Required for dialogs
+    - core/jquery.form # If you also want to use Ajax for form operations
+    - bat_fullcalendar/bat-fullcalendar-cdn-scheduler
+

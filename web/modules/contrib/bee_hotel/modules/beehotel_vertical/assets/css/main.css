@@ -1,0 +1,74 @@
+body.vertical-table #preview  .inner {
+  max-width: 100%;
+}
+
+table.vertical-table tr {
+  border: 0;
+  min-height: 90px;
+}
+
+table.vertical-table th .unit {
+  text-align: center;
+}
+
+table.vertical-table td {
+  padding: 0;
+}
+
+table.vertical-table .day-of-the-week {
+  font-weight: bold;
+}
+
+table.vertical-table .year {
+  color: grey;
+}
+
+table.vertical-table tr > td > div {
+  margin: 0 auto;
+  width: 80%;
+}
+
+table.vertical-table tr > td > div > div {
+  padding: 8px;
+}
+
+
+table.vertical-table tr > td > div > div.a  ,
+table.vertical-table tr > td > div > div.b {
+  height: 35%;
+}
+
+table.vertical-table tr > td > div > div.spacer {
+  height: 30%;
+  font-size: 0;
+}
+
+table.vertical-table tr > td > div > .reservation ,
+table.vertical-table tr > td > div > .occupied {
+  background: #139ff7;
+  color: white;
+  font-weight: bold;
+}
+
+
+table.vertical-table tr > td > div > .reservation.same-as-daybefore .vertical-order-item ,
+table.vertical-table tr > td > div > .reservation.checkout .vertical-order-item {
+  visibility: hidden;
+}
+
+
+table.vertical-table tr > td > div > .checkin {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+table.vertical-table tr > td > div > .checkout {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+@media screen and (max-width: 1680px) {
+  body.vertical-table #preview .inner {
+    max-width: 100%;
+  }
+}

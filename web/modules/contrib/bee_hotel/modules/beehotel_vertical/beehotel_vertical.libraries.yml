@@ -1,0 +1,13 @@
+vertical:
+  version: 1.x
+  css:
+    theme:
+      assets/css/vertical.css: {}
+      assets/css/vertical.state.css: {}
+  js:
+    assets/js/vertical.js: {}
+  dependencies:
+    - core/drupalSettings
+    - core/drupal
+    - core/jquery
+    - core/once

@@ -1,0 +1,15 @@
+services:
+  plugin.manager.beehotel.pricealterator:
+    class: Drupal\beehotel_pricealterator\PriceAlteratorPluginManager
+    parent: default_plugin_manager
+    arguments: ['@entity_type.manager', '@config.factory']
+  beehotel_pricealterator.prealter:
+    class: Drupal\beehotel_pricealterator\PreAlter
+    arguments: ['@current_user', '@module_handler', '@config.factory', '@beehotel_utils.dates', '@messenger']
+  beehotel_pricealterator.alter:
+    class: Drupal\beehotel_pricealterator\Alter
+    arguments: ['@current_user', '@beehotel_pricealterator.prealter', '@plugin.manager.beehotel.pricealterator', '@entity_type.manager', '@beehotel_utils.beehotelcommerce', '@renderer', '@session', '@beehotel_utils.beehotelunit']
+  beehotel_pricealterator.base:
+    class: Drupal\beehotel_pricealterator\PriceAlteratorBase
+  beehotel_pricealterator.util:
+    class: Drupal\beehotel_pricealterator\Util

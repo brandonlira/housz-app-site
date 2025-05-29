@@ -1,0 +1,10 @@
+configure beehotel settings:
+  title: 'Configure BEE Hotel'
+  description: 'Allows users to manage site-wide BEE HOTEL configuration settings.'
+
+create bee_hotel book_this_unit:
+  title: 'Book Units'
+  description: 'Book Units'
+
+permission_callbacks:
+  - Drupal\bee_hotel\BeeHotelPermissions::permissions

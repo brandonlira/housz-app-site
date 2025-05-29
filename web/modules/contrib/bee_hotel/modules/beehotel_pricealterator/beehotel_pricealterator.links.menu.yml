@@ -1,0 +1,5 @@
+beehotel_pricealterator.info.chain:
+  title: 'Price Alterators'
+  route_name: 'beehotel_pricealterator.info.chain'
+  parent: 'beehotel.admin'
+  description: 'Automate/optimize your prices with alterators. Sorted by preferences, you control your own price Algorithm.'

@@ -1,0 +1,12 @@
+name: Bee Hotel Price Alterator
+type: module
+description: Price Alterator Base for BEE Hotel Dynamic prices logic
+package: 'BEE Hotel'
+core_version_requirement: ^9.4 || ^10.2 || ^11
+dependencies:
+  - drupal:beehotel_utils
+
+# Information added by Drupal.org packaging script on 2025-05-10
+version: '2.24.6'
+project: 'bee_hotel'
+datestamp: 1746864358

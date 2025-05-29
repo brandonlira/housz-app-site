@@ -1,0 +1,8 @@
+body.main-theme {
+  color: inherit;
+}
+
+.units .unit {
+  border: 1px solid lightgrey;
+  padding: 6px;
+}

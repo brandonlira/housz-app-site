@@ -1,0 +1,166 @@
+body.beehotel.beehotel-pricealterator  h1.page-title {
+  background-image: url(images/price-alterator.png);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 38px;
+  padding: 4px 60px;
+}
+
+#edit-alterators tr th {
+  text-align: center;
+}
+
+#edit-alterators tr th.th__enabled {
+  display: none;
+}
+
+#edit-alterators tr td:first-child + td + td {
+  width: 40%;
+}
+
+#edit-alterators tr td .enabled {
+  width: 1%;
+}
+
+/* Disabled */
+#edit-alterators tr.enabled-0 * ,
+#edit-alterators tr.enabled- * {
+  color: lightgrey;
+}
+
+#edit-alterators tr.enabled-0 .settings a ,
+#edit-alterators tr.enabled- .settings a {
+  color: green;
+}
+
+#edit-alterators tr.enabled-0 .settings a img ,
+#edit-alterators tr.enabled-1 .settings a img {
+  width: 24px;
+  height: 24px;
+  max-width: initial;
+}
+
+#edit-alterators tr td.description {
+  background: #f7f7f7;
+  font-size: 0.86em;
+}
+
+/*#edit-alterators tr td .settings.enabled-1 {
+  background-image: url(images/gui-check-yes-svgrepo-com.svg);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 18px;
+  padding: 4px 18px;
+  position: top right;
+}*/
+
+.name {
+  font-weight: bold;
+}
+
+/* Current value  */
+.current-value {
+  text-align: center;
+}
+
+.person {
+  height: 18px;
+}
+
+.smaller {
+  font-size: 0.8em;
+}
+/* Info */
+form details {
+  overflow: hidden;
+  max-height: 90px;
+  transition: max-height 1s ease-in-out;
+
+/* CSS3 max-height transitions need a specific height.*/
+/* @see http://stackoverflow.com/a/19341648 */
+  &[open] {
+    max-height: 3600px;
+  }
+}
+
+form details {
+  margin-top: 0;
+}
+
+/* getSeasons */
+tr.getseason #chart {
+  font-size: 0.84em;
+  max-height: 200px;
+  width: 65%;
+}
+
+.value {
+  font-weight: 400;
+  font-size: 1.2em;
+}
+
+.add .value {
+  font-size: 1.6em;
+}
+
+/* Occupants */
+tr.occupants table {
+  margin: 0;
+  padding: 0;
+}
+
+tr.occupants table tr th ,
+tr.occupants table tr td {
+  height: 16px;
+  margin: 0;
+  padding: 0 12px;
+  text-align: center;
+}
+
+tr.occupants table tr th,
+tr.occupants table tr td.persons {
+  height: 16px;
+  text-align: left;
+}
+
+/* Consecutive Nights */
+table.consecutivenights tr.details {
+  border-collapse: collapse;
+  border: none;
+}
+
+table.consecutivenights tr.details td {
+  height: 16px;
+  text-align: center;
+}
+
+/* Price Alterators chain Block  */
+.price-alterators-chain {
+  background: #fbfbfb;
+  border: 1px dashed #cdcdcd;
+  padding: 12px;
+}
+
+.price-alterators-chain details {}
+
+.price-alterators-chain details > summary {
+  background-color: #fff;
+  display: list-item;
+}
+
+.price-alterators-chain ul {
+  list-style-type: " ⤷ ";
+}
+
+.price-alterators-chain ul li *  {
+  color:grey;
+}
+
+.price-alterators-chain ul li.is-final * {
+  font-weight: bold;
+  color:#000;
+}
+
+.price-alterators-chain  .warning  {
+  color: grey;
+  font-size: 0.68em;
+  font-weight: bold;
+}

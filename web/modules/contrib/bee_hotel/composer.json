@@ -1,0 +1,26 @@
+{
+    "name": "drupal/bee_hotel",
+    "description": "BEE Hotel, Hotel management for Drupal",
+    "type": "drupal-module",
+    "homepage": "https://www.drupal.org/project/bee_hotel",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Augusto Fagioli (afagioli)",
+            "homepage": "https://www.drupal.org/u/afagioli",
+            "role": "Creator"
+        }
+    ],
+    "require": {
+        "drupal/bat": "^11.1",
+        "drupal/bat_api": "^11.1",
+        "drupal/bee": "^11.1",
+        "drupal/commerce": "^2.0 || ^3.0",
+        "drupal/commerce_invoice": "^2.0",
+        "drupal/beehotel_pricealterator": "*",
+        "drupal/beehotel_pricealterators": "*",
+        "drupal/beehotel_vertical": "*"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

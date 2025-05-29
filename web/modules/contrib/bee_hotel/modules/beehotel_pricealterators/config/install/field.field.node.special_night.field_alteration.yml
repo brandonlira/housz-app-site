@@ -1,0 +1,23 @@
+uuid: d59159cc-cdf8-40fd-bdff-777072044138
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_alteration
+    - node.type.special_night
+id: node.special_night.field_alteration
+field_name: field_alteration
+entity_type: node
+bundle: special_night
+label: Value
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: decimal

@@ -1,0 +1,21 @@
+beehotel_pricealterator.mandatory.basepricetable:
+  path: '/node/{node}/basepricetable'
+  defaults:
+    _form: 'Drupal\beehotel_pricealterator\Form\UnitBasePriceTable'
+    _title_callback: '\Drupal\beehotel_pricealterator\Form\UnitBasePriceTable::title'
+  requirements:
+    _permission: 'admin pricealterator'
+beehotel_pricealterator.pricealterator.getseason_settings:
+  path: '/admin/beehotel/pricealterator/alterators/getseason'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterator\Form\GetSeason'
+    _title: 'Get Season'
+  requirements:
+    _permission: 'administer bee_hotel'
+beehotel_pricealterator.info.chain:
+  path: '/admin/beehotel/pricealterator/alterators'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterator\Form\AlteratorsList'
+    _title: 'Price alterators'
+  requirements:
+    _permission: 'administer bee_hotel'

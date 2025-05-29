@@ -1,0 +1,40 @@
+bat.admin:
+  title: 'Bat'
+  route_name: bat.admin
+  description: 'Administer Bat'
+  parent: system.admin
+
+bat.admin.config:
+  title: 'Configuration'
+  route_name: bat.admin.config
+  description: 'More settings'
+  parent: bat.admin
+  weight: 900
+
+bat.admin.group:
+  title: 'Group'
+  route_name: bat.admin.group
+  description: 'Group settings'
+  parent: bat.admin
+  weight: 600
+
+entity.bat_type_group.collection:
+  title: 'Groups'
+  route_name: entity.bat_type_group.collection
+  description: 'List Groups related to Unit types'
+  parent: bat.admin.group
+  weight: 610
+
+entity.bat_type_group_bundle.collection:
+  title: 'Group Bundles'
+  route_name: entity.bat_type_group_bundle.collection
+  description: 'List Group Bundles'
+  parent: bat.admin.group
+  weight: 620
+
+bat.admin.date:
+  title: 'Date'
+  route_name: bat.admin.date
+  description: 'Configure date for BAT'
+  parent: bat.admin.config
+  weight: 9

@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Sample Hotel - Install and configure for a Sample Hotel.
+ */
+
+/**
+ * Implements hook_formatter_page_attachments().
+ */
+function beehotel_samplehotel_page_attachments(array &$page) {
+  $path = \Drupal::service('path.current')->getPath();
+  if ($path == "/admin/beehotel/vertical") {
+    $page['#attached']['library'][] = 'beehotel_samplehotel/vertical';
+  }
+}

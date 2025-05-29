@@ -1,0 +1,22 @@
+{
+  "name": "drupal/bee",
+  "type": "drupal-module",
+  "description": "BEE: Bookable Entities Everywhere",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "http://drupal.org/project/bee",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "support": {
+    "issues": "http://drupal.org/project/issues/bee",
+    "source": "http://cgit.drupalcode.org/bee"
+  },
+  "require": {
+    "php": ">=8.3",
+    "drupal/core": "^9.5 || ^10.2 || ^11",
+    "drupal/commerce": "^2.0 || ^3.0"
+  },
+  "require-dev": {
+    "drush/drush": "^12"
+  }
+}

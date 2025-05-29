@@ -1,0 +1,25 @@
+alterator-special-nights:
+  version: 1.x
+  css:
+    theme:
+      assets/css/alterator-special-nights.css: {}
+
+alterator-global-slider:
+  version: 1.x
+  css:
+    theme:
+      assets/css/alterator-global-slider.css: {}
+
+alterator-consecutivenights:
+  version: 1.x
+  css:
+    theme:
+      assets/css/alterator-consecutivenights.css: {}
+
+
+charts:
+  version: 1.x
+  js:
+    # https://ajax.googleapis.com/ajax/libs/angularjs/1.4.4/angular.min.js: { type: external, minified: true,  weight: -1 }
+    https://www.gstatic.com/charts/loader.js: { type: external, minified: true,  weight: -1 }
+    assets/js/pricealterator-globalslider.js: {}

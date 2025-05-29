@@ -1,0 +1,28 @@
+services:
+  access_check.bee_hotel.book-this-unit:
+    class: Drupal\bee_hotel\Access\BeeHotelBookThisUnitAccessCheck
+    arguments: ['@entity_type.manager', '@config.factory']
+    tags:
+      - { name: access_check, applies_to: _bee_hotel_book_this_unit_access }
+  bee_hotel.saleprice_resolver:
+    class: Drupal\bee_hotel\Resolvers\SalepriceResolver
+    arguments: ['@request_stack', '@beehotel_utils.dates', '@bee_hotel.beehotel', '@beehotel_utils.beehotelunit', '@beehotel_pricealterator.prealter', '@beehotel_pricealterator.alter', '@session', '@plugin.manager.beehotel.pricealterator']
+    tags:
+      #priority always +1 of the original bee service
+      - { name: commerce_price.price_resolver, priority: 601 }
+  bee_hotel.booking_subscriber:
+    class: Drupal\bee_hotel\EventSubscriber\BatBookingEventSubscriber
+    arguments: ['@entity_type.manager', '@config.factory']
+    tags:
+      - { name: event_subscriber }
+  bee_hotel.beehotelbat:
+    class: Drupal\bee_hotel\BeeHotelBat
+    arguments: ['@entity_type.manager', '@database']
+  bee_hotel.beehotel:
+    class: Drupal\bee_hotel\BeeHotel
+    arguments: ['@commerce_product.attribute_field_manager',  '@beehotel_utils.beehotelunit', '@config.factory', '@entity_type.manager', '@messenger']
+  bee_hotel.event:
+    class: Drupal\bee_hotel\Event
+    arguments: ['@bee_hotel.beehotelbat', '@logger.factory', '@entity_type.manager', '@database', '@messenger']
+  beehotel.guest_message_tokens:
+    class: Drupal\bee_hotel\BeeHotelGuestMessageTokens

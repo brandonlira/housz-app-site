@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * @file
+ * Contains global features for beehotel price alterator logic.
+ */
+
+/**
+ * Implements hook_page_attachments().
+ */
+function beehotel_pricealterators_page_attachments(array &$page) {
+  $page['#attached']['library'][] = 'beehotel_pricealterator/main';
+  $page['#attached']['library'][] = 'beehotel_pricealterators/alterator-global-slider';
+  $page['#attached']['library'][] = 'beehotel_pricealterators/alterator-special-nights';
+}
+
+/**
+ * Implements hook_theme().
+ */
+function beehotel_pricealterators_theme($existing, $type, $theme, $path) {
+
+  return [
+    'beehotel_pricealterators_occupants_values' => [
+      'template' => 'beehotel-pricealterators-occupants-values',
+      'variables' => [
+        'first' => [],
+        'second' => [],
+        'third' => [],
+        'fourth' => [],
+        'misc' => [],
+        'path' => NULL,
+        'enabled' => NULL,
+      ],
+    ],
+
+    'beehotel_pricealterators_globalslider' => [
+      'template' => 'beehotel-pricealterators-globalslider',
+      'variables' => [
+        'first' => [],
+        'second' => [],
+        'third' => [],
+        'fourth' => [],
+        'misc' => [],
+        'path' => NULL,
+      ],
+    ],
+
+    'beehotel_pricealterators_daysbeforecheckin' => [
+      'template' => 'beehotel-pricealterators-daysbeforecheckin',
+      'variables' => [
+        'class' => [],
+        'description' => [],
+        'string' => [],
+      ],
+    ],
+
+    'beehotel_pricealterators_consecutivenights_values' => [
+      'template' => 'beehotel-pricealterators-consecutivenights-values',
+      'variables' => [
+        'first' => [],
+        'second' => [],
+        'third' => [],
+        'fourth' => [],
+        'misc' => [],
+        'path' => NULL,
+        'enabled' => NULL,
+      ],
+    ],
+
+    'beehotel_pricealterators_consecutivenights_preview' => [
+      'template' => 'beehotel-pricealterators-consecutivenights-preview',
+      'variables' => [
+        'base' => [],
+        'nights' => [],
+        'total' => [],
+        'average' => [],
+      ],
+    ],
+  ];
+
+}
+
+/**
+ * Implements hook_beehotel_pricealterator_season().
+ *
+ * Hooks can be implemented by both the module that invokes them like we are
+ * doing here, as well as by any other enabled module. Do we still need this?
+ */
+function beehotel_pricealterators_beehotel_pricealterator_season($data) {
+}
+
+/**
+ * Implements hook_beehotel_pricealterator_base_table().
+ *
+ *   Do we still need this?
+ */
+function beehotel_pricealterators_beehotel_pricealterator_base_table($table) {
+
+}
+
+/**
+ * Clean configuration values.
+ */
+function beehotel_pricealterators_clean_config() {
+
+  $yml = [];
+  $yml[] = 'field.field.node.special_night.field_alteration';
+  $yml[] = 'field.field.node.special_night.field_nights';
+  $yml[] = 'field.field.node.special_night.field_polarity';
+  $yml[] = 'field.field.node.special_night.field_type';
+  $yml[] = 'field.storage.node.field_alteration';
+  $yml[] = 'field.storage.node.field_nights';
+  $yml[] = 'field.storage.node.field_polarity';
+  $yml[] = 'field.storage.node.field_type';
+  $yml[] = 'node.type.special_night';
+
+  foreach ($yml as $item) {
+    \Drupal::configFactory()->getEditable($item)->delete();
+  }
+}
+
+/**
+ * Hook _proprocess.
+ *
+ * This _preprocess should pass alterators data to js.
+ * See beehotel_pricealterator_preprocess(&$variables).
+ *
+ * @todo code
+ */
+function beehotel_pricealterators_preprocess(&$variables) {
+
+}

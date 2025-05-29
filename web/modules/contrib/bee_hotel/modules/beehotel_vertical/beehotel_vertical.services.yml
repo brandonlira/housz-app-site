@@ -1,0 +1,5 @@
+services:
+  # beehotel_vertical.timerange_form:
+    # class: Drupal\beehotel_vertical\Form\TimeRangeForm
+  beehotel_vertical.beehotelvertical:
+    class: Drupal\beehotel_vertical\BeehotelVertical
