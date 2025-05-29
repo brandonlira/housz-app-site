@@ -1,0 +1,44 @@
+<cite>
+    <ul>
+      {% for item in report %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+</cite>
+
+<details  class="form-wrapper" id="edit-advanced">
+  <summary>Actions</summary>
+
+  <div class="details-wrapper">
+    <ul>
+        {% for link  in links %}
+          {{ link }}
+        {% endfor %}
+    </ul>
+  </div>
+</details>
+
+<details open='open' class="form-wrapper" id="edit-advanced">
+  <summary>Data</summary>
+  <div class="details-wrapper">
+    <table id='bat-event-management'>
+      <tr>
+        <th> Table name</td>
+        <th> count </td>
+      </tr>
+      {% for key, value  in data.batTables.main %}
+        <tr class='main'>
+          <td>{{ key }}</td>
+          <td>{{ value }}</td>
+        </tr>
+      {% endfor %}
+
+      {% for key, value  in data.batTables.related %}
+        <tr class='related'>
+          <td>{{ key }}</td>
+          <td>{{ value }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+</details>

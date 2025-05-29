@@ -1,0 +1,86 @@
+<?php
+
+/**
+ * @file
+ * BEE Hotel install/update/uninstall hook implementation.
+ */
+
+use Drupal\Component\Serialization\Yaml;
+use Drupal\image\Entity\ImageStyle;
+
+/**
+ * Implements hook_requirements().
+ *
+ * Bee Hotel has dependencies on more core/contributed module settings.
+ * Managed as Drupal requirements, we  limit controls at runtime.
+ */
+function bee_hotel_requirements($phase) {
+
+  $requirements = [];
+
+  // ******************.
+  /* A.  Image styles */
+
+  // Required image styles.
+  $data['required']['styles'] = [
+    "cover_image_teaser",
+    "thumbnail",
+  ];
+
+  $styles = ImageStyle::loadMultiple();
+
+  foreach ($data['required']['styles'] as $required_style) {
+    $key = 'bee_hotel_style_' . $required_style;
+    $missings_styles[$required_style] = FALSE;
+    $requirements[$key] = [
+      'title' => t('Required image style'),
+      'description' => t('@style not fund. Please <a href="/admin/config/media/image-styles">check or create image style @style', ['@style' => $required_style]),
+      'severity' => REQUIREMENT_ERROR,
+    ];
+    foreach (ImageStyle::loadMultiple() as $id => $object) {
+      if ($required_style == $id) {
+        unset($requirements[$key]);
+      }
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ */
+function bee_hotel_install() {
+  bee_hotel_update_modules_weight();
+}
+
+/**
+ * Implements hook_entity_uninstall().
+ */
+function bee_hotel_uninstall() {
+  bee_hotel_clean_config();
+}
+
+/**
+ * Update all config settings (beehotel unit image cover field now defined)
+ */
+function bee_hotel_update_8001() {
+  $data = [];
+  $data['module_path'] = \Drupal::service('extension.list.module')->getPath('bee_hotel');
+  $data['yml'] = Yaml::decode(file_get_contents($data['module_path'] . '/config/install/beehotel.settings.yml'));
+  $data['config'] = \Drupal::service('config.factory')->getEditable('beehotel.settings');
+
+  if (empty($data['config']->get("beehotel"))) {
+    $data['config']->set("beehotel", $data['yml']['beehotel'])->save();
+  }
+}
+
+/**
+ * Enable beehotel_utils module.
+ */
+function bee_hotel_update_8002() {
+  if (!\Drupal::service('module_handler')->moduleExists('beehotel_utils')) {
+    \Drupal::service('module_installer')->install(['beehotel_utils']);
+  }
+  drupal_flush_all_caches();
+}

@@ -1,0 +1,101 @@
+<?php
+
+/**
+ * @file
+ * Sets up the base table.
+ *
+ * Sets up the base table for our entity and a table to store information about
+ * the entity types.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function bat_unit_install() {
+
+  // OK
+  bat_unit_install_create_default_unit_bundle();
+  bat_unit_install_create_bat_type_bundle();
+  bat_unit_install_create_unit_type();
+
+  // @todo
+  //bat_unit_install_create_unit();
+}
+
+/**
+ * Create default unit bundle.
+ */
+function bat_unit_install_create_default_unit_bundle() {
+  $default_unit_bundle = bat_unit_bundle_create([
+    'type'  => 'default',
+    'name' => 'Default',
+  ]);
+  $default_unit_bundle->save();
+}
+
+/**
+ * Create some sample unit type bundles.
+ */
+function bat_unit_install_create_bat_type_bundle() {
+
+  $types = [
+    "apt" => "Apartment",
+    "bike" => "Bike",
+    "bus" => "Bus (multiunits)",
+    "car" => "Car",
+    "equipemnt" => "Equipemnt",
+    "meeting_room" => "Meeting Room",
+    "motorbike" => "Motorbike",
+    "padel" => "Padel Court",
+    "room" => "Room",
+    "tent" => "Tent",
+    "ticket" => "Ticket (access to an event)",
+    "tennis" => "Tennis Court",
+    "villa" => "Villa",
+  ];
+
+  foreach ( $types as $type => $name) {
+    \Drupal::entityTypeManager()->getStorage('bat_type_bundle')->create([
+      "type" => $type,
+      "locked" => TRUE,
+      "name" => $name,
+      "uid" => 1,
+    ])
+    ->save();
+  }
+
+}
+
+/**
+ * Create a sample unit type.
+ */
+function bat_unit_install_create_unit_type() {
+
+  \Drupal::entityTypeManager()->getStorage('bat_unit_type')->create([
+      "bundle" => "apt",
+      "label" => "Apts Property #1",
+      "locked" => TRUE,
+      "name" => "Apts Property #1",
+      "type" => "apt",
+      "uid" => 1,
+  ])
+  ->save();
+
+}
+
+/**
+ * Create a unit sample.
+ */
+function bat_unit_install_create_unit() {
+
+  \Drupal::entityTypeManager()->getStorage('bat_unit')->create([
+      "bundle" => "apt",
+      "locked" => TRUE,
+      "type" => "default",
+      "name" => "Apartment Dolce Vita2",
+      "unit_type_id" => 1,
+      "bat_unit_bundle" => "apt",
+      "uid" => 1,
+  ])
+  ->save();
+}

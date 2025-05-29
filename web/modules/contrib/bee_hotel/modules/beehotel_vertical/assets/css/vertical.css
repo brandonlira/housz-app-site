@@ -1,0 +1,333 @@
+:root {
+  --select-border: transparent;
+  --time-range-form-font-size: 10px;
+}
+
+body.vertical-table .layout-container #main .inner {
+  max-width: 100%;
+}
+
+#tablemanager {
+  max-height: 500px;
+  overflow: auto;
+}
+
+table.vertical-table {
+  height: 300px;
+  position: relative;
+  table-layout: fixed;
+  text-align: left;
+}
+
+table.vertical-table caption {
+  text-align: right;
+  margin: 12px 0;
+  font-size: 0.76em;
+}
+
+table.vertical-table tr {
+  border: 0;
+  height: 120px;
+}
+
+table.vertical-table tr.even {
+  background: cyan;
+}
+
+table.vertical-table th {
+  background: white;
+  color: green;
+  position: sticky;
+  top: 0;
+}
+
+table.vertical-table th  h3 a: before {
+  font-family: "Font Awesome 5 Pro";
+  font-weight: 900;
+  font-size: 0.658em;
+}
+
+table.vertical-table th h3.settings a: before {
+  content: "\f013";
+}
+
+table.vertical-table th h3.unit a: before {
+  content: "\f0c1";
+}
+
+table.vertical-table th .unit {
+  text-align: center;
+}
+
+table.vertical-table tr td {
+  border-left: 1px dotted lightgrey;
+  border-right: 1px dotted lightgrey;
+  height: 100%;
+  max-width: 300px;
+  padding: 0;
+}
+
+table.vertical-table tr th:first-child ,
+table.vertical-table tr td:first-child {
+  width: 86px;
+  min-width: 86px;
+  max-width: 86px;
+  word-break: break-all;
+  font-size: 0.86em;
+  text-align: center;
+}
+
+table.vertical-table tr > td > div {
+  height: 100%;
+  margin: 0 auto;
+  position: relative;
+  width: 80%;
+}
+
+#beehotel-vertical-timerange  .row.form {
+  display: flex;
+  align-items: center;
+  background-color: #ebebeb;
+  float: right;
+  text-align: right;
+}
+
+form.beehotel-vertical-timerange .form-item,
+form.beehotel-vertical-timerange .form-actions {
+  display: inline-block;
+  margin: 0;
+}
+
+form.beehotel-vertical-timerange .form-item--range {
+  border: 0px solid #777;
+  display: flex;
+  align-items: center;
+}
+
+form.beehotel-vertical-timerange .form-item--range label {
+  margin: 0 1em;
+  width: 100%;
+  font-weight: normal;
+  font-size: var(--time-range-form-font-size);
+}
+
+form.beehotel-vertical-timerange .form-item--range select {
+  min-width: 15ch;
+  max-width: 30ch;
+  border: 1px solid var(--select-border);
+  border-radius: 0.25em;
+  padding: 0.25em 0.5em;
+  /*font-size: 1.25rem;*/
+  font-size: var(--time-range-form-font-size);
+  cursor: pointer;
+  line-height: 1.1;
+  background-color: #d5d5d5;
+  width: 100%;
+}
+
+form.beehotel-vertical-timerange .form-actions input {
+  align-items: center;
+  background-color: #ebebeb;
+  font-size: var(--time-range-form-font-size);
+  color: black;
+  display: flex;
+  height: 40px;
+  margin: 0 1em;
+  padding: 0;
+}
+
+table.vertical-table tr > td > .col1 {
+  border-left-style: solid;
+}
+
+table.vertical-table tr > td > .col1.low {
+  border-left-width: 8px;
+  border-left-color: grey;
+}
+
+table.vertical-table tr > td > .col1.high {
+  border-left-width: 10px;
+  border-left-color: orange;
+}
+
+table.vertical-table tr > td > .col1.peak {
+  border-left-width: 12px;
+  border-left-color: red;
+}
+
+table.vertical-table tr > td > div > .season {
+  font-size: 0.68em;
+  font-weight: bold;
+  margin-left: 4px;
+  text-align: left;
+}
+
+table.vertical-table tr > td > div > .season .detailed {
+  display: none;
+}
+
+table.vertical-table tr > td > div > .season.peak {
+  color: red;
+}
+
+table.vertical-table tr > td > div > .season.high {
+  color: orange;
+}
+
+table.vertical-table tr > td > div > .season.low {
+  color: grey;
+}
+
+table.vertical-table .day-of-the-week {
+  display: block;
+  font-weight: bold;
+  font-size: 1.28em;
+}
+
+table.vertical-table .day-number {
+  display: block;
+  font-weight: bold;
+  font-size: 2.48em;
+  clear: both;
+}
+
+table.vertical-table .year {
+  color: grey;
+  display: block;
+}
+
+table.vertical-table .elab-day {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: red;
+  font-size: 3em;
+}
+
+table.vertical-table tr > td > div > div {
+  /*display: inline-block;*/
+  padding: 0px;
+}
+
+table.vertical-table tr > td > div > div.b.reservation {
+  height: inherit;
+}
+
+table.vertical-table tr > td > div > .b > div.state-box {
+  background: #d8f9d8;
+  border: green;
+  border-radius: 8px;
+  color: green;
+  font-weight: bold;
+  margin: auto;
+  padding: 0 4px;
+  text-align: center;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+table.vertical-table tr > td > div > .b  > div.state-box.blocking {
+  background: antiquewhite;
+  border: red;
+  border-radius: 8px;
+  color: red;
+}
+
+table.vertical-table tr > td > div > .b  > a.price-link .price {
+  height: 48px;
+  width: 48px;
+  border-radius: 50%;
+  background: yellow;
+  margin: 24px auto;
+  outline: none !important;
+  box-shadow: none !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+table.vertical-table tr > td > div > .b  > a.price-link .price .smaller {
+  font-size: 0.48em;
+}
+
+table.vertical-table tr > td > div > div.spacer {
+  font-size: 0;
+}
+
+table.vertical-table tr > td > div > div.spacer.no-display {
+  display: none;
+}
+
+table.vertical-table tr > td > div > .reservation,
+table.vertical-table tr > td > div > .occupied,
+table.vertical-table tr > td > div > .extra {
+  background: #139ff7;
+  color: white;
+  font-weight: bold;
+}
+
+table.vertical-table tr > td > div > div  .vertical-order-item {
+  padding-left: 8px;
+  vertical-align: unset;
+}
+
+table.vertical-table tr > td > div > .reservation .vertical-order-item  .payments div {
+  display: inline;
+  list-style-type: none;
+  padding: 0px 4px;
+}
+
+table.vertical-table tr > td > div > .reservation .vertical-order-item  .payments .amount {
+  background: white;
+  border: green;
+  border-radius: 8px;
+  color: green;
+  padding: 0 4px;
+}
+
+table.vertical-table tr > td > div > .reservation .vertical-order-item  .payments .balance {
+  border: white;
+  background: white;
+  color: red;
+  padding: 0 4px;
+  border-radius: 8px;
+}
+
+table.vertical-table tr > td > div > .reservation .vertical-order-item  .payments .balanced {
+  color: darkgreen;
+  font-size: 1.42em;
+}
+
+table.vertical-table tr > td > div > .reservation.same-as-daybefore .vertical-order-item ,
+table.vertical-table tr > td > div > .reservation.checkout .vertical-order-item {
+  visibility: hidden;
+}
+
+table.vertical-table tr > td > div > .checkin {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  margin-top: 4px;
+  display: block;
+  width: auto;
+}
+
+table.vertical-table tr > td > div > .checkout {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* Mobile */
+@media screen and (max-width: 377px) {
+  .reservation .vertical-order-item .comments,
+  .reservation .vertical-order-item .amount,
+    .reservation .vertical-order-item .balance {
+    display:none;
+  }
+}
+
+
+@media screen and (max-width: 1680px) {
+  body.vertical-table #preview  .inner {
+    max-width: 100%;
+  }
+}

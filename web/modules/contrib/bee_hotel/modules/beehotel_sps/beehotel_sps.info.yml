@@ -1,0 +1,13 @@
+name: BEE Hotel SPS (obsolete)
+type: module
+description: 'Store price Slider for BEE Hotel'
+package: 'BEE Hotel'
+core_version_requirement: ^9.4 || ^10  || ^11
+dependencies:
+  - drupal:range_slider
+  - drupal:bee_hotel
+
+# Information added by Drupal.org packaging script on 2025-05-10
+version: '2.24.6'
+project: 'bee_hotel'
+datestamp: 1746864358

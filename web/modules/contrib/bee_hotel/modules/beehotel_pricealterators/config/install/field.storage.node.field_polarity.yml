@@ -1,0 +1,30 @@
+uuid: c075184b-a163-4d82-8a24-3a08ba6fb0f7
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_polarity
+field_name: field_polarity
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: add
+      label: 'Add this value'
+    -
+      value: subtract
+      label: 'Subtract this value'
+    -
+      value: neutral
+      label: Neutral
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

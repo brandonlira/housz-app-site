@@ -1,0 +1,12 @@
+{
+    "name": "drupal/beehotel_pricealterators",
+    "description": "BEE Hotel Price Alterators",
+    "type": "drupal-module",
+    "homepage": "https://www.drupal.org/project/bee_hotel",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/range_slider": "^2.0"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

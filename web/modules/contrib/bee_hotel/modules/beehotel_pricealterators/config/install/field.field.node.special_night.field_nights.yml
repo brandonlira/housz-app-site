@@ -1,0 +1,21 @@
+uuid: 7db225e1-605e-446a-96dc-3f52d1457bf0
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_nights
+    - node.type.special_night
+  module:
+    - datetime_range
+id: node.special_night.field_nights
+field_name: field_nights
+entity_type: node
+bundle: special_night
+label: Nights
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: daterange

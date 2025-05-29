@@ -1,0 +1,52 @@
+uuid: 570ca2ca-e21d-45c2-8a91-cc594acde59f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.guest_message.field_attachments
+    - field.field.node.guest_message.field_links
+    - field.field.node.guest_message.field_message
+    - node.type.guest_message
+  module:
+    - file
+    - link
+    - user
+id: node.guest_message.default
+targetEntityType: node
+bundle: guest_message
+mode: default
+content:
+  field_attachments:
+    type: file_default
+    label: above
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_links:
+    type: link
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_message:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  entity_print_view_epub: true
+  entity_print_view_pdf: true
+  entity_print_view_word_docx: true
+  langcode: true
+  links: true
+  private_message_link: true

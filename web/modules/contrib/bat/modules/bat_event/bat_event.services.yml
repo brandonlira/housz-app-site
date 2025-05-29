@@ -1,0 +1,12 @@
+services:
+  access_check.bat_event.add:
+    class: Drupal\bat_event\Access\EventAddAccessCheck
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: access_check, applies_to: _event_add_access }
+  bat_event.util.event_manager:
+    class: Drupal\bat_event\Util\EventManager
+    arguments: ['@logger.factory', '@entity_type.manager', '@database', '@renderer']
+  bat_event.util.event_maintenance:
+    class: Drupal\bat_event\Util\EventMaintenance
+    arguments: ['@entity_type.manager']

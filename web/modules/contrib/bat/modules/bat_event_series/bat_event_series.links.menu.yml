@@ -1,0 +1,13 @@
+entity.bat_event_series.collection:
+  title: 'Event Series'
+  route_name: entity.bat_event_series.collection
+  description: 'List of event Series'
+  parent: bat.admin.events
+  weight: 11
+
+entity.bat_event_series_type.collection:
+  title: 'Event series Types'
+  route_name: entity.bat_event_series_type.collection
+  description: 'List of event series Types'
+  parent: bat.admin.events
+  weight: 12

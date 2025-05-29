@@ -1,0 +1,717 @@
+sample:
+  bat:
+    type: config_object
+    label: 'Bat settings for a Sample Hotel'
+    note: 'Patch required: https://www.drupal.org/project/bee/issues/3388586'
+    entities:
+      bat_unit_bundle:
+        type: 'bee'
+        name: 'BeeHotel Unit bundle'
+        owner: 1
+        status: 1
+        uid: 1
+        where: '/admin/bat/config/unit-bundles'
+      bat_unit_type:
+        type: 'unit_type'
+        name: 'Bee Hotel Unit'
+        owner: 1
+        status: 1
+        uid: 1
+        where: '/admin/bat/config/unit_type'
+  commerce:
+    type: config_object
+    label: 'Commerce settings for a Sample BeeHotel'
+    entities:
+      # Store
+      commerce_store:
+        type: 'store'
+        where: '/admin/commerce/config/stores'
+        address:
+          country_code: 'US'
+          address_line1: '123 Moonlight Drive'
+          locality: 'Beverly Hills'
+          administrative_area: 'CA'
+          postal_code: '90210'
+        currency: 'USD'
+        uid: 1
+        name: 'Sample BEE Hotel Store'
+        mail: 'admin@mysamplehotel.com'
+        billing_countries: 'US'
+      # Order Item Type
+      commerce_order_item_type:
+        purchasableEntityType: 'commerce_product_variation'
+        # will be units_booking
+        # orderType: 'unit_booking'
+        orderType: 'default'
+        id: 'bee'
+        label: 'Bee Hotel Order item type'
+        where: '/admin/commerce/config/order-item-types'
+        # Fields To Order Item Type
+        fields:
+          # create field_node on behalf of BEE module
+          field_node:
+            fieldconfig:
+              bundle: bee
+              create: TRUE
+              default_value: {  }
+              default_value_callback: ''
+              dependencies:
+                config:
+                  - commerce_order.commerce_order_item_type.bee
+                  - field.storage.commerce_order_item.field_node
+              description: ''
+              entity_type: commerce_order_item
+              field_name: field_node
+              field_type: entity_reference
+              id: commerce_order_item.bee.field_node
+              label: Node
+              status: true
+              required: false
+              settings:
+                handler: 'default:node'
+                handler_settings:
+                  target_bundles: {  }
+              translatable: true
+              where: '/admin/commerce/config/order-item-types/bee/edit/fields'
+            fieldstorageconfig:
+              status: true
+              dependencies:
+                module:
+                  - commerce_order
+                  - node
+              id: commerce_order_item.field_node
+              field_name: field_node
+              entity_type: commerce_order_item
+              type: entity_reference
+              settings:
+                target_type: node
+              module: core
+              locked: true
+              cardinality: 1
+              translatable: true
+              indexes: {  }
+              persist_with_no_fields: false
+              custom_storage: false
+          field_checkin:
+            fieldstorageconfig:
+              field_name: 'field_checkin'
+              entity_type: 'commerce_order_item'
+              type: 'datetime'
+              cardinality: -1
+            fieldconfig:
+              create: TRUE
+              field_name: 'field_checkin'
+              entity_type: 'commerce_order_item'
+              bundle: 'bee'
+              label: 'Check in'
+          field_checkout:
+            fieldstorageconfig:
+              field_name: 'field_checkout'
+              entity_type: 'commerce_order_item'
+              type: 'datetime'
+              cardinality: -1
+            fieldconfig:
+              create: TRUE
+              field_name: 'field_checkout'
+              entity_type: 'commerce_order_item'
+              bundle: 'bee'
+              label: 'Check out'
+          field_order_item_nights:
+            fieldstorageconfig:
+              field_name: 'field_order_item_nights'
+              entity_type: 'commerce_order_item'
+              type: 'integer'
+              cardinality: -1
+            fieldconfig:
+              create: TRUE
+              field_name: 'field_order_item_nights'
+              entity_type: 'commerce_order_item'
+              bundle: 'bee'
+              label: 'Nights'
+      commerce_checkout_flow:
+        id: 'beeh_booking_flow'
+        label: 'Bee Hotel booking flow'
+        plugin: 'multistep_default'
+        where: '/admin/commerce/config/checkout-flows'
+      commerce_order_type:
+        id: 'bee'
+        label: 'Bee'
+        workflow: 'order_default'
+        where: '/admin/commerce/config/order-types'
+      commerce_payment_gateway:
+        id: 'beeh_payment_gateway'
+        label: 'Bee Hotel payment gateway'
+        plugin: 'manual'
+        conditionOperator: 'AND'
+        where: '/admin/commerce/config/payment-gateways'
+      commerce_product_attribute:
+        id: 'guests'
+        label: 'Guests'
+        elementType: 'radios'
+        where: '/admin/commerce/product-attributes'
+        note: 'Goto /admin/commerce/config/product-variation-types/bee/edit and set Attributes as "Guests"'
+      commerce_product_variation_type:
+          fields:
+            field_max_occupancy:
+              note: 'remove already exists on install'
+              where: '/admin/commerce/config/product-variation-types/bee/edit/fields'
+              fieldstorageconfig:
+                status: true
+                dependencies:
+                  module:
+                    - commerce_product
+                    - options
+                id: commerce_product_variation.field_max_occupancy
+                field_name: field_max_occupancy
+                entity_type: commerce_product_variation
+                type: list_integer
+                settings:
+                  allowed_values:
+                    -
+                      value: 1
+                      label: '1'
+                    -
+                      value: 2
+                      label: '2'
+                    -
+                      value: 3
+                      label: '3'
+                    -
+                      value: 4
+                      label: '4'
+                    -
+                      value: 5
+                      label: '5'
+                    -
+                      value: 6
+                      label: '6'
+                    -
+                      value: 7
+                      label: '7'
+                    -
+                      value: 8
+                      label: '8'
+                    -
+                      value: 9
+                      label: '9'
+                    -
+                      value: 10
+                      label: '10'
+                  allowed_values_function: ''
+                module: options
+                locked: false
+                cardinality: 1
+                translatable: true
+                indexes: {  }
+                persist_with_no_fields: false
+                custom_storage: false
+              fieldconfig:
+                create: TRUE
+                status: true
+                dependencies:
+                  config:
+                    - commerce_product.commerce_product_variation_type.bee
+                    - field.storage.commerce_product_variation.field_max_occupancy
+                  module:
+                    - options
+                id: commerce_product_variation.bee.field_max_occupancy
+                field_name: field_max_occupancy
+                entity_type: commerce_product_variation
+                bundle: bee
+                label: 'Max Occupancy'
+                description: 'Max number of guests this unit can host'
+                required: true
+                translatable: false
+                default_value: {  }
+                default_value_callback: ''
+                settings: {  }
+                field_type: list_integer
+              fieldentityformdisplay:
+                id: commerce_product_variation.bee.field_max_occupancy
+                content:
+                  type: options_select
+                  weight: 4
+                  region: content
+                  settings: {  }
+                  third_party_settings: {  }
+              fieldentityviewdisplay:
+                id: commerce_product_variation.bee.default
+                content:
+                  label: above
+                  region: content
+                  settings:
+                    thousand_separator: ''
+                    prefix_suffix: true
+                  third_party_settings: {  }
+                  type: number_integer
+                  weight: 2
+  drupal:
+    type: config_object
+    label: 'Drupal entities'
+    entities:
+      node_type:
+        status: true
+        dependencies:
+          module:
+            - bee
+            - menu_ui
+        third_party_settings:
+          menu_ui:
+            available_menus:
+              - main
+            parent: 'main:'
+          bee:
+            bee:
+              bookable: 1
+              bookable_type: daily
+              availability: available
+              payment: 1
+              payment_default_value: 0
+        name: 'Bee Hotel Unit CT'
+        type: 'unit_ct'
+        description: "A BeeHotel bookable content type for units"
+        help: ''
+        new_revision: true
+        preview_mode: 1
+        display_submitted: true
+        owner: 1
+        uid: 1
+        where: '/admin/structure/types'
+        fields:
+          field_description:
+            where: '/admin/structure/types/manage/unit_ct/fields/node.unit_ct.field_description'
+            fieldconfig:
+              create: TRUE
+              status: true
+              dependencies:
+                config:
+                  - field.storage.node.field_description
+                  - node.type.unit_ct
+                module:
+                  - text
+              id: node.unit_ct.field_description
+              field_name: field_description
+              entity_type: node
+              bundle: unit_ct
+              label: Description
+              description: 'Type is a description of the Unit. This text will be exposed to guests'
+              required: true
+              translatable: false
+              default_value:
+                -
+                  value: '<p>This is the description for the Bee Hotel Unit</p>'
+                  summary: ''
+                  format: basic_html
+              default_value_callback: ''
+              settings:
+                display_summary: true
+                required_summary: true
+              field_type: text_with_summary
+            fieldstorageconfig:
+              langcode: en
+              status: true
+              dependencies:
+                module:
+                  - node
+                  - text
+              id: node.field_description
+              field_name: field_description
+              entity_type: node
+              type: text_with_summary
+              settings: {  }
+              module: text
+              locked: false
+              cardinality: 1
+              translatable: true
+              indexes: {  }
+              persist_with_no_fields: false
+              custom_storage: false
+            fieldentityformdisplay:
+              id: node.unit_ct.default
+              content:
+                type: text_textarea_with_summary
+                weight: 1
+                region: content
+                settings:
+                  rows: 9
+                  summary_rows: 3
+                  placeholder: ''
+                  show_summary: false
+                third_party_settings: {  }
+            fieldentityviewdisplay:
+              id: node.unit_ct.default
+              content:
+                type: text_default
+                label: above
+                settings: {  }
+                third_party_settings: {  }
+                weight: 1
+                region: content
+          field_cover_image:
+            where: '/admin/structure/types/manage/unit_ct/fields/node.unit_ct.field_cover_image'
+            fieldconfig:
+              create: TRUE
+              status: true
+              dependencies:
+                config:
+                  - field.storage.node.field_cover_image
+                  - node.type.unit_ct
+                module:
+                  - image
+              id: node.unit_ct.field_cover_image
+              field_name: field_cover_image
+              entity_type: node
+              bundle: unit_ct
+              label: 'Cover image'
+              description: 'Cover image for this unit'
+              required: true
+              translatable: false
+              default_value: {  }
+              default_value_callback: ''
+              settings:
+                handler: 'default:file'
+                handler_settings: {  }
+                file_directory: '[date:custom:Y]-[date:custom:m]'
+                file_extensions: 'png gif jpg jpeg'
+                max_filesize: ''
+                max_resolution: ''
+                min_resolution: ''
+                alt_field: true
+                alt_field_required: true
+                title_field: false
+                title_field_required: false
+                default_image:
+                  uuid: ''
+                  alt: ''
+                  title: ''
+                  width: null
+                  height: null
+              field_type: image
+            fieldstorageconfig:
+              langcode: en
+              status: true
+              dependencies:
+                module:
+                  - file
+                  - image
+                  - node
+              id: node.field_cover_image
+              field_name: field_cover_image
+              entity_type: node
+              type: image
+              settings:
+                target_type: file
+                display_field: false
+                display_default: false
+                uri_scheme: public
+                default_image:
+                  uuid: ''
+                  alt: ''
+                  title: ''
+                  width: null
+                  height: null
+              module: image
+              locked: false
+              cardinality: 1
+              translatable: true
+              indexes: {  }
+              persist_with_no_fields: false
+              custom_storage: false
+            fieldentityformdisplay:
+              id: node.unit_ct.default
+              content:
+                type: image_image
+                weight: 1
+                region: content
+                settings:
+                  progress_indicator: throbber
+                  preview_image_style: thumbnail
+                third_party_settings: {  }
+            fieldentityviewdisplay:
+              id: node.unit_ct.default
+              content:
+                type: image
+                label: above
+                settings:
+                  image_link: ''
+                  image_style: ''
+                  image_loading:
+                    attribute: lazy
+                third_party_settings: {  }
+                weight: 0
+                region: content
+          field_occupancy:
+            where: '/admin/structure/types/manage/unit_ct/fields/node.unit_ct.field_occupancy'
+            fieldstorageconfig:
+              status: true
+              dependencies:
+                module:
+                  - node
+              id: node.field_occupancy
+              field_name: field_occupancy
+              entity_type: node
+              type: integer
+              settings:
+                unsigned: false
+                size: normal
+              module: core
+              locked: false
+              cardinality: 1
+              translatable: true
+              indexes: {  }
+              persist_with_no_fields: false
+              custom_storage: false
+            fieldconfig:
+              create: TRUE
+              status: true
+              dependencies:
+                config:
+                  - field.storage.node.field_occupancy
+                  - node.type.unit_ct
+              id: node.unit_ct.field_occupancy
+              field_name: field_occupancy
+              entity_type: node
+              bundle: unit_ct
+              label: Occupancy
+              description: 'Number of max guests this unit can host'
+              required: false
+              field_type: integer
+            fieldentityformdisplay:
+              id: node.unit_ct.default
+              content:
+                type: number
+                weight: -3
+                region: content
+                settings:
+                  placeholder: ''
+                third_party_settings: {  }
+            fieldentityviewdisplay:
+              id: node.unit_ct.default
+              content:
+                label: above
+                region: content
+                settings:
+                  thousand_separator: ''
+                  prefix_suffix: true
+                third_party_settings: {  }
+                type: number_integer
+                weight: 2
+          field_accept_reservations:
+            where: '/admin/structure/types/manage/unit_ct/fields/node.unit_ct.field_accept_reservations'
+            fieldconfig:
+              create: TRUE
+              status: true
+              dependencies:
+                config:
+                  - field.storage.node.field_accept_reservations
+                  - node.type.unit_ct
+                module:
+                  - options
+              id: node.unit_ct.field_accept_reservations
+              field_name: field_accept_reservations
+              entity_type: node
+              bundle: unit_ct
+              label: 'Accept reservations'
+              description: "Enable/disable a unit being offered online.\r\n\r\n<ul>\r\n<li>Yes: available for reservation from now\r\n<li>No: NOT available for reservation \r\n<li>2 hours: Not available now. Available in 2 hours\r\n<li>etc\r\n</ul>"
+              required: false
+              translatable: false
+              default_value: {  }
+              default_value_callback: ''
+              settings: {  }
+              field_type: list_string
+            fieldstorageconfig:
+              status: true
+              dependencies:
+                module:
+                  - node
+                  - options
+              id: node.field_accept_reservations
+              field_name: field_accept_reservations
+              entity_type: node
+              type: list_string
+              settings:
+                allowed_values:
+                  -
+                    value: '0'
+                    label: 'No. NOT available for reservations'
+                  -
+                    value: '1'
+                    label: 'Yes. Available for reservations'
+                  -
+                    value: '030'
+                    label: 'Available for reservations in 30 minutes'
+                  -
+                    value: '2'
+                    label: 'Available for reservations in 2 hours'
+                  -
+                    value: '3'
+                    label: 'Available for reservations in 3 hours'
+                  -
+                    value: '4'
+                    label: 'Available for reservations in 4 hours'
+                  -
+                    value: '8'
+                    label: 'Available for reservations in 8 hours'
+                  -
+                    value: '12'
+                    label: 'Available for reservations in 12 hours'
+                  -
+                    value: '24'
+                    label: 'Available for reservations in 1 day'
+                  -
+                    value: '72'
+                    label: 'Available for reservations in 3 days'
+                allowed_values_function: ''
+              module: options
+              locked: false
+              cardinality: 1
+              translatable: true
+              indexes: {  }
+              persist_with_no_fields: false
+              custom_storage: false
+            fieldentityformdisplay:
+              id: node.unit_ct.default
+              content:
+                type: options_select
+                weight: 4
+                region: content
+                settings: {  }
+                third_party_settings: {  }
+            fieldentityviewdisplay:
+              id: node.unit_ct.default
+              content:
+                label: above
+                region: content
+                settings: {  }
+                third_party_settings: {  }
+                type: list_default
+                weight: 3
+          field_open_hours:
+            where: '/admin/structure/types/manage/unit_ct/fields/node.unit_ct.field_open_hours'
+            fieldconfig:
+              create: FALSE  # bee hotel install needs this key
+              status: true
+              dependencies:
+                config:
+                  - field.storage.node.field_open_hours
+                  - node.type.unit_ct
+                module:
+                  - office_hours
+              id: node.unit_ct.field_open_hours
+              field_name: field_open_hours
+              entity_type: node
+              bundle: unit_ct
+              label: 'Open Hours'
+              description: ''
+              required: false
+              translatable: true
+              default_value: {  }
+              default_value_callback: ''
+              settings: {  }
+              field_type: office_hours
+            fieldstorageconfig:
+              uuid: cbcc991c-4703-47f2-853c-4fcdd6da594d
+              langcode: en
+              status: true
+              dependencies:
+                module:
+                  - node
+                  - office_hours
+              id: node.field_open_hours
+              field_name: field_open_hours
+              entity_type: node
+              type: office_hours
+              settings:
+                time_format: G
+                element_type: office_hours_datetime
+                increment: 60
+                valhrs: false
+                required_start: false
+                limit_start: ''
+                required_end: false
+                limit_end: ''
+                all_day: false
+                exceptions: true
+                seasons: false
+                comment: 0
+                cardinality_per_day: 2
+              module: office_hours
+              locked: true
+              cardinality: -1
+              translatable: true
+              indexes: {  }
+              persist_with_no_fields: false
+              custom_storage: false
+            fieldentityformdisplay:
+              id: node.unit_ct.default
+              content:
+                type: office_hours_default
+                weight: 9
+                region: content
+                settings:
+                  collapsed: false
+                third_party_settings: {  }
+            fieldentityviewdisplay:
+              id: node.unit_ct.default
+              content:
+                type: office_hours
+                label: above
+                settings:
+                  day_format: long
+                  time_format: G
+                  compress: false
+                  grouped: false
+                  show_closed: all
+                  closed_format: Closed
+                  all_day_format: 'All day open'
+                  separator:
+                    days: '<br />'
+                    grouped_days: ' - '
+                    day_hours: ': '
+                    hours_hours: '-'
+                    more_hours: ', '
+                  current_status:
+                    position: ''
+                    open_text: 'Currently open!'
+                    closed_text: 'Currently closed'
+                  exceptions:
+                    title: 'Exception hours'
+                    restrict_exceptions_to_num_days: 7
+                    date_format: long
+                    all_day_format: 'All day open'
+                  timezone_field: ''
+                  office_hours_first_day: ''
+                  schema:
+                    enabled: false
+                third_party_settings: {  }
+                weight: 3
+                region: content
+          field_availability_daily:
+            where: '/admin/structure/types/manage/unit_ct/display'
+            fieldconfig:
+              bundle: unit_ct
+              create: false
+              description: ""
+              entity_type: node
+              field_name: field_availability_daily
+              label: 'Availability'
+            fieldentityformdisplay:
+              id: node.unit_ct.default
+              content:
+                hidden: true
+                type: options_select
+                weight: 7
+                region: content
+                settings: {  }
+                third_party_settings: {  }
+            fieldentityviewdisplay:
+              id: node.unit_ct.default
+              content:
+                label: above
+                type: entity_reference_label
+                region: content
+                settings:
+                  link: true
+                third_party_settings: {  }
+                weight: 6
+      node:

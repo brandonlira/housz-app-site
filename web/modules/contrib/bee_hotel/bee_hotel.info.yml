@@ -1,0 +1,19 @@
+name: Bee Hotel
+type: module
+description: 'Hotel management for Drupal'
+package: BEE Hotel
+core_version_requirement: ^9.4 || ^10.2 || ^11
+dependencies:
+  - drupal:bat
+  - drupal:bat_api
+  - drupal:bee
+  - drupal:beehotel_pricealterator
+  - drupal:beehotel_utils
+  - drupal:commerce_product
+  - drupal:commerce_store
+  - hook_event_dispatcher:core_event_dispatcher (^4)
+
+# Information added by Drupal.org packaging script on 2025-05-10
+version: '2.24.6'
+project: 'bee_hotel'
+datestamp: 1746864358

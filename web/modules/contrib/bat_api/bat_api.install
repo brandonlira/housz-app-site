@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function bat_api_uninstall() {
+  Drupal::configFactory()->getEditable('services.service_endpoint.bat_api')->delete();
+}

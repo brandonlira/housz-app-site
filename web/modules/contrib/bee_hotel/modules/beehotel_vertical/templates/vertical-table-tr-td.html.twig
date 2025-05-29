@@ -1,0 +1,30 @@
+{# td content layout  #}
+<div>
+
+  {# A #}
+  {% if a_content == TRUE %}
+    <div class='a {{ a_class }}'>
+      {{ a_content }}
+    </div>
+  {% endif %}
+
+  {# spacer #}
+  <div class='spacer {{ spacer_class }}'>
+    {# improve CSS and remove those 3 dots #}
+    {{ spacer_content }}...
+  </div>
+  
+  {# B #}
+  {% if b_content == TRUE %}
+    <div class='b {{ b_class }}'>
+      {{ b_content }}
+    </div>
+  {% endif %}
+
+  {# when no record is present, we are interested in knowing whether the day is available, blocked, etc  #}
+  {% if (a_content !=  TRUE) and (b_content !=  TRUE)  %}
+    <div class='status'>
+      {{ state }}
+    </div>
+  {% endif %}
+</div>

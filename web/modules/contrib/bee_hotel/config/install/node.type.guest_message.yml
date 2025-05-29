@@ -1,0 +1,17 @@
+uuid: 9b31fba9-4ff4-409f-a524-2c86c84ae568
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus: {  }
+    parent: ''
+name: guest_message
+type: guest_message
+description: 'a message template to guest, prefilled with custom values'
+help: null
+new_revision: false
+preview_mode: 1
+display_submitted: false

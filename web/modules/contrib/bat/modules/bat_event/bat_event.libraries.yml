@@ -1,0 +1,14 @@
+color:
+  version: VERSION
+  js:
+    js/bat_color.js: {}
+  dependencies:
+    - core/jquery.farbtastic
+
+bat_event:
+  version: VERSION
+  js:
+    assets/js/bat_event.js: {}
+  css:
+    theme:
+      assets/css/bat_event.css: {}

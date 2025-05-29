@@ -1,0 +1,33 @@
+name: BAT Unit
+type: module
+description: Create and manage units (e.g. rooms).
+core_version_requirement: ^9.4 || ^10.2 || ^11
+package: bat
+dependencies:
+  - bat:bat
+  - drupal:views
+
+# Information added by Drupal.org packaging script on 2024-11-05
+# version: '11.0.0'
+# project: 'bat'
+# datestamp: 1730801017
+
+# Information added by Drupal.org packaging script on 2025-03-21
+# version: '11.1.0-beta1'
+# project: 'bat'
+# datestamp: 1742560183
+
+# Information added by Drupal.org packaging script on 2025-04-22
+# version: '11.1.0-beta2'
+# project: 'bat'
+# datestamp: 1745308123
+
+# Information added by Drupal.org packaging script on 2025-04-29
+# version: '11.1.0-beta5'
+# project: 'bat'
+# datestamp: 1745926938
+
+# Information added by Drupal.org packaging script on 2025-04-29
+version: '11.1.0-rc1'
+project: 'bat'
+datestamp: 1745954887

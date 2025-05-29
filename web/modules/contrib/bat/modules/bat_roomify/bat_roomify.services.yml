@@ -1,0 +1,4 @@
+services:
+  bat_roomify.drupaldbstore:
+    class: Drupal\bat_roomify\Store\DrupalDBStore
+    arguments: ['@logger.factory', '@database']

@@ -1,0 +1,53 @@
+.bold {
+  font-weight: bold;
+}
+
+.larger {
+  font-size: 1.2em;
+}
+
+.smaller {
+  font-size: 0.86em;
+}
+
+.value {
+  font-weight: bold;
+}
+
+.subtract,
+.sub {
+  color: red;
+}
+
+.add {
+  color: green;
+}
+
+.grey {
+  color: grey;
+}
+
+.beehotel-pricealterator-seasons {
+  background: #e7e7e580;
+  padding: 12px 24px;
+}
+
+details {
+  display: initial;
+}
+
+details > summary {
+  padding: 4px;
+  width: 200px;
+  background-color: lightgrey;
+  border: none;
+  box-shadow: 1px 1px 2px #bbbbbb;
+  cursor: pointer;
+}
+
+details > p {
+  background-color: #eeeeee;
+  padding: 4px;
+  margin: 0;
+  box-shadow: 1px 1px 2px #bbbbbb;
+}

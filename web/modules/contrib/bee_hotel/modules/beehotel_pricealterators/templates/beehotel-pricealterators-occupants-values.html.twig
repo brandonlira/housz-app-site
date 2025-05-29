@@ -1,0 +1,51 @@
+{# bee-hotel s provides a list of available units  #}
+{# this is the unit html  #}
+<table class='occupants enabled-{{ enabled }}'>
+  <tr>
+    <th>occupants</th>
+    <th>increase</th>
+    <th>preview</th>
+  </tr>
+  <tr>
+    <td class='persons'>
+     <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+    </td>
+    <td><span class='{{first.class}}'> {{ first.value }}<span class='smaller'>%</span></span></td>
+    <td><span class='{{first.class}} preview'>{{ first.simulation }}<span class='smaller'>{{misc.currency}}</span></span></td>
+  </tr>
+  <tr>
+    <td class='persons'>
+
+    <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+    <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+
+    </td>
+    <td><span class='{{second.class}}'> {{ second.value }}<span class='smaller'>%</span></span></td>
+    <td><span class='{{first.class}} preview'>{{ second.simulation }}<span class='smaller'>{{misc.currency}}</span></span></td>
+  </tr>
+  <tr>
+    <td class='persons'>
+
+    <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+    <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+    <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+
+    </td>
+    <td><span class='{{third.class}}'> {{ third.value }}<span class='smaller'>%</span></span></td>
+    <td><span class='{{first.class}} preview'>{{ third.simulation }}<span class='smaller'>{{misc.currency}}</span></span></td>
+  </tr>
+  <tr>
+    <td class='persons'>
+    <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+    <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+    <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+    <img class='person' alt='{{'Person' | t}}' title='{{'Person' | t}}' src='/{{ path }}/assets/css/images/person-svgrepo-com.svg'>
+    </td>
+    <td><span class='{{fourth.class}}'> {{ fourth.value }}<span class='smaller'>%</span></span></td>
+    <td><span class='{{first.class}} preview'>{{ fourth.simulation }}<span class='smaller'>{{misc.currency}}</span></span></td>
+  </tr>
+
+</table>
+
+<p class="description">{{ "Preview"| t }} {{ "Base"| t }}: {{ misc.simulation.base }}<span class='smaller'>{{misc.currency}}</span></p>
+

@@ -1,0 +1,40 @@
+bat.admin.events:
+  title: 'Event'
+  route_name: bat.admin.events
+  description: 'Event Settings'
+  parent: bat.admin
+
+entity.bat_event.collection:
+  title: 'Events'
+  route_name: entity.bat_event.collection
+  description: 'List of Events'
+  parent: bat.admin.events
+  weight: 1
+
+entity.state.collection:
+  title: 'Event States'
+  route_name: entity.state.collection
+  description: 'List of event States'
+  parent: bat.admin.events
+  weight: 2
+
+entity.bat_event_type.collection:
+  title: 'Event Types'
+  route_name: entity.bat_event_type.collection
+  description: 'List of event Types'
+  parent: bat.admin.events
+  weight: 3
+
+bat_event.settings:
+  title: 'Settings'
+  route_name: bat_event.admin.date
+  description: 'Set up values for BAT Event'
+  parent: bat.admin.config
+  weight: 98
+
+bat_event.maintenance:
+  title: 'Maintenance'
+  route_name: bat_event.admin.maintenance
+  description: 'Tables Maintenance '
+  parent: bat.admin.config
+  weight: 99

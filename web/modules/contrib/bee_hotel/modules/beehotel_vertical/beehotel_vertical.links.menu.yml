@@ -1,0 +1,14 @@
+beehotel_vertical.vertical:
+  title: 'VertiCal'
+  route_name: 'beehotel_vertical.vertical'
+  parent: beehotel.admin
+  description: 'A vertical Calendar. For every Unit, check-in check-out, balance, etc. in a vertical timeline'
+  weight: 200
+
+
+beehotel_vertical.vertical.settings:
+  title: 'VertiCal Settings'
+  route_name: 'beehotel_vertical.admin_settings'
+  parent: beehotel.admin
+  description: 'Set up VertiCal preferences'
+  weight: 201

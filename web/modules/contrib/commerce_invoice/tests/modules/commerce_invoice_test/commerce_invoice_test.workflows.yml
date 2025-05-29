@@ -1,0 +1,20 @@
+invoice_test_workflow:
+  id: invoice_test_workflow
+  group: commerce_invoice
+  label: 'Test workflow'
+  states:
+    pending:
+      label: Pending
+    paid:
+      label: Paid
+    canceled:
+      label: Canceled
+  transitions:
+    pay:
+      label: 'Pay invoice'
+      from: [pending]
+      to: paid
+    cancel:
+      label: 'Cancel invoice'
+      from: [pending]
+      to:   canceled

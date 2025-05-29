@@ -1,0 +1,22 @@
+uuid: bb4c8665-d636-4c4d-a854-e0f92a63711a
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.guest_message
+id: node.guest_message.promote
+field_name: promote
+entity_type: node
+bundle: guest_message
+label: 'Promoted to front page'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

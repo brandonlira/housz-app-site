@@ -1,0 +1,5 @@
+#bee_hotel.node.book_this_unit:
+  #route_name: 'bee_hotel.node.book_this_unit'
+  #title: 'Book this Unit'
+  #appears_on:
+    #- entity.node.canonical

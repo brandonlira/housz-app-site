@@ -1,0 +1,21 @@
+uuid: b03d49a4-d33d-4138-83cd-f63986b2463b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_polarity
+    - node.type.special_night
+  module:
+    - options
+id: node.special_night.field_polarity
+field_name: field_polarity
+entity_type: node
+bundle: special_night
+label: Polarity
+description: 'Use neutral with "fixed" type.'
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

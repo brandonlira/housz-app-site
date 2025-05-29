@@ -1,0 +1,20 @@
+uuid: 8fd7f13c-713e-44d7-8db0-0278b4caae97
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime_range
+    - node
+id: node.field_nights
+field_name: field_nights
+entity_type: node
+type: daterange
+settings:
+  datetime_type: allday
+module: datetime_range
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

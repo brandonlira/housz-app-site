@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_api
+    - serialization
+    - user
+id: bat_api_units_resource
+plugin_id: bat_api_units_resource
+granularity: resource
+configuration:
+  methods:
+    - GET
+  formats:
+    - json
+  authentication:
+    - cookie

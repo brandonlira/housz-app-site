@@ -1,0 +1,73 @@
+beehotel.admin:
+  path: '/admin/beehotel'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Bee Hotel'
+  requirements:
+    _permission: 'administer bee_hotel'
+
+bee_hotel.node.book_this_unit:
+  path: '/node/{node}/book-this-unit'
+  defaults:
+    _form: '\Drupal\bee_hotel\Form\BookThisUnitForm'
+  requirements:
+    _bee_hotel_book_this_unit_access: 'node'
+
+bee_hotel.node.related_product:
+  path: '/node/{node}/product'
+  defaults:
+    _controller: '\Drupal\bee_hotel\Controller\RelatedProduct::product'
+    _title: 'Related Product'
+  options:
+    parameters:
+      node:
+        type: entity:node
+  requirements:
+    _permission: 'administer bee_hotel'
+# search form with result below
+beehotel.unit_search:
+  path: '/us'
+  defaults:
+    _form: '\Drupal\bee_hotel\Form\UnitsSearch'
+    _title: 'Search'
+  requirements:
+    _permission: 'access content'
+# seach result with form above
+beehotel.search_result:
+  path: '/u'
+  defaults:
+    _controller: '\Drupal\bee_hotel\Controller\SearchResult::result'
+    _title: 'Search Result'
+  requirements:
+    _permission: 'access content'
+beehotel.admin_settings:
+  path: '/admin/beehotel/settings'
+  defaults:
+    _form: '\Drupal\bee_hotel\Form\BeeHotelSettingsForm'
+    _title: 'Settings'
+  requirements:
+    _permission: 'administer bee_hotel'
+# bee_hotel.mail.welcome.send:
+#   path: '/admin/bee_hotel/mailguest/{order}/{type}'
+#   defaults:
+#     _form: '\Drupal\bee_hotel\Form\MailGuest'
+#     _title: 'MailGuest'
+#     type: welcomemail
+#   options:
+#     parameters:
+#       order:
+#         type: entity:commerce_order
+#   requirements:
+#     _permission: 'administer bee_hotel'
+entity.commerce_order.guest_messages:
+  path: '/admin/commerce/orders/{commerce_order}/guest-messages'
+  defaults:
+    _controller: '\Drupal\bee_hotel\Controller\GuestMessages::result'
+    _title: 'Guest Messages'
+    type: welcomemail
+  options:
+    parameters:
+      commerce_order:
+        type: 'entity:commerce_order'
+  requirements:
+    _invoice_order_access: 'TRUE'

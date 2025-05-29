@@ -1,0 +1,4 @@
+services:
+  beehotel_sps.apply_price_slider:
+    class: Drupal\beehotel_sps\ApplyPriceSlider
+    arguments: []

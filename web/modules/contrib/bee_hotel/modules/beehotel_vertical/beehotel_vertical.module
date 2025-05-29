@@ -1,0 +1,90 @@
+<?php
+
+/**
+ * @file
+ * VertiCal - vertical calendar for Bee Hotel.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function beehotel_vertical_theme() {
+
+  $theme = [
+    'vertical_day' => [
+      'variables' => [
+        'date' => NULL,
+        'items' => NULL,
+      ],
+    ],
+
+    'vertical_form' => [
+      'render element' => 'form',
+    ],
+
+    'vertical_table_tr_td' => [
+      'variables' => [
+        'a_class' => NULL,
+        'a_content' => NULL,
+        'spacer_class' => NULL,
+        'spacer_content' => NULL,
+        'b_class' => NULL,
+        'b_content' => NULL,
+        'season' => [],
+        'state' => NULL,
+        'extra' => NULL,
+      ],
+    ],
+    'vertical_table_tr_td_col1' => [
+      'variables' => [
+        'season_class' => NULL,
+        'content' => NULL,
+        'day' => NULL,
+        'season' => [],
+        'elab_day' => NULL,
+      ],
+    ],
+    'vertical_order_item' => [
+      'variables' => [
+        'balance' => NULL,
+        'comments' => NULL,
+        'hidden_text' => NULL,
+        'extra' => NULL,
+        'mail' => NULL,
+        'name' => NULL,
+        'order_id' => NULL,
+        'order_number' => NULL,
+        'payments' => NULL,
+        'surname' => NULL,
+        'total' => NULL,
+      ],
+    ],
+
+    'event_state_box' => [
+      'variables' => [
+        'blocking' => NULL,
+        'color' => NULL,
+        'label' => NULL,
+        'extra' => NULL,
+      ],
+    ],
+  ];
+  return $theme;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for HTML document templates.
+ */
+function beehotel_vertical_preprocess_html(&$variables) {
+  $variables['attributes']['class'][] = 'vertical-table';
+}
+
+/**
+ * Implements hook_formatter_page_attachments().
+ */
+function beehotel_vertical_page_attachments(array &$page) {
+  $path = \Drupal::service('path.current')->getPath();
+  if ($path == "/admin/beehotel/vertical") {
+    $page['#attached']['library'][] = 'beehotel_vertical/vertical';
+  }
+}

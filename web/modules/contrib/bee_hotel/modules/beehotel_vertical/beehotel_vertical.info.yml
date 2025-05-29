@@ -1,0 +1,12 @@
+name: Bee Hotel VertiCal
+type: module
+description: "A vertical Calendar for BeeHotel Reservation"
+core_version_requirement: ^9.4 || ^10  || ^11
+package: 'BEE Hotel'
+dependencies:
+  - drupal:bee_hotel
+
+# Information added by Drupal.org packaging script on 2025-05-10
+version: '2.24.6'
+project: 'bee_hotel'
+datestamp: 1746864358

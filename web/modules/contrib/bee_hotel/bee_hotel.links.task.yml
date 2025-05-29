@@ -1,0 +1,6 @@
+entity.commerce_order.guest_messages:
+  route_name: entity.commerce_order.guest_messages
+  # route_name: entity.commerce_order.credit_memos
+  base_route: entity.commerce_order.canonical
+  title: 'Guest Messages'
+  weight: 16

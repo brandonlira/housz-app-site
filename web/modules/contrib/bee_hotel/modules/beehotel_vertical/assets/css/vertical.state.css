@@ -1,0 +1,65 @@
+.state-link {
+  display: block;
+  width: 66px;
+  max-width: 66px;
+  margin: 24px auto;
+  /* override Claro setting  */
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.state-link .state {
+  width: 66px;
+  border: 0px solid #ccc;
+  height: 20px;
+  margin: 0;
+  perspective: 100px;
+}
+
+.state-link .state .card {
+  width: 66px;
+  margin: 0;
+  height: 100%;
+  transition: transform 1s;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  position: relative;
+}
+
+.state-link .state .card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.state-link .state .card__face {
+  backface-visibility: hidden;
+  color: white;
+  font-weight: bold;
+  height: 100%;
+  font-size: 10px;
+  line-height: 24px;
+  text-align: center;
+  position: absolute;
+  width: 66px;
+  -webkit-backface-visibility: hidden;
+  padding: 2px 12px;
+  border-radius: 4px;
+}
+
+.state-link .state .card__face.green {
+  background: #7ac97a;
+  width: 46px;
+}
+
+.state-link .state .card__face.red {
+  background: #ff6262;
+  width: 46px;
+}
+
+.state-link .state .card__face--front {
+  background: grey;
+}
+
+.state-link .state .card__face--back {
+  background: grey;
+  transform: rotateY(180deg);
+}

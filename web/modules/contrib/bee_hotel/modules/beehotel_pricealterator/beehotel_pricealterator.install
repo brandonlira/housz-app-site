@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * BEE Hotel install/update/uninstall hook implementation.
+ */
+
+/**
+ * Implements hook_entity_uninstall().
+ */
+function beehotel_pricealterator_uninstall() {
+  beehotel_pricealterator_clean_config();
+}

@@ -1,0 +1,8 @@
+beehotel_addtocart.list:
+ path: '/add/product/{productId}'
+ defaults:
+   _controller: '\Drupal\beehotel_addtocart\Controller\BeeHotelAddToCart::addToCart'
+   _title: ''
+ requirements:
+   _permission: 'access content'
+   productId: \d+

@@ -1,0 +1,6 @@
+beehotel_vertical_access_vertical:
+  title: 'Access VertiCal'
+  description: 'Access the Vertical Calendar'
+
+permission_callbacks:
+  - Drupal\beehotel_vertical\BeehotelVerticalPermissions::permissions

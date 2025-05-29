@@ -1,0 +1,441 @@
+<?php
+
+/**
+ * @file
+ * Contains global features for bee hotel.
+ */
+
+use Drupal\bee_hotel\BeeHotelGuestMessageTokens;
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_page_attachments().
+ */
+function bee_hotel_page_attachments(array &$page) {
+
+  if (\Drupal::service('bee_hotel.beehotel')->isAdmin()) {
+    $page['#attached']['library'][] = 'bee_hotel/extra';
+    $page['#attached']['library'][] = 'bee_hotel/admin';
+  }
+
+  $page['#attached']['library'][] = 'bee_hotel/beehotel-guestmessages';
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function bee_hotel_menu_local_tasks_alter(&$data, $route_name, RefinableCacheableDependencyInterface $cacheability) {
+  if ($route_name === 'entity.node.canonical') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    $isBeehotel = \Drupal::service('beehotel_utils.beehotelunit')->isThisNodeBeeHotel($node);
+    if ($isBeehotel == 1) {
+      // @todo more granular permission.
+      if (\Drupal::currentUser()->hasPermission('administer bee_hotel')) {
+        $data['tabs'][0]['bee_hotel.node.related_product'] = [
+          '#theme' => 'menu_local_task',
+          '#link' => [
+            'title' => t('Product'),
+            'url' => Url::fromRoute('bee_hotel.node.related_product', ['node' => $node->id()]),
+            'localized_options' => [
+              'attributes' => [
+                'title' => t('Related product'),
+              ],
+            ],
+          ],
+        ];
+        // The tab we're adding is dependent on a user's access to add content.
+        $cacheability->addCacheContexts(['user.permissions']);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function bee_hotel_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+
+  if ($form_id == 'node_guest_message_form') {
+
+    // Add the token tree UI.
+    $tmp = t("Drupal stadard tokens are also supported.");
+    $beeHotelGuestMessageTokens = new BeeHotelGuestMessageTokens();
+
+    $tmp = "<ul>";
+    foreach ($beeHotelGuestMessageTokens->guestMessageTokensSchema() as $key => $token) {
+      $tmp .= "<li><span class='token-id'>[" . $key . "]</span> " . $token['description'];
+    }
+    $tmp .= "</ul>";
+
+    $form['field_message']['beehotel_tokens'] = [
+      '#description' => t("Drupal stadard tokens are also supported.") . $tmp,
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#weight' => 90,
+    ];
+
+    $form['field_message']['token_tree'] = [
+      '#prefix' => t("Drupal stadard tokens are also supported."),
+      '#theme' => 'token_tree_link',
+      '#token_types' => ['user'],
+      '#show_restricted' => TRUE,
+      '#weight' => 91,
+    ];
+  }
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function bee_hotel_preprocess_html(&$variables) {
+  $path = \Drupal::service('path.current')->getPath();
+  if (\Drupal::service('path.matcher')->matchPath($path, '/admin/beehotel')) {
+    $variables['attributes']['class'][] = 'beehotel';
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ *
+ * Demonstrates using a preprocess function to alter the renderable array that
+ * represents the page currently being viewed.
+ */
+function bee_hotel_preprocess_page(&$variables) {
+
+  if (\Drupal::routeMatch()->getRouteName() !== 'beehotel.admin') {
+    return;
+  }
+
+  $config = \Drupal::config('bee_hotel.settings');
+
+  $page = &$variables['page'];
+
+  // Move the breadcrumbs into the content area.
+  if ($config->get('move_breadcrumbs') && !empty($page['breadcrumb']) && !empty($page['content'])) {
+    $page['content']['breadcrumb'] = $page['breadcrumb'];
+    unset($page['breadcrumb']);
+    $page['content']['breadcrumb']['#weight'] = -99999;
+  }
+
+  $renderable = [
+    '#theme' => 'beehotel_dashboard_inbox',
+    '#unread_text' => NULL,
+    '#messages' => [],
+  ];
+
+  $page['content']['page_render_array'] = [
+    '#type' => 'markup',
+    '#prefix' => \Drupal::service('renderer')->renderPlain($renderable),
+    '#weight' => -99999,
+  ];
+
+  $page['content']['#sorted'] = FALSE;
+
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function bee_hotel_entity_insert(EntityInterface $entity) {
+
+  $beehotelunit = \Drupal::service('beehotel_utils.beehotelunit');
+
+  // @todo once removed this, use ...  event booking night value.
+  if ($entity->getEntityTypeId() == "commerce_order_item") {
+    $beehotelunit->beeHotelCalculateNights($entity);
+  }
+
+  if ($entity->getEntityTypeId() == "node") {
+    if ($beehotelunit->isThisNodeBeeHotel($entity) == TRUE) {
+      $beehotelunit->registerAcceptReservationPause($entity);
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function bee_hotel_entity_update(EntityInterface $entity) {
+
+  $beehotelunit = \Drupal::service('beehotel_utils.beehotelunit');
+
+  if ($entity->getEntityTypeId() == "commerce_order_item") {
+    $beehotelunit->beeHotelCalculateNights($entity);
+  }
+
+  if ($entity->getEntityTypeId() == "node") {
+    if ($beehotelunit->isThisNodeBeeHotel($entity) == TRUE) {
+      $beehotelunit->registerAcceptReservationPause($entity);
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function bee_hotel_node_view(array &$build, EntityInterface $node, EntityViewDisplayInterface $display, $view_mode) {
+
+  if ($view_mode == "full") {
+
+    $options = [];
+    $config = \Drupal::service('config.factory')->getEditable('beehotel.settings');
+
+    if ($config->get('beehotel.setup_mode') == 1) {
+      $beeHotel = \Drupal::service('bee_hotel.beehotel');
+      $beeHotel->checkBeeHotelSetupNode($node);
+      $beeHotel->checkLibraries();
+    }
+
+    if ($config->get('beehotel.book_this_unit_position') != 'none') {
+      if ($node->hasField('field_availability_daily')) {
+        if (!empty($node->get("field_availability_daily")->target_id)) {
+          $current_path = \Drupal::service('path.current')->getPath();
+          if ($current_path == "/node/" . $node->Id()) {
+            $builtForm = \Drupal::formBuilder()->getForm("Drupal\bee_hotel\Form\BookThisUnitForm");
+            $build['beehotel_book_this_unit_form'] = $builtForm;
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function bee_hotel_theme($existing, $type, $theme, $path) {
+  return [
+    'bee_hotel_s_unit' => [
+      'template' => 'bee-hotel-s-unit',
+      'variables' => [
+        'currency' => NULL,
+        'description' => NULL,
+        'destination' => NULL,
+        'img' => NULL,
+        'nights' => NULL,
+        'price' => NULL,
+        'title' => NULL,
+        'store' => NULL,
+        'product_id' => NULL,
+        'variation_id' => NULL,
+      ],
+    ],
+
+    'bee_hotel_new_search_link' => [
+      'template' => 'bee-hotel-new-search-link',
+      'variables' => [
+        'description' => NULL,
+        'link' => NULL,
+      ],
+    ],
+
+    'beehotel_dashboard_inbox' => [
+      'variables' => [
+        'unread_text' => '',
+        'messages' => [],
+      ],
+    ],
+
+    'beehotel_guest_messages' => [
+      'variables' => [
+        'table' => NULL,
+      ],
+    ],
+
+    'beehotel_guest_messages_value' => [
+      'variables' => [
+        'value' => NULL,
+        'footer' => NULL,
+        'node_title' => NULL,
+      ],
+    ],
+
+    'beehotel_guest_messages_value_footer' => [
+      'variables' => [
+        'footer' => NULL,
+      ],
+    ],
+
+  ];
+}
+
+/**
+ * Implements hook_cron().
+ */
+function bee_hotel_cron() {
+  $beehotelunit = \Drupal::service('beehotel_utils.beehotelunit');
+  $beehotelunit->beeHotelUnitsEnableAcceptReservations();
+}
+
+/**
+ * Implements hook_toolbar().
+ */
+function bee_hotel_toolbar() {
+  $items = [];
+
+  $items['bee_hotel'] = [
+    '#type' => 'toolbar_item',
+    '#attached' => [
+      'library' => [
+        'bee_hotel/drupal.beehotel.toolbar',
+      ],
+    ],
+  ];
+
+  return $items;
+}
+
+/**
+ * Clean configuration values.
+ */
+function bee_hotel_clean_config() {
+  $bee_hotel_config = [];
+  $bee_hotel_config[] = 'beehotel.settings';
+  $bee_hotel_config[] = 'commerce_product.commerce_product_type.bee_unit';
+  $bee_hotel_config[] = 'core.entity_form_display.node.unit.default';
+  $bee_hotel_config[] = 'core.entity_view_display.node.unit.default';
+  $bee_hotel_config[] = 'core.entity_view_display.node.unit.teaser';
+  $bee_hotel_config[] = 'field.field.commerce_order_item.bee.field_booking';
+  $bee_hotel_config[] = 'field.field.commerce_order_item.bee.field_check_in';
+  $bee_hotel_config[] = 'field.field.commerce_order_item.bee.field_check_out';
+  $bee_hotel_config[] = 'field.field.node.unit.body';
+  $bee_hotel_config[] = 'field.field.node.unit.field_availability_daily';
+  $bee_hotel_config[] = 'field.field.node.unit.field_image';
+
+  // Old versions.
+  $bee_hotel_config[] = 'field.field.node.unit.field_image_large';
+
+  $bee_hotel_config[] = 'field.field.node.unit.field_cover_image';
+  $bee_hotel_config[] = 'field.field.node.unit.field_open_hours';
+  $bee_hotel_config[] = 'field.field.node.unit.field_price';
+  $bee_hotel_config[] = 'field.field.node.unit.field_price_frequency';
+  $bee_hotel_config[] = 'field.field.node.unit.field_product';
+  $bee_hotel_config[] = 'field.field.node.unit.field_slogan';
+  $bee_hotel_config[] = 'field.field.node.unit.field_use_open_hours';
+  $bee_hotel_config[] = 'field.storage.commerce_order_item.field_booking';
+  $bee_hotel_config[] = 'field.storage.commerce_order_item.field_check_in';
+  $bee_hotel_config[] = 'field.storage.commerce_order_item.field_check_out';
+  $bee_hotel_config[] = 'field.storage.node.field_availability_daily';
+
+  // Old versions.
+  $bee_hotel_config[] = 'field.storage.node.field_image_large';
+
+  $bee_hotel_config[] = 'field.storage.node.field_cover_image';
+  $bee_hotel_config[] = 'field.storage.node.field_open_hours';
+  $bee_hotel_config[] = 'field.storage.node.field_price';
+  $bee_hotel_config[] = 'field.storage.node.field_price_frequency';
+  $bee_hotel_config[] = 'field.storage.node.field_product';
+  $bee_hotel_config[] = 'field.storage.node.field_slogan';
+  $bee_hotel_config[] = 'field.storage.node.field_use_open_hours';
+  $bee_hotel_config[] = 'node.type.unit';
+
+  foreach ($bee_hotel_config as $item) {
+    \Drupal::configFactory()->getEditable($item)->delete();
+  }
+}
+
+/**
+ * List of Forms with no need of Drupal message.
+ *
+ * @todo use Drupal Core data settings.
+ */
+function bee_hotel_number_format($number) {
+
+  if ($number < 0) {
+    return;
+  }
+
+  $settings = [];
+  $settings['decimals'] = 2;
+  $settings['decimal_separator'] = ".";
+  $settings['thousand_separator'] = "";
+
+  return number_format($number,
+    $settings['decimals'],
+    $settings['decimal_separator'],
+    $settings['thousand_separator']);
+}
+
+/**
+ * List of Forms with no need of Drupal message.
+ */
+function bee_hotel_hide_message_from_these_forms() {
+  return [
+    'bee_hotel_book_this_unit_form',
+  ];
+}
+
+/**
+ * Remove BEE link to reservation .
+ */
+function bee_hotel_menu_local_actions_alter(&$local_actions) {
+
+  // With book unit forn in place, we don't need this anymore.
+  unset($local_actions['bee.node.add_reservation']);
+
+}
+
+/**
+ * Gets weight of a given module.
+ *
+ * The weight of uninstalled modules cannot be changed.
+ *
+ * @param string $module
+ *   The name of the module (without the .module extension).
+ */
+function bee_hotel_get_module_weight($module) {
+  $extension_config = \Drupal::configFactory()->getEditable('core.extension');
+  return $extension_config->get("module." . $module);
+}
+
+/**
+ * BEE Hotels is heavier than BEE module.
+ */
+function bee_hotel_update_modules_weight() {
+
+  $weight = [
+    'bee' => bee_hotel_get_module_weight('bee'),
+    'bee_hotel' => bee_hotel_get_module_weight('bee_hotel'),
+  ];
+
+  // Set bee_hotel to a weight 1 lighter,
+  // so ours moves higher in execution order.
+  module_set_weight('bee_hotel', $weight['bee'] - 1);
+}
+
+/**
+ * Preprocess the Commerce Order.
+ */
+function bee_hotel_preprocess_commerce_order(&$variables) {
+
+  $data = [];
+  $data['markup'] = "<hr/><h4>Bee Hotel</h4>";
+
+  /** @var Drupal\commerce_order\Entity\OrderInterface $order */
+  $data['order'] = $variables['order_entity'];
+  $data['payment_gateway'] = $data['order']->get('payment_gateway')->entity;
+  $data['order_id'] = $data['order']->get('order_id')->value;
+  $data['order_first_item'] = $data['order']->get('order_items')[0]->entity;
+
+  if ($data['order_first_item']->hasField('field_booking')) {
+
+    $data['order_first_item_booking'] = $data['order_first_item']->get('field_booking')->entity;
+    $data['order_first_item_booking_event'] = $data['order_first_item_booking']->get('booking_event_reference')->entity;
+
+    if (isset($data['order_first_item_booking_event'])) {
+      $data['order_first_item_booking_event_id'] = $data['order_first_item_booking_event']->get('id')->value;
+      $data['markup'] .= "<a href='/admin/bat/events/event/" . $data['order_first_item_booking_event_id'] . "/edit?/admin/commerce/orders/" . $data['order_id'] . "'>Event</a>";
+    }
+  }
+
+  $variables['additional_order_fields']['beehotel'] = [
+    '#title' => "BAT event",
+    '#markup' => $data['markup'],
+    '#weight' => 98,
+  ];
+
+}

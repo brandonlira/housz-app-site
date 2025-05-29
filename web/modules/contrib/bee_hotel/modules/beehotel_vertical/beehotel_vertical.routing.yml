@@ -1,0 +1,34 @@
+beehotel_vertical.vertical:
+  path: '/admin/beehotel/vertical'
+  defaults:
+    _controller: '\Drupal\beehotel_vertical\Controller\Vertical::page'
+    _title: 'VertiCal'
+  requirements:
+    _custom_access: '\Drupal\beehotel_vertical\Controller\Vertical::access'
+
+beehotel_vertical.admin_settings:
+  path: '/admin/beehotel/vertical/settings'
+  defaults:
+    _form: '\Drupal\beehotel_vertical\Form\BeeeHotelVerticalSettingsForm'
+    _title: 'Bee Hotel Vertical'
+  requirements:
+    _permission: 'administer vertical settings'
+
+beehotel_vertical.event_form:
+    path: '/admin/beehotel/vertical/event-form/{nojs}'
+    defaults:
+        _form:  '\Drupal\beehotel_vertical\Form\EventForm'
+        _title: 'Event form'
+        nojs: ajax
+    requirements:
+        _permission: 'administer vertical settings'
+
+# This route is for an AJAX callback. It has a {nojs} parameter, which gives us
+# a way to know whether the request is an AJAX request or is from some other
+# source.
+beehotel_vertical.ajax_link_callback:
+  path: '/beehotel-vertical/ajax/status/{nojs}/{card_id}'
+  defaults:
+    _controller: '\Drupal\beehotel_vertical\Controller\Vertical::ajaxLinkCallback'
+  requirements:
+    _permission: 'access content'

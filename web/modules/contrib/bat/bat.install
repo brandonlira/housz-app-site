@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * BAT install/update/uninstall hook implementation.
+ */
+
+/**
+ * Enable bat_roomify module
+ */
+function bat_update_8001() {
+  if (!\Drupal::service('module_handler')->moduleExists('bat_roomify')) {
+    \Drupal::service('module_installer')->install(['bat_roomify']);
+  }
+  drupal_flush_all_caches();
+}

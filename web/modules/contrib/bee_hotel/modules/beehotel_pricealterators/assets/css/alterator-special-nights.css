@@ -1,0 +1,17 @@
+tr.disabled,
+tr.disabled a {
+  color: grey;
+}
+
+.value {
+  font-weight: bold;
+}
+
+.subtract,
+.sub {
+  color: red;
+}
+
+.add {
+  color: green;
+}

@@ -1,0 +1,12 @@
+bee:
+  version: VERSION
+  js:
+    js/bee.js: {}
+  dependencies:
+    - core/drupal
+
+bee_form:
+  version: VERSION
+  css:
+    theme:
+      css/bee.css: {}

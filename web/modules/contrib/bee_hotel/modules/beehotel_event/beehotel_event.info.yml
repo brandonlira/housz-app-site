@@ -1,0 +1,12 @@
+name: BEE Hotel Event
+type: module
+description: 'Utilites for BEE Hotel BAT Events'
+package: 'BEE Hotel'
+core_version_requirement: ^9.4 || ^10 || ^11
+dependencies:
+  - drupal:bat
+
+# Information added by Drupal.org packaging script on 2025-05-10
+version: '2.24.6'
+project: 'bee_hotel'
+datestamp: 1746864358

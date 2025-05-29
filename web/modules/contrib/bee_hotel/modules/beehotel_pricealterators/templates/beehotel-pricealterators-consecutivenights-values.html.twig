@@ -1,0 +1,66 @@
+<table class='consecutivenights enabled-{{ enabled }}'>
+  <tr>
+    <th>nights</th>
+    <th>increase</th>
+    <th>preview*</th>
+  </tr>
+
+  <tr class='details first'>
+    <td class='persons'>
+     <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+    </td>
+    <td><span class='{{first.class}}'> {{ first.value }}<span class='smaller'>%</span></span></td>
+    <td><span class='{{first.class}} preview'>{{ first.simulation }}<span class='smaller'>{{misc.currency}}</span></span></td>
+  </tr>
+  <tr class='description first'>
+    <td class='description' colspan='4'>Reservations for 1 night will have a {{ first.value }}% price variation</td>
+  </tr>
+
+  <tr class='details second'>
+    <td class='persons'>
+
+    <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+    <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+
+    </td>
+    <td><span class='{{second.class}}'> {{ second.value }}<span class='smaller'>%</span></span></td>
+    <td><span class='{{first.class}} preview'>{{ second.simulation }}<span class='smaller'>{{misc.currency}}</span></span></td>
+  </tr>
+
+
+  <tr class='description second'>
+    <td class='description' colspan='4'>Reservations for 2 nights will have a {{ second.value }}% price variation</td>
+  </tr>
+
+  <tr class='details third'>
+    <td class='persons'>
+    <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+    <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+    <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+    </td>
+    <td><span class='{{third.class}}'> {{ third.value }}<span class='smaller'>%</span></span></td>
+    <td><span class='{{first.class}} preview'>{{ third.simulation }}<span class='smaller'>{{misc.currency}}</span></span></td>
+  </tr>
+
+  <tr class='description third'>
+    <td class='description' colspan='4'>Reservations for 3 nights will have a {{ third.value }}% price variation</td>
+  </tr>
+
+  <tr class='details forth'>
+    <td class='persons'>
+    <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+    <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+    <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+    <img class='person' alt='{{'Night' | t}}' title='{{'Night' | t}}' src='/{{ path }}/assets/css/images/night-svgrepo-com.svg'>
+    </td>
+    <td><span class='{{fourth.class}}'> {{ fourth.value }}<span class='smaller'>%</span></span></td>
+    <td><span class='{{first.class}} preview'>{{ fourth.simulation }}<span class='smaller'>{{misc.currency}}</span></span></td>
+  </tr>
+
+  <tr class='description fourth'>
+    <td class='description' colspan='4'>Reservations for 4 nights will have a {{ fourth.value }}% price variation</td>
+  </tr>
+
+</table>
+
+<p class="description">{{ "*Preview"| t }} {{ "Base"| t }}: {{ misc.simulation.base }}<span class='smaller'>{{misc.currency}}</span></p>

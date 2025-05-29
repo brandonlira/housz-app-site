@@ -1,0 +1,27 @@
+uuid: 4139b2da-d802-4a04-8966-8eca70629fa7
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_attachments
+    - node.type.guest_message
+  module:
+    - file
+id: node.guest_message.field_attachments
+field_name: field_attachments
+entity_type: node
+bundle: guest_message
+label: Attachments
+description: "File to be shared with the message. \r\nWhen attaching images, keep in mind there will be no resizing or styling "
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:file'
+  handler_settings: {  }
+  file_directory: 'guest-message/[date:custom:Y]-[date:custom:m]'
+  file_extensions: 'png jpg jpeg avi mpeg mp4'
+  max_filesize: ''
+  description_field: false
+field_type: file

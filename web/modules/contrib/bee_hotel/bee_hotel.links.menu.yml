@@ -1,0 +1,20 @@
+beehotel.admin:
+  title: 'BEEHotel'
+  route_name: beehotel.admin
+  description: 'Administer BeeHotel'
+  parent: system.admin
+  weight: -8
+
+beehotel.unitsearch:
+  title: 'Room search'
+  route_name: beehotel.unit_search
+  description: 'Type dates and occupants and see available rooms'
+  parent: beehotel.admin
+  weight: -800
+
+beehotel.admin.config.settings:
+  title: 'Settings'
+  route_name: beehotel.admin_settings
+  description: 'Settings for BEE Hotel'
+  parent: beehotel.admin
+  weight: 900

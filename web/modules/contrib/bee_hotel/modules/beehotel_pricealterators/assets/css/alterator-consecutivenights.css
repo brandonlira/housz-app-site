@@ -1,0 +1,9 @@
+div.consecutivenights-preview-night {
+  background: lightgrey;
+  display: inline-block;
+  font-size: 0.8em;
+}
+
+div.consecutivenights-preview-night span {
+  padding: 12px;
+}
