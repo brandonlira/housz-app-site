@@ -64,6 +64,8 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
             'Symfony\\Component\\DependencyInjection\\' => 38,
             'Symfony\\Component\\Console\\' => 26,
             'Symfony\\Bridge\\PsrHttpMessage\\' => 30,
+            'Shaper\\Tests\\' => 13,
+            'Shaper\\' => 7,
         ),
         'R' => 
         array (
@@ -83,6 +85,11 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
         'M' => 
         array (
             'Masterminds\\' => 12,
+            'MabeEnum\\' => 9,
+        ),
+        'J' => 
+        array (
+            'JsonSchema\\' => 11,
         ),
         'G' => 
         array (
@@ -240,6 +247,14 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
         array (
             0 => __DIR__ . '/..' . '/symfony/psr-http-message-bridge',
         ),
+        'Shaper\\Tests\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/e0ipso/shaper/tests/src',
+        ),
+        'Shaper\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/e0ipso/shaper/src',
+        ),
         'Revolt\\' => 
         array (
             0 => __DIR__ . '/..' . '/revolt/event-loop/src',
@@ -280,6 +295,14 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
         'Masterminds\\' => 
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
+        ),
+        'MabeEnum\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/marc-mabe/php-enum/src',
+        ),
+        'JsonSchema\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (
@@ -415,6 +438,7 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
         'SebastianBergmann\\Diff\\Output\\UnifiedDiffOutputBuilder' => __DIR__ . '/..' . '/sebastian/diff/src/Output/UnifiedDiffOutputBuilder.php',
         'SebastianBergmann\\Diff\\Parser' => __DIR__ . '/..' . '/sebastian/diff/src/Parser.php',
         'SebastianBergmann\\Diff\\TimeEfficientLongestCommonSubsequenceCalculator' => __DIR__ . '/..' . '/sebastian/diff/src/TimeEfficientLongestCommonSubsequenceCalculator.php',
+        'Stringable' => __DIR__ . '/..' . '/marc-mabe/php-enum/stubs/Stringable.php',
         'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
     );
 
