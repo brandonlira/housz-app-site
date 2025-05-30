@@ -16,6 +16,7 @@
     ],
     "require": {
         "composer/installers": "^2.3",
+        "drupal/admin_toolbar": "^3.6",
         "drupal/bee_hotel": "^2.24",
         "drupal/core-composer-scaffold": "^11.1",
         "drupal/core-project-message": "^11.1",
