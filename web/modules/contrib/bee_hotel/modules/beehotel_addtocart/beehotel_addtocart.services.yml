@@ -1,4 +1,0 @@
-services:
-  beehotel_addtocart.addtocart:
-    class: Drupal\beehotel_addtocart\AddToCart
-    arguments: ['@entity_type.manager', '@config.factory', '@commerce_cart.cart_manager',  '@commerce_cart.cart_provider']

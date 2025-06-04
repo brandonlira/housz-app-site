@@ -1,0 +1,36 @@
+housz_api.rooms:
+  path: '/api/rooms'
+  defaults:
+    _controller: '\Drupal\hous_z_api\Controller\ApiController::rooms'
+    _format: 'json'
+  requirements:
+    _permission: 'access content'
+  options:
+    # Declara que aceitamos estes parâmetros na query string:
+    parameters:
+      checkInDate:
+        type: string
+      checkOutDate:
+        type: string
+housz_api.calendar:
+  path: '/api/availability/{unitId}/{bedType}/{start}/{end}'
+  defaults:
+    _controller: '\Drupal\hous_z_api\Controller\ApiController::calendar'
+    _format: 'json'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      unitId:   { type: integer }
+      bedType:  { type: string }
+      start:    { type: string }
+      end:      { type: string }
+
+housz_api.book:
+  path: '/api/reservation'
+  defaults:
+    _controller: '\Drupal\hous_z_api\Controller\ApiController::book'
+    _format: 'json'
+  requirements:
+    _permission: 'access content'
+  methods: [ POST ]
