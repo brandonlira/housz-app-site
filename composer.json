@@ -25,7 +25,8 @@
         "drupal/paragraphs": "^1.19",
         "drupal/search_api": "^1.38",
         "drupal/simple_oauth": "^6.0",
-        "drush/drush": "^13.6"
+        "drush/drush": "^13.6",
+        "ext-http": "*"
     },
     "conflict": {
         "drupal/drupal": "*"

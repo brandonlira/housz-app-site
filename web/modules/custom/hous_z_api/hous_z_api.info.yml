@@ -1,0 +1,10 @@
+name: 'Hous‑Z API'
+type: module
+description: 'Custom API endpoints for the Hous‑Z Booking App'
+core_version_requirement: ^11 || ^10 || ^9
+package: Custom
+dependencies:
+  - drupal:jsonapi
+  - drupal:rest
+  - drupal:serialization
+  - drupal:bat_unit
