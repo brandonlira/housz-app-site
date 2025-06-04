@@ -6,12 +6,12 @@ housz_api.rooms:
   requirements:
     _permission: 'access content'
   options:
-    # Declara que aceitamos estes parâmetros na query string:
     parameters:
       checkInDate:
         type: string
       checkOutDate:
         type: string
+
 housz_api.calendar:
   path: '/api/availability/{unitId}/{bedType}/{start}/{end}'
   defaults:
