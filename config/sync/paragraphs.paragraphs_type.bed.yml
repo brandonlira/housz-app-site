@@ -1,0 +1,10 @@
+uuid: ed186819-3737-470f-81de-5f2971769b6f
+langcode: en
+status: true
+dependencies: {  }
+id: bed
+label: Bed
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

@@ -1,0 +1,27 @@
+uuid: 2a2e9f7b-c8ed-4864-b795-f836b6d975c5
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - paragraphs
+id: paragraph.field_bed_type
+field_name: field_bed_type
+entity_type: paragraph
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: single_bed
+      label: 'Single bed'
+    -
+      value: double_bed
+      label: 'Double bed'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

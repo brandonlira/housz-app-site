@@ -1,51 +1,90 @@
 _core:
   default_config_hash: 4GIX5Esnc_umpXUBj4IIocRX7Mt5fPhm4AgXfE3E56E
 module:
+  address: 0
   admin_toolbar: 0
   admin_toolbar_search: 0
   admin_toolbar_tools: 0
   announcements_feed: 0
   automated_cron: 0
+  bat: 0
+  bat_api: 0
+  bat_booking: 0
+  bat_event: 0
+  bat_event_series: 0
+  bat_event_ui: 0
+  bat_fullcalendar: 0
+  bat_roomify: 0
+  bat_unit: 0
+  bee: 0
+  bee_hotel: 0
+  beehotel_pricealterator: 0
+  beehotel_utils: 0
   big_pipe: 0
   block: 0
   block_content: 0
   breakpoint: 0
   ckeditor5: 0
   comment: 0
+  commerce: 0
+  commerce_number_pattern: 0
+  commerce_order: 0
+  commerce_price: 0
+  commerce_product: 0
+  commerce_store: 0
   config: 0
   contact: 0
   contextual: 0
+  core_event_dispatcher: 0
   datetime: 0
+  datetime_range: 0
   dblog: 0
   dynamic_page_cache: 0
   editor: 0
+  entity: 0
+  entity_reference_revisions: 0
   field: 0
   field_ui: 0
   file: 0
   filter: 0
+  fullcalendar_library: 0
   help: 0
   history: 0
+  hook_event_dispatcher: 0
+  hous_z_api: 0
   image: 0
+  inline_entity_form: 0
+  jsonapi: 0
+  jsonapi_extras: 0
   link: 0
+  mailsystem: 0
   menu_link_content: 0
   menu_ui: 0
   mysql: 0
   node: 0
+  office_hours: 0
   options: 0
   page_cache: 0
   path: 0
   path_alias: 0
+  profile: 0
+  rest: 0
+  restui: 0
   search: 0
   search_api: 0
+  serialization: 0
   shortcut: 0
+  state_machine: 0
   system: 0
   taxonomy: 0
   text: 0
+  token: 0
   toolbar: 0
   update: 0
   user: 0
   views_ui: 0
   views: 10
+  paragraphs: 11
   standard: 1000
 theme:
   olivero: 0

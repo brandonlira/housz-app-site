@@ -1,0 +1,21 @@
+uuid: 98264e2f-47f9-4f5a-9426-3c5683979208
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_unit
+    - entity_reference_revisions
+    - paragraphs
+id: bat_unit.field_beds
+field_name: field_beds
+entity_type: bat_unit
+type: entity_reference_revisions
+settings:
+  target_type: paragraph
+module: entity_reference_revisions
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

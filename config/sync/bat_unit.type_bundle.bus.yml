@@ -1,0 +1,7 @@
+uuid: 039d05e8-0e15-4f08-931b-1657ec561d6b
+langcode: en
+status: true
+dependencies: {  }
+name: 'Bus (multiunits)'
+type: bus
+default_event_value_field_ids: null

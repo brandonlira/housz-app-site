@@ -1,0 +1,11 @@
+uuid: 63fff877-7486-4b07-a5b1-23e1f2697172
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_booking
+id: bat_booking.token
+label: Token
+description: null
+targetEntityType: bat_booking
+cache: true

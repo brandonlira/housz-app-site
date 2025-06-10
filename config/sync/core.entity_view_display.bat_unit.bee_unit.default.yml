@@ -1,0 +1,88 @@
+uuid: 88931cee-8a09-4bae-bf79-43294020f9fb
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_unit.unit_bundle.bee_unit
+    - field.field.bat_unit.bee_unit.field_address
+    - field.field.bat_unit.bee_unit.field_beds
+    - field.field.bat_unit.bee_unit.field_cover_image
+    - field.field.bat_unit.bee_unit.field_manager_email
+    - field.field.bat_unit.bee_unit.field_tags
+  module:
+    - entity_reference_revisions
+    - image
+    - user
+id: bat_unit.bee_unit.default
+targetEntityType: bat_unit
+bundle: bee_unit
+mode: default
+content:
+  field_address:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 3
+    region: content
+  field_beds:
+    type: entity_reference_revisions_entity_view
+    label: above
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_cover_image:
+    type: image
+    label: above
+    settings:
+      image_link: ''
+      image_style: ''
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_manager_email:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_tags:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  name:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: -4
+    region: content
+  uid:
+    type: author
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  unit_type_id:
+    type: entity_reference_label
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  search_api_excerpt: true

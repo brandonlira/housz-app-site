@@ -1,0 +1,20 @@
+uuid: 54da4c8a-48d6-463a-8e7d-44d537aeb745
+langcode: en-gb
+status: true
+dependencies:
+  module:
+    - bat_api
+    - serialization
+    - user
+_core:
+  default_config_hash: k6dpVNunAF83p0VYIgiNn_QTzNbw3J8LnEhh1UpJCUg
+id: bat_api_events_resource
+plugin_id: bat_api_events_resource
+granularity: resource
+configuration:
+  methods:
+    - GET
+  formats:
+    - json
+  authentication:
+    - cookie

@@ -1,0 +1,25 @@
+uuid: 414c140a-1ce3-4c5e-a3a0-a999c19ef4fc
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_event
+    - bat_unit
+  enforced:
+    module:
+      - bee
+_core:
+  default_config_hash: ONCFhGWy-OExjhwPuauMBgz59WR9bchsP2dpvmUt8vg
+id: bat_unit_type.field_availability_hourly
+field_name: field_availability_hourly
+entity_type: bat_unit_type
+type: entity_reference
+settings:
+  target_type: state
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

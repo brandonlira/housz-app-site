@@ -1,0 +1,31 @@
+uuid: fa48b18a-1466-430d-92db-42fdc2e63107
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_unit.unit_bundle.bee_unit
+    - field.storage.bat_unit.field_beds
+    - paragraphs.paragraphs_type.bed
+  module:
+    - entity_reference_revisions
+id: bat_unit.bee_unit.field_beds
+field_name: field_beds
+entity_type: bat_unit
+bundle: bee_unit
+label: Beds
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    target_bundles:
+      bed: bed
+    negate: 0
+    target_bundles_drag_drop:
+      bed:
+        weight: 2
+        enabled: true
+field_type: entity_reference_revisions

@@ -1,0 +1,11 @@
+uuid: 2864ecfc-937d-4e63-97d2-d8f2a8468a75
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_event
+id: bat_event.token
+label: Token
+description: null
+targetEntityType: bat_event
+cache: true

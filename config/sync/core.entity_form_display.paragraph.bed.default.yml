@@ -1,0 +1,29 @@
+uuid: 116c3539-b105-4ed3-a0ce-d23cba81c8a5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.bed.field_bed_quantity
+    - field.field.paragraph.bed.field_bed_type
+    - paragraphs.paragraphs_type.bed
+id: paragraph.bed.default
+targetEntityType: paragraph
+bundle: bed
+mode: default
+content:
+  field_bed_quantity:
+    type: number
+    weight: 1
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_bed_type:
+    type: options_select
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  created: true
+  status: true

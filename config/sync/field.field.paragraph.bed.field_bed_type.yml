@@ -1,0 +1,21 @@
+uuid: 1783b2ed-25d4-4897-b535-bfd9560196d1
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_bed_type
+    - paragraphs.paragraphs_type.bed
+  module:
+    - options
+id: paragraph.bed.field_bed_type
+field_name: field_bed_type
+entity_type: paragraph
+bundle: bed
+label: 'Bed Type'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

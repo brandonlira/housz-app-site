@@ -1,0 +1,18 @@
+uuid: 03430cbb-09a9-4dbf-b61d-595262d2dcb5
+langcode: en
+status: true
+dependencies:
+  module:
+    - hous_z_api
+    - serialization
+    - user
+id: availability_resource
+plugin_id: availability_resource
+granularity: resource
+configuration:
+  methods:
+    - GET
+  formats:
+    - json
+  authentication:
+    - cookie

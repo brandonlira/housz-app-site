@@ -1,0 +1,30 @@
+uuid: c938de1a-94d8-4c55-ac1a-961181b01c06
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_unit.type_bundle.daily
+    - field.storage.bat_unit_type.field_availability_daily
+  enforced:
+    module:
+      - bee
+_core:
+  default_config_hash: TpkvoF6jro3f_oeZhqnQQQIjuNXfMrLyh9fx6-dYUw8
+id: bat_unit_type.daily.field_availability_daily
+field_name: field_availability_daily
+entity_type: bat_unit_type
+bundle: daily
+label: 'Availability Daily'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:state'
+  handler_settings:
+    target_bundles: null
+    sort:
+      field: _none
+    auto_create: false
+field_type: entity_reference

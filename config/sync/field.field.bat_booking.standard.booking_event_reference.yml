@@ -1,0 +1,21 @@
+uuid: 117b2c0b-13db-4ff1-b16a-57a8dc774bd6
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_booking.booking_bundle.standard
+    - field.storage.bat_booking.booking_event_reference
+id: bat_booking.standard.booking_event_reference
+field_name: booking_event_reference
+entity_type: bat_booking
+bundle: standard
+label: Event
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:bat_event'
+  handler_settings: {  }
+field_type: entity_reference

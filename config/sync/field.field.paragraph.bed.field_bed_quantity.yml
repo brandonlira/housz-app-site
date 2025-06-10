@@ -1,0 +1,23 @@
+uuid: 532558b2-773b-4004-9695-28a9fbbccf80
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_bed_quantity
+    - paragraphs.paragraphs_type.bed
+id: paragraph.bed.field_bed_quantity
+field_name: field_bed_quantity
+entity_type: paragraph
+bundle: bed
+label: Quantity
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: 1
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

@@ -1,0 +1,15 @@
+uuid: 686513ba-6f6a-4c46-8b11-5436ac134f91
+langcode: en
+status: true
+dependencies: {  }
+name: cover_image_teaser
+label: 'Cover image teaser'
+effects:
+  328c2306-f665-4d54-9805-e82867b8e4b0:
+    uuid: 328c2306-f665-4d54-9805-e82867b8e4b0
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 600
+      height: 400
+      anchor: center-center

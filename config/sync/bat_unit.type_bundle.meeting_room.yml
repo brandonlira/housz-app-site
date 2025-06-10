@@ -1,0 +1,7 @@
+uuid: 5d34e082-4f58-4e5a-8f0a-7eacd963dbdb
+langcode: en
+status: true
+dependencies: {  }
+name: 'Meeting Room'
+type: meeting_room
+default_event_value_field_ids: null

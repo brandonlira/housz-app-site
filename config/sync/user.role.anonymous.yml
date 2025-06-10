@@ -4,10 +4,18 @@ status: true
 dependencies:
   config:
     - filter.format.restricted_html
+    - rest.resource.availability_resource
+    - rest.resource.bat_api_events_resource
+    - rest.resource.bat_api_units_resource
+    - rest.resource.reservation_resource
+    - rest.resource.rooms_resource
   module:
+    - bee
     - comment
+    - commerce_product
     - contact
     - filter
+    - rest
     - search
     - system
 _core:
@@ -20,5 +28,14 @@ permissions:
   - 'access comments'
   - 'access content'
   - 'access site-wide contact form'
+  - 'administer rest resources'
+  - 'restful get availability_resource'
+  - 'restful get bat_api_events_resource'
+  - 'restful get bat_api_units_resource'
+  - 'restful get rooms_resource'
+  - 'restful post reservation_resource'
   - 'search content'
   - 'use text format restricted_html'
+  - 'view calendar data for any availability_daily event'
+  - 'view calendar data for any availability_hourly event'
+  - 'view commerce_product'
