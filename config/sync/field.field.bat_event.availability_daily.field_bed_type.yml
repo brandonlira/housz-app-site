@@ -1,0 +1,21 @@
+uuid: f5827df4-7a4d-4ca7-be3c-064d96d4233a
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_event.event_type.availability_daily
+    - field.storage.bat_event.field_bed_type
+  module:
+    - options
+id: bat_event.availability_daily.field_bed_type
+field_name: field_bed_type
+entity_type: bat_event
+bundle: availability_daily
+label: 'Bed Type'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

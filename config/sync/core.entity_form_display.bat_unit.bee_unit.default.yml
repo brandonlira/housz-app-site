@@ -1,0 +1,107 @@
+uuid: 3e4e1da3-efa6-4d33-a92f-33300c956122
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_unit.unit_bundle.bee_unit
+    - field.field.bat_unit.bee_unit.field_address
+    - field.field.bat_unit.bee_unit.field_beds
+    - field.field.bat_unit.bee_unit.field_cover_image
+    - field.field.bat_unit.bee_unit.field_manager_email
+    - field.field.bat_unit.bee_unit.field_tags
+    - image.style.thumbnail
+  module:
+    - image
+    - paragraphs
+id: bat_unit.bee_unit.default
+targetEntityType: bat_unit
+bundle: bee_unit
+mode: default
+content:
+  created:
+    type: datetime_timestamp
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_address:
+    type: string_textfield
+    weight: 13
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_beds:
+    type: paragraphs
+    weight: 15
+    region: content
+    settings:
+      title: Paragraph
+      title_plural: Paragraphs
+      edit_mode: open
+      closed_mode: summary
+      autocollapse: none
+      closed_mode_threshold: 0
+      add_mode: dropdown
+      form_display_mode: default
+      default_paragraph_type: ''
+      features:
+        collapse_edit_all: collapse_edit_all
+        duplicate: duplicate
+    third_party_settings: {  }
+  field_cover_image:
+    type: image_image
+    weight: 11
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+  field_manager_email:
+    type: email_default
+    weight: 14
+    region: content
+    settings:
+      placeholder: ''
+      size: 60
+    third_party_settings: {  }
+  field_tags:
+    type: entity_reference_autocomplete
+    weight: 12
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  name:
+    type: string_textfield
+    weight: -4
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  unit_type_id:
+    type: entity_reference_autocomplete
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden: {  }

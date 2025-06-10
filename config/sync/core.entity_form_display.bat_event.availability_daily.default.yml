@@ -1,0 +1,62 @@
+uuid: 67a8e420-606f-4843-9d48-8dbf667be0aa
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_event.event_type.availability_daily
+    - field.field.bat_event.availability_daily.event_bat_unit_reference
+    - field.field.bat_event.availability_daily.event_dates
+    - field.field.bat_event.availability_daily.event_series
+    - field.field.bat_event.availability_daily.event_state_reference
+    - field.field.bat_event.availability_daily.field_bed_type
+  module:
+    - datetime_range
+id: bat_event.availability_daily.default
+targetEntityType: bat_event
+bundle: availability_daily
+mode: default
+content:
+  event_bat_unit_reference:
+    type: entity_reference_autocomplete
+    weight: 3
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  event_dates:
+    type: daterange_default
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  event_state_reference:
+    type: entity_reference_autocomplete
+    weight: 3
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_bed_type:
+    type: options_select
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  event_series: true

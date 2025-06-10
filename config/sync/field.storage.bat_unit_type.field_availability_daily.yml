@@ -1,0 +1,25 @@
+uuid: cdabb6be-6b25-47da-ada0-372ffaedcc81
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_event
+    - bat_unit
+  enforced:
+    module:
+      - bee
+_core:
+  default_config_hash: aEWMdbRD38e0AyuasvqR8jZoPVrKyLHULhYnjVhiPo4
+id: bat_unit_type.field_availability_daily
+field_name: field_availability_daily
+entity_type: bat_unit_type
+type: entity_reference
+settings:
+  target_type: state
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

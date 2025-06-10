@@ -1,0 +1,7 @@
+uuid: 405ee78a-1f89-4eca-a083-5d3a9b3d8e4c
+langcode: en
+status: true
+dependencies: {  }
+name: 'Padel Court'
+type: padel
+default_event_value_field_ids: null

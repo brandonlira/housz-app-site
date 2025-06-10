@@ -1,0 +1,19 @@
+uuid: 94610f70-7338-4fcc-9ffa-1c505b8e1358
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_unit.unit_bundle.bee_unit
+    - field.storage.bat_unit.field_address
+id: bat_unit.bee_unit.field_address
+field_name: field_address
+entity_type: bat_unit
+bundle: bee_unit
+label: Address
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

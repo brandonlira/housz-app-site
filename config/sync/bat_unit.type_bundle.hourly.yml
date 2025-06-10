@@ -1,0 +1,14 @@
+uuid: fee7a253-ca06-45c9-8f2b-2cc4be95c0ba
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - bee
+_core:
+  default_config_hash: 1IkaeOp5PVPiyIoHHL0b9Iubn8w8XJR6Zg_ZjRae_o4
+name: Hourly
+type: hourly
+default_event_value_field_ids:
+  availability_daily: ''
+  availability_hourly: field_availability_hourly

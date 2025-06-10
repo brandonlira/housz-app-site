@@ -1,0 +1,7 @@
+uuid: 446a500c-4599-4040-9196-e955d11a812e
+langcode: en
+status: true
+dependencies: {  }
+name: Villa
+type: villa
+default_event_value_field_ids: null

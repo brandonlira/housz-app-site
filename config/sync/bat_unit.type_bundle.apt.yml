@@ -1,0 +1,7 @@
+uuid: 4aad66d2-6bc1-4bd4-a3ec-c5ba551be552
+langcode: en
+status: true
+dependencies: {  }
+name: Apartment
+type: apt
+default_event_value_field_ids: null

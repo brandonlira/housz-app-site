@@ -1,0 +1,7 @@
+uuid: 8bae965c-a3cc-4343-ba35-392bbd79a7e0
+langcode: en
+status: true
+dependencies: {  }
+name: Room
+type: room
+default_event_value_field_ids: null

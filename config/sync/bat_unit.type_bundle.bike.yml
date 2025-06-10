@@ -1,0 +1,7 @@
+uuid: 6f56da3d-8a0c-454a-87d6-97bb597cfc4d
+langcode: en
+status: true
+dependencies: {  }
+name: Bike
+type: bike
+default_event_value_field_ids: null

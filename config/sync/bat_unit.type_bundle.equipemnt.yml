@@ -1,0 +1,7 @@
+uuid: 86db9975-52a1-461c-b6a0-88387a384292
+langcode: en
+status: true
+dependencies: {  }
+name: Equipemnt
+type: equipemnt
+default_event_value_field_ids: null

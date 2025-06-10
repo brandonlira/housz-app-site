@@ -1,0 +1,13 @@
+_core:
+  default_config_hash: EQDanpn93uao_-o1OH2gLgzI7mrNb-PKHLf6OaWeW2o
+bat_open_state_default_zero_color: '#F3C776'
+bat_open_state_default_color: '#9DDC9D'
+bat_fullcalendar_scheduler_key: non-commercial
+bat_fullcalendar_scheduler_commercial_key: null
+bat_fullcalendar_calendar_timerange_start: '-30'
+bat_fullcalendar_calendar_timerange_end: '30'
+bat_fullcalendar_calendar_height: '400'
+bat_fullcalendar_calendar_view_daily: timeGridWeek
+bat_fullcalendar_calendar_edit_daily: timeGridWeek
+bat_fullcalendar_calendar_view_hourly: timeGridDay
+bat_fullcalendar_calendar_edit_hourly: dayGridWeek

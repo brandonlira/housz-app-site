@@ -1,0 +1,19 @@
+uuid: 2562af64-af23-45ee-ae56-3c6341dc9d78
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_unit.unit_bundle.bee_unit
+    - field.storage.bat_unit.field_manager_email
+id: bat_unit.bee_unit.field_manager_email
+field_name: field_manager_email
+entity_type: bat_unit
+bundle: bee_unit
+label: 'Manager Email'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: email

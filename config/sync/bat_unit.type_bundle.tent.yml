@@ -1,0 +1,7 @@
+uuid: 9df7059e-d2d7-4cfe-8c68-425cad73d744
+langcode: en
+status: true
+dependencies: {  }
+name: Tent
+type: tent
+default_event_value_field_ids: null

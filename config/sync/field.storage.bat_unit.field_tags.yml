@@ -1,0 +1,20 @@
+uuid: 9957deeb-d16e-40db-8e8f-b4578ce33ca3
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_unit
+    - taxonomy
+id: bat_unit.field_tags
+field_name: field_tags
+entity_type: bat_unit
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

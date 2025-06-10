@@ -1,0 +1,2 @@
+enabled: 1
+seasons: "{\r\n    \"seasons\": {\r\n        \"fallback\": \"high\",\r\n        \"range\": {\r\n            \"low\": {},\r\n            \"high\": {\r\n                \"0\": {\r\n                    \"from\": \"2025-01-01T00:00:00.000Z\",\r\n                    \"to\": \"2025-12-31T23:59:59.999Z\"\r\n                }\r\n            },\r\n            \"peak\": {}\r\n        }\r\n    }\r\n  }"

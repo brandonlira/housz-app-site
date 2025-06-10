@@ -1,0 +1,27 @@
+uuid: 26565d2f-8ca5-45d4-953b-aa7f68de2dfc
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_event
+    - options
+id: bat_event.field_bed_type
+field_name: field_bed_type
+entity_type: bat_event
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: single_bed
+      label: 'Single bed'
+    -
+      value: double_bed
+      label: 'Double bed'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

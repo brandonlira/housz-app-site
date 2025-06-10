@@ -1,0 +1,21 @@
+uuid: fa36019e-525c-4d43-b1b0-2cd37b7fa758
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_event_series.event_series_type.availability_hourly
+    - field.storage.bat_event_series.event_dates
+  module:
+    - datetime_range
+id: bat_event_series.availability_hourly.event_dates
+field_name: event_dates
+entity_type: bat_event_series
+bundle: availability_hourly
+label: 'Event Dates'
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: daterange

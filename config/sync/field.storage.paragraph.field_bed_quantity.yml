@@ -1,0 +1,20 @@
+uuid: bee7d6fb-167d-402c-9a4d-3f7fc428e3e6
+langcode: en
+status: true
+dependencies:
+  module:
+    - paragraphs
+id: paragraph.field_bed_quantity
+field_name: field_bed_quantity
+entity_type: paragraph
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

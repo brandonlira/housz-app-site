@@ -1,0 +1,39 @@
+uuid: 417c6aee-9655-4268-8def-d22c585f165d
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_event.event_type.availability_daily
+    - field.field.bat_event.availability_daily.event_bat_unit_reference
+    - field.field.bat_event.availability_daily.event_dates
+    - field.field.bat_event.availability_daily.event_series
+    - field.field.bat_event.availability_daily.event_state_reference
+    - field.field.bat_event.availability_daily.field_bed_type
+  module:
+    - options
+    - user
+id: bat_event.availability_daily.default
+targetEntityType: bat_event
+bundle: availability_daily
+mode: default
+content:
+  field_bed_type:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  uid:
+    type: author
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  event_bat_unit_reference: true
+  event_dates: true
+  event_series: true
+  event_state_reference: true
+  search_api_excerpt: true

@@ -1,0 +1,29 @@
+uuid: 3882cd45-cc0e-499b-9d04-aa08ffa344e3
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_unit.unit_bundle.bee_unit
+    - field.storage.bat_unit.field_tags
+    - taxonomy.vocabulary.tags
+id: bat_unit.bee_unit.field_tags
+field_name: field_tags
+entity_type: bat_unit
+bundle: bee_unit
+label: Tags
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      tags: tags
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

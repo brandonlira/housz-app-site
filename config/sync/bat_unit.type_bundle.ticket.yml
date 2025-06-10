@@ -1,0 +1,7 @@
+uuid: 85191dbc-563b-444b-9fe5-1cbd8716b884
+langcode: en
+status: true
+dependencies: {  }
+name: 'Ticket (access to an event)'
+type: ticket
+default_event_value_field_ids: null

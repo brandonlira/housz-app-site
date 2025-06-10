@@ -1,0 +1,18 @@
+uuid: cd7032c1-35f0-4066-8567-1d2aa6de0184
+langcode: en
+status: true
+dependencies:
+  module:
+    - hous_z_api
+    - serialization
+    - user
+id: rooms_resource
+plugin_id: rooms_resource
+granularity: resource
+configuration:
+  methods:
+    - GET
+  formats:
+    - json
+  authentication:
+    - cookie
