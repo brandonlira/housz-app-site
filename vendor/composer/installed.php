@@ -3,7 +3,7 @@
         'name' => 'drupal/recommended-project',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'a19bdc081e3386d3426822eb225187cf1d113514',
+        'reference' => 'd17c19617053fc70ec702e11a6de4e5298daacfe',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -685,6 +685,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'drupal/mailsystem' => array(
+            'pretty_version' => '4.5.0',
+            'version' => '4.5.0.0',
+            'reference' => '8.x-4.5',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../web/modules/contrib/mailsystem',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'drupal/office_hours' => array(
             'pretty_version' => '1.28.0',
             'version' => '1.28.0.0',
@@ -724,7 +733,7 @@
         'drupal/recommended-project' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'a19bdc081e3386d3426822eb225187cf1d113514',
+            'reference' => 'd17c19617053fc70ec702e11a6de4e5298daacfe',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

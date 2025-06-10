@@ -15,6 +15,7 @@
         }
     ],
     "require": {
+        "ext-http": "*",
         "composer/installers": "^2.3",
         "drupal/admin_toolbar": "^3.6",
         "drupal/bee_hotel": "^2.24",
@@ -22,11 +23,11 @@
         "drupal/core-project-message": "^11.1",
         "drupal/core-recommended": "^11.1",
         "drupal/jsonapi_extras": "^3.26",
+        "drupal/mailsystem": "^4.5",
         "drupal/paragraphs": "^1.19",
         "drupal/search_api": "^1.38",
         "drupal/simple_oauth": "^6.0",
-        "drush/drush": "^13.6",
-        "ext-http": "*"
+        "drush/drush": "^13.6"
     },
     "conflict": {
         "drupal/drupal": "*"
