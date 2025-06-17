@@ -6,15 +6,7 @@
 !/web/sites/*/settings.php
 
 # Ignore Drupal's file directory
-/web/sites/*/files/*
 /web/sites/*/files/
-/web/sites/*/files
-/web/sites/default
-/web/sites/default/files
-/web/sites
-!/web/sites/*/files/*
-!/web/sites/default
-!/web/sites/default/files
 !/web/sites/default/files/gin-custom.css
 !/web/sites/*/files/gin-custom.css
 !gin-custom.css
