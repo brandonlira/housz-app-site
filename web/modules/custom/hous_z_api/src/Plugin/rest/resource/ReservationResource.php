@@ -146,13 +146,13 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
     }
 
     // Load "Booked" state.
-    $term_storage = \Drupal::entityTypeManager()->getStorage('state');
-    $terms = $term_storage->loadByProperties(['name' => 'Pending']);
-    $term = reset($terms);
-    if (!$term) {
-      return new JsonResponse(['error' => 'State "Pending" missing'], 500);
+    $state_storage = \Drupal::entityTypeManager()->getStorage('state');
+    $pending_terms = $state_storage->loadByProperties(['name' => 'Pending']);
+    $pending_term = reset($pending_terms);
+    if (!$pending_term) {
+      return new JsonResponse(['error' => 'Could not find the "Pending" state.'], 500);
     }
-    $state_id = $term->id();
+    $pending_state_id = $pending_term->id();
 
     // Format dates for storage.
     $startValue = (new \DateTime($input['checkInDate']))
@@ -166,7 +166,7 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
       'event_dates'              => ['value' => $startValue, 'end_value' => $endValue],
       'event_bat_unit_reference' => ['target_id' => (int) $input['unitId']],
       'field_bed_type'           => $desired,
-      'event_state_reference'    => ['target_id' => $state_id],
+      'event_state_reference'    => ['target_id' => $pending_state_id],
     ]);
     $event->save();
 
@@ -177,7 +177,7 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
       'booking_event_reference' => ['target_id' => $event->id()],
       'uid'                     => ['target_id' => \Drupal::currentUser()->id()],
       'status'                  => 1,
-      'field_event_state'       => ['target_id' => $state_id],
+      'field_event_state'       => ['target_id' => $pending_state_id],
       'booking_start_date'      => ['value' => $startValue],
       'booking_end_date'        => ['value' => $endValue],
     ]);
