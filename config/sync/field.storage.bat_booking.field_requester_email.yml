@@ -1,0 +1,21 @@
+uuid: b67f9895-3fec-430d-a884-070548fafc63
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_booking
+id: bat_booking.field_requester_email
+field_name: field_requester_email
+entity_type: bat_booking
+type: string
+settings:
+  max_length: 255
+  case_sensitive: false
+  is_ascii: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
