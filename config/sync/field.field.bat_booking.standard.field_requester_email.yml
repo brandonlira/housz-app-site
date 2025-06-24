@@ -1,0 +1,19 @@
+uuid: 58b48da6-0de3-4317-8466-b51745e3e9ac
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_booking.booking_bundle.standard
+    - field.storage.bat_booking.field_requester_email
+id: bat_booking.standard.field_requester_email
+field_name: field_requester_email
+entity_type: bat_booking
+bundle: standard
+label: 'Requester Email'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

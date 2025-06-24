@@ -154,6 +154,10 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
     }
     $pending_state_id = $pending_term->id();
 
+    if (empty($input['email']) || !filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
+      return new JsonResponse(['error' => 'A valid email is required'], 400);
+    }
+
     // Format dates for storage.
     $startValue = (new \DateTime($input['checkInDate']))
       ->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
@@ -176,6 +180,7 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
       'type'                    => 'standard',
       'booking_event_reference' => ['target_id' => $event->id()],
       'uid'                     => ['target_id' => \Drupal::currentUser()->id()],
+      'field_requester_email'   => ['value' => $input['email']],
       'status'                  => 1,
       'field_event_state'       => ['target_id' => $pending_state_id],
       'booking_start_date'      => ['value' => $startValue],
@@ -201,6 +206,7 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
         'checkIn'  => ['date' => $input['checkInDate'], 'time' => $input['checkInTime'] ?? ''],
         'checkOut' => ['date' => $input['checkOutDate'], 'time' => $input['checkOutTime'] ?? ''],
       ],
+      'requesterEmail' => $input['email'],
       'details' => $input['details'] ?? '',
     ];
 

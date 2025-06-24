@@ -8,6 +8,7 @@ dependencies:
     - field.field.bat_booking.standard.booking_event_reference
     - field.field.bat_booking.standard.booking_start_date
     - field.field.bat_booking.standard.field_event_state
+    - field.field.bat_booking.standard.field_requester_email
 id: bat_booking.standard.default
 targetEntityType: bat_booking
 bundle: standard
@@ -15,7 +16,7 @@ mode: default
 content:
   booking_event_reference:
     type: entity_reference_autocomplete
-    weight: 2
+    weight: 3
     region: content
     settings:
       match_operator: STARTS_WITH
@@ -25,7 +26,7 @@ content:
     third_party_settings: {  }
   created:
     type: datetime_timestamp
-    weight: 1
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
@@ -39,15 +40,23 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_requester_email:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete
-    weight: 0
+    weight: 1
     region: content
     settings:
       match_operator: CONTAINS
       match_limit: 10
       size: 60
-      placeholder: ''
+      placeholder: 'Booked by'
     third_party_settings: {  }
 hidden:
   booking_end_date: true

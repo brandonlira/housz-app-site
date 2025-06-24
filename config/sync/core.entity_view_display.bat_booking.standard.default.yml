@@ -8,6 +8,7 @@ dependencies:
     - field.field.bat_booking.standard.booking_event_reference
     - field.field.bat_booking.standard.booking_start_date
     - field.field.bat_booking.standard.field_event_state
+    - field.field.bat_booking.standard.field_requester_email
   module:
     - user
 id: bat_booking.standard.default
@@ -22,6 +23,14 @@ content:
       link: true
     third_party_settings: {  }
     weight: 2
+    region: content
+  field_requester_email:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 3
     region: content
   uid:
     type: author
