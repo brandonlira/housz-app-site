@@ -7,22 +7,15 @@ dependencies:
     - field.field.bat_booking.standard.booking_end_date
     - field.field.bat_booking.standard.booking_event_reference
     - field.field.bat_booking.standard.booking_start_date
-  module:
-    - datetime
+    - field.field.bat_booking.standard.field_event_state
 id: bat_booking.standard.default
 targetEntityType: bat_booking
 bundle: standard
 mode: default
 content:
-  booking_end_date:
-    type: datetime_default
-    weight: 1
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   booking_event_reference:
     type: entity_reference_autocomplete
-    weight: 4
+    weight: 2
     region: content
     settings:
       match_operator: STARTS_WITH
@@ -30,17 +23,21 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  booking_start_date:
-    type: datetime_default
-    weight: 3
+  created:
+    type: datetime_timestamp
+    weight: 1
     region: content
     settings: {  }
     third_party_settings: {  }
-  created:
-    type: datetime_timestamp
-    weight: 2
+  field_event_state:
+    type: entity_reference_autocomplete
+    weight: 4
     region: content
-    settings: {  }
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete
@@ -52,4 +49,6 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-hidden: {  }
+hidden:
+  booking_end_date: true
+  booking_start_date: true

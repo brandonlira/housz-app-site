@@ -1,0 +1,20 @@
+uuid: 8c2e4c87-921b-4ed2-9c6c-7209460030a2
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_booking
+    - bat_event
+id: bat_booking.field_event_state
+field_name: field_event_state
+entity_type: bat_booking
+type: entity_reference
+settings:
+  target_type: state
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
