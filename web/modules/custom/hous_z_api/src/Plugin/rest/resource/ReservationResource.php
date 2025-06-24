@@ -147,10 +147,10 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
 
     // Load "Booked" state.
     $term_storage = \Drupal::entityTypeManager()->getStorage('state');
-    $terms = $term_storage->loadByProperties(['name' => 'Booked']);
+    $terms = $term_storage->loadByProperties(['name' => 'Pending']);
     $term = reset($terms);
     if (!$term) {
-      return new JsonResponse(['error' => 'State "Booked" missing'], 500);
+      return new JsonResponse(['error' => 'State "Pending" missing'], 500);
     }
     $state_id = $term->id();
 
@@ -177,6 +177,9 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
       'booking_event_reference' => ['target_id' => $event->id()],
       'uid'                     => ['target_id' => \Drupal::currentUser()->id()],
       'status'                  => 1,
+      'field_event_state'       => ['target_id' => $state_id],
+      'booking_start_date'      => ['value' => $startValue],
+      'booking_end_date'        => ['value' => $endValue],
     ]);
     $booking->save();
 

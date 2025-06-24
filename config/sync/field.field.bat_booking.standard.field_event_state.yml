@@ -1,0 +1,26 @@
+uuid: e4dc64e8-3218-49ad-b1b9-b6dbb9f2263a
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_booking.booking_bundle.standard
+    - field.storage.bat_booking.field_event_state
+id: bat_booking.standard.field_event_state
+field_name: field_event_state
+entity_type: bat_booking
+bundle: standard
+label: 'Event State'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:state'
+  handler_settings:
+    target_bundles: null
+    sort:
+      field: _none
+      direction: ASC
+    auto_create: false
+field_type: entity_reference

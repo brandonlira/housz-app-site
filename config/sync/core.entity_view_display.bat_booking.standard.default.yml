@@ -1,0 +1,37 @@
+uuid: db7732ae-0146-4fcd-a52d-9845dab8eac0
+langcode: en
+status: true
+dependencies:
+  config:
+    - bat_booking.booking_bundle.standard
+    - field.field.bat_booking.standard.booking_end_date
+    - field.field.bat_booking.standard.booking_event_reference
+    - field.field.bat_booking.standard.booking_start_date
+    - field.field.bat_booking.standard.field_event_state
+  module:
+    - user
+id: bat_booking.standard.default
+targetEntityType: bat_booking
+bundle: standard
+mode: default
+content:
+  field_event_state:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  uid:
+    type: author
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  booking_end_date: true
+  booking_event_reference: true
+  booking_start_date: true
+  search_api_excerpt: true
