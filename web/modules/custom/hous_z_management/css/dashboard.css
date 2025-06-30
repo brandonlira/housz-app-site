@@ -1,0 +1,53 @@
+.houz-dashboard {
+  margin: 20px 0;
+}
+
+.houz-stats,
+.houz-actions {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.houz-stats h2,
+.houz-actions h2 {
+  margin-top: 0;
+  color: #495057;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+
+.houz-stats p {
+  font-size: 16px;
+  margin: 10px 0;
+  color: #6c757d;
+}
+
+.houz-actions .button {
+  margin-right: 10px;
+  margin-bottom: 10px;
+  display: inline-block;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #333;
+}
+
+.houz-actions .button--primary {
+  background: #007bff;
+  border-color: #007bff;
+  color: #fff;
+}
+
+.houz-actions .button:hover {
+  background: #e9ecef;
+}
+
+.houz-actions .button--primary:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}

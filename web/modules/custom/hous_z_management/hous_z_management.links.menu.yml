@@ -1,0 +1,20 @@
+hous_z_management.admin_menu:
+  title: 'Housz'
+  description: 'Houz booking management system'
+  route_name: hous_z_management.dashboard
+  parent: system.admin
+  weight: -10
+
+hous_z_management.bookings_menu:
+  title: 'Bookings'
+  description: 'Manage bookings'
+  route_name: hous_z_management.bookings
+  parent: hous_z_management.admin_menu
+  weight: 0
+
+hous_z_management.units_menu:
+  title: 'Units'
+  description: 'Manage units and rooms'
+  route_name: hous_z_management.units
+  parent: hous_z_management.admin_menu
+  weight: 10

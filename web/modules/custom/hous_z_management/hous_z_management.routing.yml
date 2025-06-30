@@ -1,0 +1,41 @@
+hous_z_management.dashboard:
+  path: '/admin/houz'
+  defaults:
+    _controller: '\Drupal\hous_z_management\Controller\HouzDashboardController::dashboard'
+    _title: 'Houz Management Dashboard'
+  requirements:
+    _permission: 'access houz dashboard'
+
+hous_z_management.bookings:
+  path: '/admin/houz/bookings'
+  defaults:
+    _controller: '\Drupal\hous_z_management\Controller\HouzDashboardController::bookings'
+    _title: 'Manage Bookings'
+  requirements:
+    _permission: 'manage houz bookings'
+
+hous_z_management.units:
+  path: '/admin/houz/units'
+  defaults:
+    _controller: '\Drupal\hous_z_management\Controller\HouzDashboardController::units'
+    _title: 'Manage Units'
+  requirements:
+    _permission: 'manage houz units'
+
+hous_z_management.booking_confirm:
+  path: '/admin/houz/booking/{booking}/confirm'
+  defaults:
+    _controller: '\Drupal\hous_z_management\Controller\HouzBookingController::confirm'
+    _title: 'Confirm Booking'
+  requirements:
+    _permission: 'manage houz bookings'
+    booking: \d+
+
+hous_z_management.booking_cancel:
+  path: '/admin/houz/booking/{booking}/cancel'
+  defaults:
+    _controller: '\Drupal\hous_z_management\Controller\HouzBookingController::cancel'
+    _title: 'Cancel Booking'
+  requirements:
+    _permission: 'manage houz bookings'
+    booking: \d+

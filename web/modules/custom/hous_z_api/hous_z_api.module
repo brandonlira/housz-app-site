@@ -1,59 +1,6 @@
 <?php
 
 /**
- * Implements hook_mail().
+ * @file
+ * Housz API module file.
  */
-/**
- * Implements hook_mail().
- *
- * Sends a notification to the room manager when a new booking is created.
- *
- * @param string $key
- *   The e-mail key.
- * @param array  $message
- *   The message array.
- * @param array  $params
- *   Parameters passed to the mail, including 'summary'.
- */
-function hous_z_api_mail($key, &$message, $params) {
-  switch ($key) {
-    case 'booking_notification':
-      // Extract the booking summary.
-      /** @var array $summary */
-      $summary = $params['summary'];
-
-      // Build the e-mail subject.
-      $message['subject'] = t('New reservation: @room', [
-        '@room' => $summary['room']['roomName'],
-      ]);
-
-      // Ensure address and managerEmail are always strings.
-      $address      = !empty($summary['room']['address'])      ? $summary['room']['address']      : '';
-      $managerEmail = !empty($summary['room']['managerEmail']) ? $summary['room']['managerEmail'] : '';
-
-      // Build the e-mail body (plain text).
-      $body = [];
-      $body[] = t('A new reservation has been made for room: @room.', [
-        '@room' => $summary['room']['roomName'],
-      ]);
-      $body[] = '';
-      $body[] = t('Check-in: @date @time', [
-        '@date' => $summary['bookingInfo']['checkIn']['date'],
-        '@time' => $summary['bookingInfo']['checkIn']['time'],
-      ]);
-      $body[] = t('Check-out: @date @time', [
-        '@date' => $summary['bookingInfo']['checkOut']['date'],
-        '@time' => $summary['bookingInfo']['checkOut']['time'],
-      ]);
-      $body[] = '';
-      $body[] = t('Details:');
-      $body[] = $summary['details'] ?: t('No additional details provided.');
-      $body[] = '';
-      $body[] = t('Address: @address', ['@address' => $address]);
-      $body[] = '';
-      $body[] = t('Manager email: @email', ['@email' => $managerEmail]);
-
-      $message['body'] = $body;
-      break;
-  }
-}

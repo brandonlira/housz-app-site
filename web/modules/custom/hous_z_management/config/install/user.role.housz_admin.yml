@@ -1,0 +1,39 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.basic_html
+  module:
+    - bat_booking
+    - bat_unit
+    - filter
+    - hous_z_management
+    - node
+    - system
+    - toolbar
+id: housz_admin
+label: 'Housz Administrator'
+weight: 4
+is_admin: false
+permissions:
+  - 'access administration pages'
+  - 'access content overview'
+  - 'access houz dashboard'
+  - 'access toolbar'
+  - 'access user profiles'
+  - 'administer bat_booking_bundle entities'
+  - 'administer bat_event_type entities'
+  - 'administer bat_unit_bundle entities'
+  - 'book units'
+  - 'create bat_event entities'
+  - 'create bat_unit entities'
+  - 'delete any bat_event entity'
+  - 'delete any bat_unit entity'
+  - 'manage houz bookings'
+  - 'manage houz units'
+  - 'update any bat_event entity'
+  - 'use text format basic_html'
+  - 'view any bat_event entity'
+  - 'view any bat_unit entity'
+  - 'view any bat_unit entity of bundle bee_unit'
+  - 'view the administration theme'

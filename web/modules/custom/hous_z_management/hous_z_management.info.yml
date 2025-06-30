@@ -1,0 +1,13 @@
+name: 'Housz Management'
+type: module
+description: 'Custom module for Housz application management functionality including dashboard, bookings, and unit management'
+core_version_requirement: ^11
+package: Custom
+dependencies:
+  - drupal:system
+  - drupal:node
+  - drupal:user
+  - drupal:views
+  - bat_api:bat_booking
+  - bat_api:bat_unit
+  - bat_api:bat_event
