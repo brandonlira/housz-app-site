@@ -220,7 +220,7 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
       ['summary' => $summary]
     );
 
-    return new JsonResponse(['message' => 'Booking ID ' . $booking->id() . ' successfully created'], 201);
+    return new JsonResponse(['message' => 'Booking ID ' . $booking->id() . ' successfully created.'], 201);
   }
 
 }
