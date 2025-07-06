@@ -93,6 +93,18 @@ function hous_z_management_mail($key, &$message, $params) {
 }
 
 /**
+ * Implements hook_entity_type_alter().
+ *
+ * Override BAT Event entity to use custom class with label functionality.
+ */
+function hous_z_management_entity_type_alter(array &$entity_types) {
+  /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
+  if (isset($entity_types['bat_event'])) {
+    $entity_types['bat_event']->setClass('Drupal\hous_z_management\Entity\HouzEvent');
+  }
+}
+
+/**
  * Implements hook_user_login().
  *
  * Redirects users to the dashboard after login.
