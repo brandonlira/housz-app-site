@@ -6,6 +6,7 @@ dependencies:
     - filter.format.restricted_html
     - rest.resource.bat_api_events_resource
     - rest.resource.bat_api_units_resource
+    - rest.resource.houz_bookings
     - rest.resource.reservation_resource
   module:
     - bee
@@ -29,6 +30,7 @@ permissions:
   - 'administer rest resources'
   - 'restful get bat_api_events_resource'
   - 'restful get bat_api_units_resource'
+  - 'restful get houz_bookings'
   - 'restful post reservation_resource'
   - 'search content'
   - 'use text format restricted_html'

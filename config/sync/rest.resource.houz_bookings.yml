@@ -1,0 +1,18 @@
+uuid: null
+langcode: en
+status: true
+dependencies:
+  module:
+    - basic_auth
+    - hous_z_management
+    - serialization
+id: houz_bookings
+plugin_id: houz_bookings
+granularity: resource
+configuration:
+  methods:
+    - GET
+  formats:
+    - json
+  authentication:
+    - basic_auth
