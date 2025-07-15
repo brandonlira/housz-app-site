@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
  *   id = "houz_bookings",
  *   label = @Translation("Houz Bookings"),
  *   uri_paths = {
- *     "canonical" = "/api/houz/bookings"
+ *     "canonical" = "/api/bookings"
  *   }
  * )
  */
@@ -77,20 +77,31 @@ class HouzBookingsResource extends ResourceBase {
    * @return \Drupal\rest\ResourceResponse
    *   The response containing the bookings data.
    */
-  public function get() {
+  public function get(): ResourceResponse {
     try {
       $bookings = $this->getBookingsData();
-      
-      return new ResourceResponse([
+
+      $data = [
         'data' => $bookings,
         'count' => count($bookings),
-      ]);
+      ];
+
+      $response = new ResourceResponse($data);
+
+      $response->getCacheableMetadata()->setCacheMaxAge(0);
+
+      return $response;
     }
     catch (\Exception $e) {
-      $this->logger->error('Error fetching houz bookings: @message', ['@message' => $e->getMessage()]);
+      $this->logger->error(
+        'Error fetching houz bookings: @message', ['@message' => $e->getMessage()
+        ]
+      );
+
       throw new HttpException(500, 'Internal Server Error');
     }
   }
+
 
   /**
    * Get bookings data using entity type manager.
@@ -98,59 +109,59 @@ class HouzBookingsResource extends ResourceBase {
    * @return array
    *   Array of booking data.
    */
-  private function getBookingsData() {
+  private function getBookingsData(): array {
     $booking_storage = $this->entityTypeManager->getStorage('bat_booking');
-    
+
     $query = $booking_storage->getQuery()
       ->accessCheck(TRUE)
       ->sort('id', 'DESC');
-    
+
     $booking_ids = $query->execute();
-    
+
     if (empty($booking_ids)) {
       return [];
     }
-    
+
     $bookings = $booking_storage->loadMultiple($booking_ids);
-    
+
     $data = [];
     foreach ($bookings as $booking) {
       $booking_data = [
         'id' => (int) $booking->id(),
-        'start_date' => null,
-        'end_date' => null,
-        'requester_email' => null,
-        'state' => null,
-        'room' => null,
+        'start_date' => NULL,
+        'end_date' => NULL,
+        'requester_email' => NULL,
+        'state' => NULL,
+        'room' => NULL,
       ];
-      
+
       if ($booking->hasField('booking_start_date') && !$booking->get('booking_start_date')->isEmpty()) {
         $start_date = $booking->get('booking_start_date')->value;
         $booking_data['start_date'] = date('Y-m-d', strtotime($start_date));
       }
-      
+
       if ($booking->hasField('booking_end_date') && !$booking->get('booking_end_date')->isEmpty()) {
         $end_date = $booking->get('booking_end_date')->value;
         $booking_data['end_date'] = date('Y-m-d', strtotime($end_date));
       }
-      
+
       if ($booking->hasField('field_requester_email') && !$booking->get('field_requester_email')->isEmpty()) {
         $booking_data['requester_email'] = $booking->get('field_requester_email')->value;
       }
-      
+
       if ($booking->hasField('field_event_state') && !$booking->get('field_event_state')->isEmpty()) {
         $state_id = $booking->get('field_event_state')->target_id;
         $booking_data['state'] = $this->getStateLabel($state_id);
       }
-      
+
       if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
         $event_id = $booking->get('booking_event_reference')->target_id;
         $booking_data['room'] = $this->getRoomFromEvent($event_id);
       }
-      
+
       $data[] = $booking_data;
     }
-    
+
     return $data;
   }
 
@@ -161,15 +172,15 @@ class HouzBookingsResource extends ResourceBase {
    *   The event ID.
    *
    * @return array|null
-   *   The room details or null if not found.
+   *   The room details or NULL if not found.
    */
-  private function getRoomFromEvent($event_id) {
+  private function getRoomFromEvent(int $event_id): ?array {
     try {
       $event = $this->entityTypeManager->getStorage('bat_event')->load($event_id);
       if ($event && $event->hasField('event_bat_unit_reference') && !$event->get('event_bat_unit_reference')->isEmpty()) {
         $unit_id = $event->get('event_bat_unit_reference')->target_id;
         $unit = $this->entityTypeManager->getStorage('bat_unit')->load($unit_id);
-        
+
         if ($unit) {
           return [
             'id' => (int) $unit->id(),
@@ -184,8 +195,8 @@ class HouzBookingsResource extends ResourceBase {
         '@message' => $e->getMessage(),
       ]);
     }
-    
-    return null;
+
+    return NULL;
   }
 
   /**
@@ -195,17 +206,16 @@ class HouzBookingsResource extends ResourceBase {
    *   The state ID.
    *
    * @return string|null
-   *   The state label or null if not found.
+   *   The state label or NULL if not found.
    */
-  private function getStateLabel($state_id) {
+  private function getStateLabel(int $state_id): ?string {
     $state_labels = [
-      1 => 'Available',
-      2 => 'Not available',
-      3 => 'Booked',
       7 => 'Pending',
+      8 => 'Cancelled',
+      9 => 'Confirmed',
     ];
-    
-    return $state_labels[$state_id] ?? null;
+
+    return $state_labels[$state_id] ?? NULL;
   }
 
 }

@@ -1,0 +1,425 @@
+<?php
+
+namespace Drupal\hous_z_api\Service;
+
+use Drupal\bat_booking\BookingInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\Core\File\FileUrlGenerator;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Psr\Log\LoggerInterface;
+
+/**
+ * Service for reservation/booking management operations.
+ */
+class ReservationService {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The logger.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * The file URL generator.
+   *
+   * @var \Drupal\Core\File\FileUrlGenerator
+   */
+  protected $fileUrlGenerator;
+
+  /**
+   * Constructs a ReservationService object.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   *   The logger factory.
+   * @param \Drupal\Core\File\FileUrlGenerator $file_url_generator
+   *   The file URL generator.
+   */
+  public function __construct(
+    EntityTypeManagerInterface $entity_type_manager,
+    LoggerChannelFactoryInterface $logger_factory,
+    FileUrlGenerator $file_url_generator
+  ) {
+    $this->entityTypeManager = $entity_type_manager;
+    $this->logger = $logger_factory->get('hous_z_api');
+    $this->fileUrlGenerator = $file_url_generator;
+  }
+
+  /**
+   * Create a new reservation.
+   *
+   * @param array $data
+   *   The reservation data.
+   *
+   * @return array
+   *   Array with 'success' boolean and 'data' or 'error' message.
+   */
+  public function createReservation(array $data): array {
+    try {
+      // Validate required fields.
+      $required_fields = ['unitId', 'bedType', 'checkInDate', 'checkOutDate'];
+      foreach ($required_fields as $field) {
+        if (empty($data[$field])) {
+          return [
+            'success' => FALSE,
+            'error' => 'Required: unitId, bedType, checkInDate, checkOutDate',
+          ];
+        }
+      }
+
+      // Load unit.
+      $unit = $this->entityTypeManager->getStorage('bat_unit')->load((int) $data['unitId']);
+      if (!$unit) {
+        return ['success' => FALSE, 'error' => 'Unit not found'];
+      }
+
+      // Check availability.
+      $availability = $this->checkAvailability(
+        $data['unitId'],
+        $data['bedType'],
+        $data['checkInDate'],
+        $data['checkOutDate']
+      );
+      if (!$availability['available']) {
+        return ['success' => FALSE, 'error' => $availability['message']];
+      }
+
+      // Get pending state.
+      $pending_state = $this->getStateByName('Pending');
+      if (!$pending_state) {
+        return ['success' => FALSE, 'error' => 'Could not find the "Pending" state'];
+      }
+
+      // Validate email.
+      if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        return ['success' => FALSE, 'error' => 'A valid email is required'];
+      }
+
+      // Format dates.
+      $start_value = (new \DateTime($data['checkInDate']))
+        ->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
+      $end_value = (new \DateTime($data['checkOutDate']))
+        ->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
+
+      // Create event.
+      $event = $this->entityTypeManager->getStorage('bat_event')->create([
+        'type' => 'availability_daily',
+        'event_dates' => ['value' => $start_value, 'end_value' => $end_value],
+        'event_bat_unit_reference' => ['target_id' => (int) $data['unitId']],
+        'field_bed_type' => $data['bedType'],
+        'event_state_reference' => ['target_id' => $pending_state->id()],
+      ]);
+      $event->save();
+
+      // Create booking.
+      $booking = $this->entityTypeManager->getStorage('bat_booking')->create([
+        'type' => 'standard',
+        'booking_event_reference' => ['target_id' => $event->id()],
+        'uid' => ['target_id' => \Drupal::currentUser()->id()],
+        'field_requester_email' => ['value' => $data['email']],
+        'status' => 1,
+        'field_event_state' => ['target_id' => $pending_state->id()],
+        'booking_start_date' => ['value' => $start_value],
+        'booking_end_date' => ['value' => $end_value],
+      ]);
+      $booking->save();
+
+      $summary = [];
+
+      if ($booking instanceof BookingInterface) {
+        // Build response summary.
+        $summary = $this->buildReservationSummary($unit, $data, $booking->id());
+
+        // Send notification email.
+        $this->sendNotificationEmail($unit, $summary);
+      }
+
+      return ['success' => TRUE, 'data' => $summary];
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error creating reservation: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      return ['success' => FALSE, 'error' => 'Internal server error'];
+    }
+  }
+
+  /**
+   * Update an existing booking.
+   *
+   * @param int $booking_id
+   *   The booking ID.
+   * @param array $data
+   *   The data to update.
+   *
+   * @return array
+   *   Array with 'success' boolean and 'data' or 'error' message.
+   */
+  public function updateBooking(int $booking_id, array $data): array {
+    try {
+      $booking = $this->entityTypeManager->getStorage('bat_booking')->load($booking_id);
+      if (!$booking) {
+        return ['success' => FALSE, 'error' => 'Booking not found'];
+      }
+
+      // Update event state if provided.
+      if (!empty($data['state'])) {
+        $state = $this->getStateByMachineName($data['state']);
+        if (!$state) {
+          return ['success' => FALSE, 'error' => 'Invalid state'];
+        }
+
+        $booking->set('field_event_state', ['target_id' => $state->id()]);
+
+        // Update associated event state.
+        if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
+          $event_id = $booking->get('booking_event_reference')->target_id;
+          $event = $this->entityTypeManager->getStorage('bat_event')->load($event_id);
+          if ($event) {
+            $event->set('event_state_reference', ['target_id' => $state->id()]);
+            $event->save();
+          }
+        }
+      }
+
+      // Update email if provided.
+      if (!empty($data['email'])) {
+        $booking->set('field_requester_email', ['value' => $data['email']]);
+      }
+
+      $booking->save();
+
+      return ['success' => TRUE, 'data' => ['booking_id' => $booking->id()]];
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error updating booking: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      return ['success' => FALSE, 'error' => 'Internal server error'];
+    }
+  }
+
+  /**
+   * Delete a booking.
+   *
+   * @param int $booking_id
+   *   The booking ID.
+   *
+   * @return array
+   *   Array with 'success' boolean and 'error' message if failed.
+   */
+  public function deleteBooking(int $booking_id): array {
+    try {
+      $booking = $this->entityTypeManager->getStorage('bat_booking')->load($booking_id);
+      if (!$booking) {
+        return ['success' => FALSE, 'error' => 'Booking not found'];
+      }
+
+      // Delete associated event.
+      if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
+        $event_id = $booking->get('booking_event_reference')->target_id;
+        $event = $this->entityTypeManager->getStorage('bat_event')->load($event_id);
+        if ($event) {
+          $event->delete();
+        }
+      }
+
+      $booking->delete();
+
+      return ['success' => TRUE];
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error deleting booking: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      return ['success' => FALSE, 'error' => 'Internal server error'];
+    }
+  }
+
+  /**
+   * Get state by machine name.
+   *
+   * @param string $machine_name
+   *   The state machine name.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   The state entity or NULL.
+   */
+  private function getStateByMachineName(string $machine_name): ?\Drupal\Core\Entity\EntityInterface {
+    $states = $this->entityTypeManager->getStorage('state')->loadByProperties([
+      'machine_name' => $machine_name,
+      'event_type' => 'availability_daily',
+    ]);
+    return reset($states) ?: NULL;
+  }
+
+  /**
+   * Get state by name.
+   *
+   * @param string $name
+   *   The state name.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   The state entity or NULL.
+   */
+  private function getStateByName(string $name): ?\Drupal\Core\Entity\EntityInterface {
+    $states = $this->entityTypeManager->getStorage('state')->loadByProperties([
+      'name' => $name,
+    ]);
+    return reset($states) ?: NULL;
+  }
+
+  /**
+   * Check availability for a unit and bed type.
+   *
+   * @param int $unit_id
+   *   The unit ID.
+   * @param string $bed_type
+   *   The bed type.
+   * @param string $check_in_date
+   *   The check-in date.
+   * @param string $check_out_date
+   *   The check-out date.
+   *
+   * @return array
+   *   Array with 'available' boolean and 'message' if not available.
+   */
+  private function checkAvailability(int $unit_id, string $bed_type, string $check_in_date, string $check_out_date): array {
+    try {
+      // Load unit and get total beds
+      $unit = $this->entityTypeManager->getStorage('bat_unit')->load($unit_id);
+      if (!$unit) {
+        return ['available' => FALSE, 'message' => 'Unit not found'];
+      }
+
+      $total_beds = 0;
+      foreach ($unit->get('field_beds') as $item) {
+        if ($p = $item->entity) {
+          if ($p->get('field_bed_type')->value === $bed_type) {
+            $total_beds = (int) $p->get('field_bed_quantity')->value;
+            break;
+          }
+        }
+      }
+
+      if ($total_beds < 1) {
+        return ['available' => FALSE, 'message' => "No beds of type $bed_type"];
+      }
+
+      // Parse dates
+      $in = new \DateTime($check_in_date);
+      $out = new \DateTime($check_out_date);
+      $out->modify('+1 day');
+      $interval = new \DateInterval('P1D');
+      $range = new \DatePeriod($in, $interval, $out);
+
+      // Check existing events
+      $storage = $this->entityTypeManager->getStorage('bat_event');
+      $query = $storage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('type', 'availability_daily')
+        ->condition('event_bat_unit_reference', $unit_id)
+        ->condition('field_bed_type', $bed_type)
+        ->condition('event_dates.value', $check_out_date, '<=')
+        ->condition('event_dates.end_value', $check_in_date, '>=');
+      $ids = $query->execute();
+
+      // Count occupied beds per day
+      $occupied = [];
+      if (!empty($ids)) {
+        $events = $storage->loadMultiple($ids);
+        foreach ($events as $ev) {
+          $s = new \DateTime($ev->get('event_dates')->value);
+          $e = new \DateTime($ev->get('event_dates')->end_value);
+          $e->modify('+1 day');
+          $inner = new \DatePeriod($s, $interval, $e);
+          foreach ($inner as $d) {
+            $key = $d->format('Y-m-d');
+            $occupied[$key] = ($occupied[$key] ?? 0) + 1;
+          }
+        }
+      }
+
+      // Check each day
+      foreach ($range as $d) {
+        $key = $d->format('Y-m-d');
+        if (($occupied[$key] ?? 0) >= $total_beds) {
+          return ['available' => FALSE, 'message' => "No $bed_type beds available on $key"];
+        }
+      }
+
+      return ['available' => TRUE];
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error checking availability: @message', ['@message' => $e->getMessage()]);
+      return ['available' => FALSE, 'message' => 'Error checking availability'];
+    }
+  }
+
+  /**
+   * Build reservation summary.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $unit
+   *   The unit entity.
+   * @param array $data
+   *   The reservation data.
+   *
+   * @return array
+   *   The reservation summary.
+   */
+  private function buildReservationSummary(EntityInterface $unit, array $data, $booking_id): array {
+    $images = [];
+    if ($img = $unit->get('field_cover_image')->entity) {
+      $images[] = $this->fileUrlGenerator->generateAbsoluteString($img->getFileUri());
+    }
+
+    return [
+      'room' => [
+        'roomName' => $unit->label(),
+        'bedType' => $data['bedType'],
+        'imageUrls' => $images,
+        'imageCount' => count($images),
+        'address' => $unit->get('field_address')->value,
+        'managerEmail' => $unit->get('field_manager_email')->value,
+      ],
+      'bookingInfo' => [
+        'checkIn' => ['date' => $data['checkInDate'], 'time' => $data['checkInTime'] ?? ''],
+        'checkOut' => ['date' => $data['checkOutDate'], 'time' => $data['checkOutTime'] ?? ''],
+      ],
+      'booking_id' => $booking_id,
+      'requesterEmail' => $data['email'],
+      'details' => $data['details'] ?? '',
+    ];
+  }
+
+  /**
+   * Send notification email.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $unit
+   *   The unit entity.
+   * @param array $summary
+   *   The reservation summary.
+   */
+  private function sendNotificationEmail(\Drupal\Core\Entity\EntityInterface $unit, array $summary): void {
+    $to = $unit->get('field_manager_email')->value;
+    \Drupal::service('plugin.manager.mail')->mail(
+      'hous_z_api',
+      'booking_notification',
+      $to,
+      \Drupal::languageManager()->getDefaultLanguage()->getId(),
+      ['summary' => $summary]
+    );
+  }
+
+}

@@ -3,15 +3,18 @@ langcode: en
 status: true
 dependencies:
   module:
+    - rest
     - hous_z_api
     - serialization
-    - user
 id: reservation_resource
 plugin_id: reservation_resource
 granularity: resource
 configuration:
   methods:
+    - GET
     - POST
+    - PATCH
+    - DELETE
   formats:
     - json
   authentication:
