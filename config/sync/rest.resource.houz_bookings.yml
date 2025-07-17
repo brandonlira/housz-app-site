@@ -3,9 +3,9 @@ langcode: en
 status: true
 dependencies:
   module:
-    - basic_auth
     - hous_z_management
     - serialization
+    - user
 id: houz_bookings
 plugin_id: houz_bookings
 granularity: resource
@@ -15,4 +15,4 @@ configuration:
   formats:
     - json
   authentication:
-    - basic_auth
+    - cookie
