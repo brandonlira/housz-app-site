@@ -422,4 +422,132 @@ class ReservationService {
     );
   }
 
+  /**
+   * Get bookings data, optionally filtered by requester email.
+   *
+   * @param string|null $email
+   *   The email address to filter bookings by, or NULL to return all bookings.
+   *
+   * @return array
+   *   Array of booking data.
+   */
+  public function getBookingsData(?string $email = NULL): array {
+    $booking_storage = $this->entityTypeManager->getStorage('bat_booking');
+
+    $query = $booking_storage->getQuery()
+      ->accessCheck(TRUE)
+      ->sort('id', 'DESC');
+
+    if ($email) {
+      $email = strtolower(trim($email));
+      $query->condition('field_requester_email', $email);
+    }
+
+    $booking_ids = $query->execute();
+
+    if (empty($booking_ids)) {
+      return [];
+    }
+
+    $bookings = $booking_storage->loadMultiple($booking_ids);
+
+    $data = [];
+
+    foreach ($bookings as $booking) {
+      $booking_data = [
+        'reservationId' => (int) $booking->id(),
+        'roomName' => NULL,
+        'bedType' => NULL,
+        'checkInDate' => NULL,
+        'checkOutDate' => NULL,
+        'status' => NULL,
+        'email' => $booking->get('field_requester_email')?->value,
+      ];
+
+      if ($booking->hasField('booking_start_date') && !$booking->get('booking_start_date')->isEmpty()) {
+        $start_date = $booking->get('booking_start_date')->value;
+        $booking_data['checkInDate'] = date('Y-m-d', strtotime($start_date));
+      }
+
+      if ($booking->hasField('booking_end_date') && !$booking->get('booking_end_date')->isEmpty()) {
+        $end_date = $booking->get('booking_end_date')->value;
+        $booking_data['checkOutDate'] = date('Y-m-d', strtotime($end_date));
+      }
+
+      if ($booking->hasField('field_event_state') && !$booking->get('field_event_state')->isEmpty()) {
+        $state_id = $booking->get('field_event_state')->target_id;
+        $booking_data['status'] = $this->getStateLabel($state_id);
+      }
+
+      if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
+        $event_id = $booking->get('booking_event_reference')->target_id;
+        $booking_data['roomName'] = $this->getRoomDetailsFromEvent($event_id)['name'];
+        $booking_data['bedType'] = $this->getRoomDetailsFromEvent($event_id)['bed'];
+        $a=0;
+      }
+
+      $data[] = $booking_data;
+    }
+
+    return $data;
+  }
+
+  /**
+   * Get room details from event entity.
+   *
+   * @param int $event_id
+   *   The event ID.
+   *
+   * @return array|null
+   *   The room details or NULL if not found.
+   */
+  private function getRoomDetailsFromEvent(int $event_id): ?array {
+    try {
+      $event = $this->entityTypeManager->getStorage('bat_event')->load($event_id);
+
+      $event_exists = $event && $event->hasField('event_bat_unit_reference') &&
+        !$event->get('event_bat_unit_reference')->isEmpty();
+
+      if ($event_exists) {
+        $unit_id = $event->get('event_bat_unit_reference')->target_id;
+        $unit = $this->entityTypeManager->getStorage('bat_unit')->load($unit_id);
+
+        if ($unit) {
+          return [
+            'id' => (int) $unit->id(),
+            'name' => $unit->label(),
+            'bed' => $event->get('field_bed_type')->value,
+          ];
+        }
+      }
+    }
+    catch (\Exception $e) {
+      $this->logger->warning('Could not load event @id or related unit: @message', [
+        '@id' => $event_id,
+        '@message' => $e->getMessage(),
+      ]);
+    }
+
+    return NULL;
+  }
+
+  /**
+   * Get state label by state ID.
+   *
+   * @param int $state_id
+   *   The state ID.
+   *
+   * @return string|null
+   *   The state label or NULL if not found.
+   */
+  private function getStateLabel(int $state_id): ?string {
+    $state_labels = [
+      7 => 'Pending',
+      8 => 'Cancelled',
+      9 => 'Confirmed',
+    ];
+
+    return $state_labels[$state_id] ?? NULL;
+  }
+
 }
