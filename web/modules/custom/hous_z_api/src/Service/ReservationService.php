@@ -481,9 +481,9 @@ class ReservationService {
 
       if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
         $event_id = $booking->get('booking_event_reference')->target_id;
-        $booking_data['roomName'] = $this->getRoomDetailsFromEvent($event_id)['name'];
-        $booking_data['bedType'] = $this->getRoomDetailsFromEvent($event_id)['bed'];
-        $a=0;
+        $roomDetails = $this->getRoomDetailsFromEvent($event_id);
+        $booking_data['roomName'] = $roomDetails['name'];
+        $booking_data['bedType'] = $roomDetails['bed'];
       }
 
       $data[] = $booking_data;
