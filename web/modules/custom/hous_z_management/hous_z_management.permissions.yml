@@ -1,0 +1,11 @@
+manage houz bookings:
+  title: 'Manage Houz bookings'
+  description: 'Allows users to manage bookings in the Houz system (view, confirm, cancel).'
+
+manage houz units:
+  title: 'Manage Houz units'
+  description: 'Allows users to manage units in the Houz system (create, edit, delete).'
+
+access houz dashboard:
+  title: 'Access Houz dashboard'
+  description: 'Allows users to access the main Houz management dashboard.'

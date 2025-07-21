@@ -1,4 +1,3 @@
-uuid: 9969fd64-1b5d-44d9-88da-6f1a82c48dd0
 langcode: en
 status: true
 dependencies:
@@ -13,10 +12,10 @@ dependencies:
     - bat_event
     - datetime
     - user
-id: pending_bookings
-label: 'Pending Bookings'
+id: houz_bookings
+label: Bookings
 module: views
-description: ''
+description: 'Manage bookings for the Houz system'
 tag: ''
 base_table: booking
 base_field: id
@@ -27,7 +26,7 @@ display:
     display_plugin: default
     position: 0
     display_options:
-      title: 'Pending Bookings'
+      title: Bookings
       fields:
         id:
           id: id
@@ -294,7 +293,7 @@ display:
           group_type: group
           admin_label: ''
           plugin_id: field
-          label: 'Event State'
+          label: State
           exclude: false
           alter:
             alter_text: false
@@ -511,17 +510,17 @@ display:
           group_type: group
           admin_label: ''
           plugin_id: numeric
-          operator: '='
+          operator: or
           value:
             min: ''
             max: ''
-            value: '7'
+            value: ''
           group: 1
-          exposed: false
+          exposed: true
           expose:
             operator_id: field_event_state_target_id_op
-            label: 'Event State (field_event_state)'
-            description: ''
+            label: 'Event State'
+            description: 'Filter bookings by their current state'
             use_operator: false
             operator: field_event_state_target_id_op
             operator_limit_selection: false
@@ -535,13 +534,14 @@ display:
               anonymous: '0'
               content_editor: '0'
               administrator: '0'
+              housz_admin: '0'
             min_placeholder: ''
             max_placeholder: ''
             placeholder: ''
-          is_grouped: false
+          is_grouped: true
           group_info:
-            label: 'Event State (field_event_state)'
-            description: null
+            label: State
+            description: 'Filter bookings by their current state'
             identifier: field_event_state_target_id
             optional: true
             widget: select
@@ -550,9 +550,34 @@ display:
             default_group: All
             default_group_multiple: {  }
             group_items:
-              1: {  }
-              2: {  }
-              3: {  }
+              1:
+                title: Available
+                operator: '='
+                value:
+                  min: ''
+                  max: ''
+                  value: '1'
+              2:
+                title: 'Not available'
+                operator: '='
+                value:
+                  min: ''
+                  max: ''
+                  value: '2'
+              3:
+                title: Booked
+                operator: '='
+                value:
+                  min: ''
+                  max: ''
+                  value: '3'
+              4:
+                title: Pending
+                operator: '='
+                value:
+                  min: ''
+                  max: ''
+                  value: '7'
       style:
         type: table
         options:
@@ -604,6 +629,7 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url
         - url.query_args
         - user.permissions
       tags:
@@ -619,12 +645,13 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: admin/pending-bookings
+      path: admin/houz/bookings
     cache_metadata:
       max-age: -1
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url
         - url.query_args
         - user.permissions
       tags:

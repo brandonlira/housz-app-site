@@ -2,12 +2,12 @@
 
 namespace Drupal\hous_z_api\Plugin\rest\resource;
 
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\rest\Plugin\ResourceBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\File\FileUrlGenerator;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\hous_z_api\Service\ReservationService;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -17,34 +17,76 @@ use Psr\Log\LoggerInterface;
  *   id = "reservation_resource",
  *   label = @Translation("Create reservation"),
  *   uri_paths = {
+ *     "canonical" = "/api/reservation/{id}",
  *     "create" = "/api/reservation"
  *   }
  * )
  */
-class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\ContainerFactoryPluginInterface {
+class ReservationResource extends ResourceBase implements ContainerFactoryPluginInterface {
 
-  /** @var \Drupal\Core\File\FileUrlGenerator */
+  /**
+   * The file URL generator.
+   *
+   * @var \Drupal\Core\File\FileUrlGenerator
+   */
   protected $fileUrlGenerator;
 
   /**
-   * Constructs a ReservationResource.
+   * The reservation service.
+   *
+   * @var \Drupal\hous_z_api\Service\ReservationService
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, array $serializer_formats, LoggerInterface $logger, FileUrlGenerator $file_url_generator) {
+  protected $reservationService;
+
+  /**
+   * Constructs a ReservationResource.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param array $serializer_formats
+   *   The available serialization formats.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   A logger instance.
+   * @param \Drupal\Core\File\FileUrlGenerator $file_url_generator
+   *   The file URL generator.
+   * @param \Drupal\hous_z_api\Service\ReservationService $reservation_service
+   *   The reservation service.
+   */
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    array $serializer_formats,
+    LoggerInterface $logger,
+    FileUrlGenerator $file_url_generator,
+    ReservationService $reservation_service
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
     $this->fileUrlGenerator = $file_url_generator;
+    $this->reservationService = $reservation_service;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(
+    ContainerInterface $container,
+    array $configuration,
+    $plugin_id,
+    $plugin_definition
+  ) {
     return new static(
       $configuration,
       $plugin_id,
       $plugin_definition,
       $container->getParameter('serializer.formats'),
       $container->get('logger.factory')->get('hous_z_api'),
-      $container->get('file_url_generator')
+      $container->get('file_url_generator'),
+      $container->get('hous_z_api.reservation')
     );
   }
 
@@ -60,167 +102,75 @@ class ReservationResource extends ResourceBase implements \Drupal\Core\Plugin\Co
    *  - checkOutTime (optional)
    *  - details (optional)
    *
+   * @param array $data
+   *   The reservation data.
+   *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    *   JSON summary or error.
    */
-  public function post() {
-    $request = Request::createFromGlobals();
-    $input = json_decode($request->getContent(), TRUE);
+  public function post(array $data): JsonResponse {
+    $result = $this->reservationService->createReservation($data);
 
-    // Validate required fields.
-    if (empty($input['unitId']) || empty($input['bedType']) || empty($input['checkInDate']) || empty($input['checkOutDate'])) {
-      return new JsonResponse(['error' => 'Required: unitId, bedType, checkInDate, checkOutDate'], 400);
+    if ($result['success']) {
+      return new JsonResponse([
+        'message' => 'Reservation created successfully',
+        'booking_id' => $result['data']['booking_id'],
+      ], 201);
     }
 
-    // Load unit.
-    $unit = \Drupal::entityTypeManager()->getStorage('bat_unit')->load((int) $input['unitId']);
-    if (!$unit) {
-      return new JsonResponse(['error' => 'Unit not found'], 404);
+    return new JsonResponse(['error' => $result['error']], 400);
+  }
+
+  /**
+   * Responds to PATCH /api/reservation/{id}.
+   *
+   * Updates an existing reservation.
+   *
+   * @param int $id
+   *   The booking ID.
+   * @param array $data
+   *   The update data.
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   *   JSON response with success/error message.
+   */
+  public function patch(int $id, array $data): JsonResponse {
+    $result = $this->reservationService->updateBooking($id, $data);
+
+    if ($result['success']) {
+      return new JsonResponse([
+        'message' => 'Reservation updated successfully',
+        'booking_id' => $result['data']['booking_id'],
+      ], 200);
     }
 
-    // Determine total beds of type.
-    $desired = $input['bedType'];
-    $totalBeds = 0;
-    foreach ($unit->get('field_beds') as $item) {
-      if ($p = $item->entity) {
-        if ($p->get('field_bed_type')->value === $desired) {
-          $totalBeds = (int) $p->get('field_bed_quantity')->value;
-          break;
-        }
-      }
-    }
-    if ($totalBeds < 1) {
-      return new JsonResponse(['error' => "No beds of type $desired"], 400);
-    }
+    $status_code = $result['error'] === 'Booking not found' ? 404 : 400;
+    return new JsonResponse(['error' => $result['error']], $status_code);
+  }
 
-    // Parse dates.
-    try {
-      $in  = new \DateTime($input['checkInDate']);
-      $out = new \DateTime($input['checkOutDate']);
-    }
-    catch (\Exception $e) {
-      return new JsonResponse(['error' => 'Invalid date format'], 400);
-    }
-    $out->modify('+1 day');
-    $interval = new \DateInterval('P1D');
-    $range = new \DatePeriod($in, $interval, $out);
+  /**
+   * Responds to DELETE /api/reservation/{id}.
+   *
+   * Deletes an existing reservation.
+   *
+   * @param int $id
+   *   The booking ID.
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   *   JSON response with success/error message.
+   */
+  public function delete(int $id): JsonResponse {
+    $result = $this->reservationService->deleteBooking($id);
 
-    // Fetch existing events for this unit+bedType overlapping the period.
-    $storage = \Drupal::entityTypeManager()->getStorage('bat_event');
-    $query = $storage->getQuery()
-      ->accessCheck(FALSE)
-      ->condition('type', 'availability_daily')
-      ->condition('event_bat_unit_reference', (int) $input['unitId'])
-      ->condition('field_bed_type', $desired)
-      ->condition('event_dates.value', $input['checkOutDate'], '<=')
-      ->condition('event_dates.end_value', $input['checkInDate'], '>=');
-    $ids = $query->execute();
-
-    // Count occupied beds per day.
-    $occupied = [];
-    if (!empty($ids)) {
-      $events = $storage->loadMultiple($ids);
-      foreach ($events as $ev) {
-        try {
-          $s = new \DateTime($ev->get('event_dates')->value);
-          $e = new \DateTime($ev->get('event_dates')->end_value);
-        }
-        catch (\Exception $ignore) {
-          continue;
-        }
-        $e->modify('+1 day');
-        $inner = new \DatePeriod($s, $interval, $e);
-        foreach ($inner as $d) {
-          $key = $d->format('Y-m-d');
-          $occupied[$key] = ($occupied[$key] ?? 0) + 1;
-        }
-      }
+    if ($result['success']) {
+      return new JsonResponse([
+        'message' => 'Reservation deleted successfully',
+        'booking_id' => $id,
+      ], 200);
     }
 
-    // Validate each day is available.
-    foreach ($range as $d) {
-      $key = $d->format('Y-m-d');
-      if (($occupied[$key] ?? 0) >= $totalBeds) {
-        return new JsonResponse(['error' => "No $desired beds on $key"], 400);
-      }
-    }
-
-    // Load "Booked" state.
-    $state_storage = \Drupal::entityTypeManager()->getStorage('state');
-    $pending_terms = $state_storage->loadByProperties(['name' => 'Pending']);
-    $pending_term = reset($pending_terms);
-    if (!$pending_term) {
-      return new JsonResponse(['error' => 'Could not find the "Pending" state.'], 500);
-    }
-    $pending_state_id = $pending_term->id();
-
-    if (empty($input['email']) || !filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
-      return new JsonResponse(['error' => 'A valid email is required'], 400);
-    }
-
-    // Format dates for storage.
-    $startValue = (new \DateTime($input['checkInDate']))
-      ->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
-    $endValue   = (new \DateTime($input['checkOutDate']))
-      ->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
-
-    // Create event.
-    $event = $storage->create([
-      'type'                     => 'availability_daily',
-      'event_dates'              => ['value' => $startValue, 'end_value' => $endValue],
-      'event_bat_unit_reference' => ['target_id' => (int) $input['unitId']],
-      'field_bed_type'           => $desired,
-      'event_state_reference'    => ['target_id' => $pending_state_id],
-    ]);
-    $event->save();
-
-    // Create booking.
-    $booking_storage = \Drupal::entityTypeManager()->getStorage('bat_booking');
-    $booking = $booking_storage->create([
-      'type'                    => 'standard',
-      'booking_event_reference' => ['target_id' => $event->id()],
-      'uid'                     => ['target_id' => \Drupal::currentUser()->id()],
-      'field_requester_email'   => ['value' => $input['email']],
-      'status'                  => 1,
-      'field_event_state'       => ['target_id' => $pending_state_id],
-      'booking_start_date'      => ['value' => $startValue],
-      'booking_end_date'        => ['value' => $endValue],
-    ]);
-    $booking->save();
-
-    // Build response summary.
-    $images = [];
-    if ($img = $unit->get('field_cover_image')->entity) {
-      $images[] = $this->fileUrlGenerator->generateAbsoluteString($img->getFileUri());
-    }
-    $summary = [
-      'room' => [
-        'roomName'     => $unit->label(),
-        'bedType'      => $desired,
-        'imageUrls'    => $images,
-        'imageCount'   => count($images),
-        'address'      => $unit->get('field_address')->value,
-        'managerEmail' => $unit->get('field_manager_email')->value,
-      ],
-      'bookingInfo' => [
-        'checkIn'  => ['date' => $input['checkInDate'], 'time' => $input['checkInTime'] ?? ''],
-        'checkOut' => ['date' => $input['checkOutDate'], 'time' => $input['checkOutTime'] ?? ''],
-      ],
-      'requesterEmail' => $input['email'],
-      'details' => $input['details'] ?? '',
-    ];
-
-    // Send notification email to manager.
-    $to = $unit->get('field_manager_email')->value;
-    \Drupal::service('plugin.manager.mail')->mail(
-      'hous_z_api',
-      'booking_notification',
-      $to,
-      \Drupal::languageManager()->getDefaultLanguage()->getId(),
-      ['summary' => $summary]
-    );
-
-    return new JsonResponse($summary, 201);
+    $status_code = $result['error'] === 'Booking not found' ? 404 : 400;
+    return new JsonResponse(['error' => $result['error']], $status_code);
   }
 
 }

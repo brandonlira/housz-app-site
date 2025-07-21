@@ -1,0 +1,14 @@
+uuid: d669bdad-3dd6-44f0-9115-9de5398a9651
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.housz_admin
+  module:
+    - user
+id: user_add_role_action.housz_admin
+label: 'Add the Housz Administrator role to the selected user(s)'
+type: user
+plugin: user_add_role_action
+configuration:
+  rid: housz_admin

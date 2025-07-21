@@ -1,0 +1,14 @@
+uuid: 432b22eb-8d90-4b50-b6ec-32a2b6971f83
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.housz_admin
+  module:
+    - user
+id: user_remove_role_action.housz_admin
+label: 'Remove the Housz Administrator role from the selected user(s)'
+type: user
+plugin: user_remove_role_action
+configuration:
+  rid: housz_admin

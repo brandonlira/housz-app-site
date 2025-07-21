@@ -1,20 +1,17 @@
-uuid: 15fef7d1-51e2-4746-9020-7d5d2920da0a
+uuid: null
 langcode: en
 status: true
 dependencies:
   module:
-    - rest
-    - hous_z_api
+    - hous_z_management
     - serialization
-id: reservation_resource
-plugin_id: reservation_resource
+    - user
+id: houz_bookings
+plugin_id: houz_bookings
 granularity: resource
 configuration:
   methods:
     - GET
-    - POST
-    - PATCH
-    - DELETE
   formats:
     - json
   authentication:

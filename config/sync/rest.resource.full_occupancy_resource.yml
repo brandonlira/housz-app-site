@@ -1,20 +1,17 @@
-uuid: 15fef7d1-51e2-4746-9020-7d5d2920da0a
+uuid: 03430cbb-09a9-4dbf-b61d-595262d2dcb6
 langcode: en
 status: true
 dependencies:
   module:
-    - rest
     - hous_z_api
     - serialization
-id: reservation_resource
-plugin_id: reservation_resource
+    - user
+id: full_occupancy_resource
+plugin_id: full_occupancy_resource
 granularity: resource
 configuration:
   methods:
     - GET
-    - POST
-    - PATCH
-    - DELETE
   formats:
     - json
   authentication:

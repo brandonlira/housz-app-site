@@ -1,42 +1,45 @@
-uuid: d99152cc-7d7c-4d83-969c-f807e16832ab
+uuid: 31d6f67a-92f6-47e6-a917-9ceb6f15a3f2
 langcode: en
 status: true
 dependencies:
   config:
-    - system.menu.admin
-    - user.role.administrator
+    - field.storage.bat_booking.booking_end_date
+    - field.storage.bat_booking.booking_start_date
+    - field.storage.bat_booking.field_event_state
+    - field.storage.bat_booking.field_requester_email
+    - field.storage.bat_event.event_bat_unit_reference
   module:
-    - bat_unit
+    - bat_booking
+    - bat_event
+    - datetime
     - user
-_core:
-  default_config_hash: 8D1c2SeepHJSdHV4diuLvTblq_p6TAWgxHFfDP6TRbM
-id: unit_management
-label: 'Unit Management (view)'
+id: houz_bookings
+label: Bookings
 module: views
-description: ''
+description: 'Manage bookings for the Houz system'
 tag: ''
-base_table: unit_type
+base_table: booking
 base_field: id
 display:
   default:
     id: default
-    display_title: Master
+    display_title: Default
     display_plugin: default
     position: 0
     display_options:
-      title: 'Unit Management (view)'
+      title: Bookings
       fields:
         id:
           id: id
-          table: unit_type
+          table: booking
           field: id
           relationship: none
           group_type: group
           admin_label: ''
-          entity_type: bat_unit_type
+          entity_type: bat_booking
           entity_field: id
           plugin_id: field
-          label: 'Type ID'
+          label: ID
           exclude: false
           alter:
             alter_text: false
@@ -92,17 +95,15 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-        type:
-          id: type
-          table: unit_type
-          field: type
-          relationship: none
+        event_bat_unit_reference:
+          id: event_bat_unit_reference
+          table: bat_event__event_bat_unit_reference
+          field: event_bat_unit_reference
+          relationship: booking_event_reference
           group_type: group
           admin_label: ''
-          entity_type: bat_unit_type
-          entity_field: type
           plugin_id: field
-          label: Bundle
+          label: Room
           exclude: false
           alter:
             alter_text: false
@@ -146,7 +147,7 @@ display:
           click_sort_column: target_id
           type: entity_reference_label
           settings:
-            link: false
+            link: true
           group_column: target_id
           group_columns: {  }
           group_rows: true
@@ -157,17 +158,206 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-        name:
-          id: name
-          table: unit_type
-          field: name
+        booking_start_date:
+          id: booking_start_date
+          table: bat_booking__booking_start_date
+          field: booking_start_date
           relationship: none
           group_type: group
           admin_label: ''
-          entity_type: bat_unit_type
-          entity_field: name
           plugin_id: field
-          label: Name
+          label: 'Start Date'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: datetime_default
+          settings:
+            timezone_override: ''
+            format_type: uk_short_date
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+        booking_end_date:
+          id: booking_end_date
+          table: bat_booking__booking_end_date
+          field: booking_end_date
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: field
+          label: 'End Date'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: datetime_default
+          settings:
+            timezone_override: ''
+            format_type: uk_short_date
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+        field_event_state:
+          id: field_event_state
+          table: bat_booking__field_event_state
+          field: field_event_state
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: field
+          label: State
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: target_id
+          type: entity_reference_label
+          settings:
+            link: true
+          group_column: target_id
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+        field_requester_email:
+          id: field_requester_email
+          table: bat_booking__field_requester_email
+          field: field_requester_email
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: field
+          label: 'Requester Email'
           exclude: false
           alter:
             alter_text: false
@@ -222,134 +412,16 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
-        status:
-          id: status
-          table: unit_type
-          field: status
-          relationship: none
-          group_type: group
-          admin_label: ''
-          entity_type: bat_unit_type
-          entity_field: status
-          plugin_id: field
-          label: Published
-          exclude: false
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: value
-          type: boolean
-          settings:
-            format: custom
-            format_custom_false: Unpublished
-            format_custom_true: Published
-          group_column: value
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
-        calendars:
-          id: calendars
-          table: unit_type
-          field: calendars
-          relationship: none
-          group_type: group
-          admin_label: ''
-          entity_type: bat_unit_type
-          plugin_id: bat_type_handler_type_calendars_field
-          label: 'Event Management'
-          exclude: false
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
         operations:
           id: operations
-          table: unit_type
+          table: booking
           field: operations
           relationship: none
           group_type: group
           admin_label: ''
-          entity_type: null
-          entity_field: null
+          entity_type: bat_booking
           plugin_id: entity_operations
-          label: 'Operations links'
+          label: 'Link to edit Booking'
           exclude: false
           alter:
             alter_text: false
@@ -390,19 +462,18 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          destination: true
+          destination: false
       pager:
-        type: full
+        type: mini
         options:
           offset: 0
-          items_per_page: 25
+          pagination_heading_level: h4
+          items_per_page: 10
           total_pages: null
           id: 0
           tags:
             next: ››
             previous: ‹‹
-            first: '« First'
-            last: 'Last »'
           expose:
             items_per_page: false
             items_per_page_label: 'Items per page'
@@ -411,7 +482,6 @@ display:
             items_per_page_options_all_label: '- All -'
             offset: false
             offset_label: Offset
-          quantity: 9
       exposed_form:
         type: basic
         options:
@@ -423,17 +493,92 @@ display:
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
-        type: role
+        type: perm
         options:
-          role:
-            administrator: administrator
+          perm: 'access content'
       cache:
         type: tag
         options: {  }
       empty: {  }
       sorts: {  }
       arguments: {  }
-      filters: {  }
+      filters:
+        field_event_state_target_id:
+          id: field_event_state_target_id
+          table: bat_booking__field_event_state
+          field: field_event_state_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: numeric
+          operator: or
+          value:
+            min: ''
+            max: ''
+            value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_event_state_target_id_op
+            label: 'Event State'
+            description: 'Filter bookings by their current state'
+            use_operator: false
+            operator: field_event_state_target_id_op
+            operator_limit_selection: false
+            operator_list: {  }
+            identifier: field_event_state_target_id
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              content_editor: '0'
+              administrator: '0'
+              housz_admin: '0'
+            min_placeholder: ''
+            max_placeholder: ''
+            placeholder: ''
+          is_grouped: true
+          group_info:
+            label: State
+            description: 'Filter bookings by their current state'
+            identifier: field_event_state_target_id
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items:
+              1:
+                title: Available
+                operator: '='
+                value:
+                  min: ''
+                  max: ''
+                  value: '1'
+              2:
+                title: 'Not available'
+                operator: '='
+                value:
+                  min: ''
+                  max: ''
+                  value: '2'
+              3:
+                title: Booked
+                operator: '='
+                value:
+                  min: ''
+                  max: ''
+                  value: '3'
+              4:
+                title: Pending
+                operator: '='
+                value:
+                  min: ''
+                  max: ''
+                  value: '7'
       style:
         type: table
         options:
@@ -441,50 +586,10 @@ display:
           row_class: ''
           default_row_class: true
           columns:
-            id: id
-            type: type
-            name: name
-            status: status
-            calendars: calendars
-            operations: operations
-          default: id
+            label: label
+          default: '-1'
           info:
-            id:
-              sortable: true
-              default_sort_order: asc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            type:
-              sortable: true
-              default_sort_order: asc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            name:
-              sortable: true
-              default_sort_order: asc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            status:
-              sortable: true
-              default_sort_order: asc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            calendars:
-              sortable: false
-              default_sort_order: asc
-              align: ''
-              separator: ''
-              empty_column: false
-              responsive: ''
-            operations:
+            label:
               sortable: false
               default_sort_order: asc
               align: ''
@@ -498,7 +603,7 @@ display:
           caption: ''
           description: ''
       row:
-        type: fields
+        type: 'entity:bat_booking'
       query:
         type: views_query
         options:
@@ -507,7 +612,16 @@ display:
           distinct: false
           replica: false
           query_tags: {  }
-      relationships: {  }
+      relationships:
+        booking_event_reference:
+          id: booking_event_reference
+          table: bat_booking__booking_event_reference
+          field: booking_event_reference
+          relationship: none
+          group_type: group
+          admin_label: 'booking_event_reference: Event'
+          plugin_id: standard
+          required: false
       header: {  }
       footer: {  }
       display_extenders: {  }
@@ -516,9 +630,15 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url
         - url.query_args
-        - user.roles
-      tags: {  }
+        - user.permissions
+      tags:
+        - 'config:field.storage.bat_booking.booking_end_date'
+        - 'config:field.storage.bat_booking.booking_start_date'
+        - 'config:field.storage.bat_booking.field_event_state'
+        - 'config:field.storage.bat_booking.field_requester_email'
+        - 'config:field.storage.bat_event.event_bat_unit_reference'
   page_1:
     id: page_1
     display_title: Page
@@ -526,21 +646,18 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: admin/bat/unit-management
-      menu:
-        type: normal
-        title: Units
-        description: 'List of Units'
-        weight: 0
-        expanded: false
-        menu_name: admin
-        parent: entity.bat_unit.top
-        context: '0'
+      path: admin/houz/bookings
     cache_metadata:
       max-age: -1
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
+        - url
         - url.query_args
-        - user.roles
-      tags: {  }
+        - user.permissions
+      tags:
+        - 'config:field.storage.bat_booking.booking_end_date'
+        - 'config:field.storage.bat_booking.booking_start_date'
+        - 'config:field.storage.bat_booking.field_event_state'
+        - 'config:field.storage.bat_booking.field_requester_email'
+        - 'config:field.storage.bat_event.event_bat_unit_reference'
