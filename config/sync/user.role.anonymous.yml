@@ -6,6 +6,7 @@ dependencies:
     - filter.format.restricted_html
     - rest.resource.bat_api_events_resource
     - rest.resource.bat_api_units_resource
+    - rest.resource.hous_z_api_my_reservations
     - rest.resource.houz_bookings
     - rest.resource.reservation_resource
   module:
@@ -31,6 +32,7 @@ permissions:
   - 'restful delete reservation_resource'
   - 'restful get bat_api_events_resource'
   - 'restful get bat_api_units_resource'
+  - 'restful get hous_z_api_my_reservations'
   - 'restful get houz_bookings'
   - 'restful patch reservation_resource'
   - 'restful post reservation_resource'
