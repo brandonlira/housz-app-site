@@ -1,6 +1,100 @@
 <?php
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Language\LanguageInterface;
+
 /**
- * @file
- * Housz API module file.
+ * Implements hook_entity_update().
  */
+function hous_z_api_entity_update(EntityInterface $entity) {
+  // Only act on bat_booking bundles of type “standard”.
+  if ($entity->getEntityTypeId() === 'bat_booking'
+    && $entity->bundle() === 'standard') {
+
+    // The original entity (before save).
+    /** @var \Drupal\bat_booking\Entity\Booking $original */
+    $original = $entity->original;
+
+    // Pull out the 'event state' field target IDs.
+    $old_state = $original->get('field_event_state')->target_id;
+    $new_state = $entity->get('field_event_state')->target_id;
+
+    // If the state has actually changed, send notifications.
+    if ($old_state !== $new_state) {
+      // Build a little summary array — just like you did in ReservationResource.
+      $unit = $entity->get('booking_event_reference')->entity->get('event_bat_unit_reference')->entity;
+      $summary = [
+        'room' => [
+          'roomName'     => $unit->label(),
+          'address'      => $unit->get('field_address')->value,
+          'managerEmail' => $unit->get('field_manager_email')->value,
+        ],
+        'bookingInfo' => [
+          'checkIn'  => [
+            'date' => $entity->get('booking_start_date')->value,
+          ],
+          'checkOut' => [
+            'date' => $entity->get('booking_end_date')->value,
+          ],
+        ],
+        'stateChangedTo' => $entity->get('field_event_state')->entity->label(),
+        'requesterEmail' => $entity->get('field_requester_email')->value,
+      ];
+
+      // Send to the manager.
+      \Drupal::service('plugin.manager.mail')->mail(
+        'hous_z_api',
+        'booking_state_notification',
+        $summary['room']['managerEmail'],
+        LanguageInterface::LANGCODE_DEFAULT,
+        ['summary' => $summary]
+      );
+      // Send a copy to the requester.
+      \Drupal::service('plugin.manager.mail')->mail(
+        'hous_z_api',
+        'booking_state_notification',
+        $summary['requesterEmail'],
+        LanguageInterface::LANGCODE_DEFAULT,
+        ['summary' => $summary]
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function hous_z_api_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'booking_state_notification':
+      $summary = $params['summary'];
+
+      // subject
+      $message['subject'] = t('Your reservation is now @state: @room', [
+        '@state' => $summary['stateChangedTo'],
+        '@room'  => $summary['room']['roomName'],
+      ]);
+
+      // body
+      $body = [];
+      $body[] = t('Hi,');
+      $body[] = t('The reservation for @room has changed to @state.', [
+        '@room'  => $summary['room']['roomName'],
+        '@state' => $summary['stateChangedTo'],
+      ]);
+      $body[] = '';
+      $body[] = t('Check‑in date: @date', [
+        '@date' => $summary['bookingInfo']['checkIn']['date'],
+      ]);
+      $body[] = t('Check‑out date: @date', [
+        '@date' => $summary['bookingInfo']['checkOut']['date'],
+      ]);
+      $body[] = '';
+      $body[] = t('If you have questions, contact the manager at @email.', [
+        '@email' => $summary['room']['managerEmail'],
+      ]);
+      $message['body'] = $body;
+      break;
+  }
+}
+
