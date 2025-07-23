@@ -1,0 +1,19 @@
+uuid: 4f5a5708-4cc9-49a7-aadd-0b87c53fa0e5
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+template: booking_status_changed
+label: 'Booking Status Changed'
+description: 'Generic template for any status change. Requires you to pass old_state and new_state in arguments.'
+text:
+  -
+    value: '<p>Hello,</p><p>The status of your booking (ID <strong>[booking:id]</strong>) for <strong>[unit:label]</strong> changed from <em>[arguments:old_state]</em> to <strong>[arguments:new_state]</strong>.</p><ul><li><strong>Dates:</strong> [booking:booking_start_date:value:custom:d/m/Y] – [booking:booking_end_date:value:custom:d/m/Y]</li></ul><p>Let us know if you need anything.</p><p>— Hous‑Z</p>'
+    format: full_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

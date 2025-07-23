@@ -1,0 +1,17 @@
+uuid: 96ed6bcd-62e2-4db4-af2d-72d71afb3edc
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_subject
+    - message.template.booking_confirmed
+id: message.booking_confirmed.mail_subject
+targetEntityType: message
+bundle: booking_confirmed
+mode: mail_subject
+content:
+  partial_0:
+    weight: 0
+    region: content
+hidden:
+  partial_1: true

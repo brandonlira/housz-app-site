@@ -1,0 +1,17 @@
+uuid: ac4410fd-699a-4350-ad1a-0bae41800eec
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_subject
+    - message.template.booking_cancelled
+id: message.booking_cancelled.mail_subject
+targetEntityType: message
+bundle: booking_cancelled
+mode: mail_subject
+content:
+  partial_0:
+    weight: 0
+    region: content
+hidden:
+  partial_1: true
