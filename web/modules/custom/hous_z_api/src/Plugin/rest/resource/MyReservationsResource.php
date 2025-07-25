@@ -72,7 +72,11 @@ final class MyReservationsResource extends ResourceBase {
         'count' => count($myReservations),
       ];
 
-      return new ResourceResponse($data, 200);
+      $response = new ResourceResponse($data, 200);
+
+      $response->getCacheableMetadata()->setCacheMaxAge(0);
+
+      return $response;
     }
     catch (\Exception $e) {
       return new ResourceResponse(
