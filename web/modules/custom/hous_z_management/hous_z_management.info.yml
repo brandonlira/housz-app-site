@@ -11,3 +11,4 @@ dependencies:
   - bat_api:bat_booking
   - bat_api:bat_unit
   - bat_api:bat_event
+  - hous_z_api:hous_z_api

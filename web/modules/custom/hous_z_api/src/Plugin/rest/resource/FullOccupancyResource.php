@@ -55,16 +55,19 @@ class FullOccupancyResource extends ResourceBase implements \Drupal\Core\Plugin\
         $beds = $unit->get('field_beds')->referencedEntities();
         foreach ($beds as $bed) {
           $bed_type = $bed->get('field_bed_type')->value;
-          $bed_quantity = (int)$bed->get('field_bed_quantity')->value;
+          $bed_quantity = (int) $bed->get('field_bed_quantity')->value;
 
-          $events_query = $storage_event->getQuery()
+          // An event occupies $dateStr as a stay-night when it starts before
+          // the end of the day AND its checkout (end_value) is strictly after
+          // $dateStr — a checkout on $dateStr is not an occupied night.
+          $event_ids = $storage_event->getQuery()
             ->accessCheck(FALSE)
             ->condition('type', 'availability_daily')
             ->condition('event_bat_unit_reference', $unit->id())
             ->condition('field_bed_type', $bed_type)
-            ->condition('event_dates.value', $dateEnd, '<=')
-            ->condition('event_dates.end_value', $dateStart, '>=');
-          $event_ids = $events_query->execute();
+            ->condition('event_dates.value',     $dateEnd,   '<=')
+            ->condition('event_dates.end_value', $dateStr,   '>')
+            ->execute();
 
           if (count($event_ids) < $bed_quantity) {
             $isFullyOccupied = FALSE;

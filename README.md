@@ -121,7 +121,86 @@ Relevant room fields:
 - `field_beds`
 - `field_cover_image`
 
+## Configuration
+
+### Minimum Stay
+
+The minimum number of nights required per booking is controlled via Drupal config:
+
+```bash
+ddev drush cset hous_z_api.settings min_stay 2
+ddev drush cr
+```
+
+Default is `2`. The value is read by `GET /api/rooms` and returned in each room's `calendarData.minStay` field.
+
+---
+
+## Availability Logic
+
+A booking occupies nights from check-in (inclusive) to check-out (exclusive).
+
+- A booking for **01/05 → 03/05** occupies the nights of **01/05 and 02/05**.
+- **03/05** is free and can be used as check-in for the next booking (back-to-back).
+
+A bed type is considered unavailable on a given day when the number of overlapping bookings for that type equals or exceeds `field_bed_quantity` on the unit.
+
+---
+
 ## API Endpoints
+
+### List Rooms
+
+`GET /api/rooms`
+
+Optional query parameters: `checkInDate`, `checkOutDate`.
+
+Response:
+
+```json
+{
+  "rooms": [
+    {
+      "room": {
+        "roomName": "Coder Alley Room",
+        "description": "...",
+        "imageUrl": "https://...",
+        "tags": ["ensuite"],
+        "availableBeds": [
+          { "type": "single_bed", "quantity": 2 },
+          { "type": "double_bed", "quantity": 1 }
+        ]
+      },
+      "calendarData": {
+        "checkInDate": "2025-06-16",
+        "checkOutDate": "2025-06-20",
+        "minStay": 2
+      }
+    }
+  ]
+}
+```
+
+---
+
+### Check Availability (per bed type)
+
+`GET /api/availability/{unitId}/{bedType}/{start}/{end}`
+
+- `bedType`: `single_bed` or `double_bed`
+- `start` / `end`: `YYYY-MM-DD`
+
+Returns a calendar tree with per-day availability for the given unit and bed type.
+
+---
+
+### Full Occupancy Calendar
+
+`GET /api/full-occupancy`
+
+Returns a calendar of dates where **all** bed types across **all** units are fully booked. Used by the app to block dates on the main calendar before the user selects a room.
+
+---
 
 ### Create Reservation
 
@@ -212,6 +291,14 @@ Response:
   ]
 }
 ```
+
+### Delete Reservation
+
+`DELETE /api/reservation/{id}`
+
+Only the booking owner or a user with the `manage housz bookings` permission can delete a booking. Returns `Access denied` otherwise.
+
+---
 
 ### Update Reservation Status
 
@@ -341,15 +428,25 @@ curl --location --request PATCH 'https://hous-z-app-site.ddev.site/api/reservati
 
 ## Known Gaps and Cleanup Items
 
-- The legacy endpoint `/api/my-reservations/{email}` still exists and is still enabled. It should be treated as deprecated to avoid app-side confusion.
-- REST authentication is still cookie-based in config export. For a real mobile app integration, OAuth or another explicit API auth flow is preferable.
-- Message template config from earlier email experiments still exists in `config/sync`, but the active email flow now runs through `hook_mail()` in `hous_z_api.module`.
-- End-to-end email delivery still depends on environment mail transport, not just code correctness.
+- The legacy endpoint `GET /api/my-reservations/{email}` still exists alongside `POST /api/user/reservations`. Both return reservation history. Treat the legacy one as deprecated and remove once the app migrates.
+- REST authentication is still cookie-based in config export. For a mobile app, OAuth (`simple_oauth`) or token-based auth is preferable.
+- Message template config from earlier email experiments still exists in `config/sync`, but the active email flow runs through `hook_mail()` in `hous_z_api.module`. The old config can be removed.
+- End-to-end email delivery depends on environment mail transport. Validate with a real SMTP provider before going live.
+
+## Changelog
+
+### 2026-04
+
+- Fixed availability date boundary: check-out day is now correctly excluded from occupancy checks, allowing back-to-back bookings.
+- Fixed overlap query to use strict inequality (`<` / `>`), consistent with the date boundary rule.
+- Added ownership check to `DELETE /api/reservation/{id}`: only the booking owner or an admin can delete.
+- Moved `minStay` from hardcoded value to `hous_z_api.settings` config (`min_stay` key).
+- Added `hous_z_api` as declared dependency of `hous_z_management` to prevent container errors.
 
 ## Recommended Next Steps
 
-1. Decide which reservation endpoint is canonical and deprecate the old one.
-2. Align REST authentication with the mobile app strategy.
+1. Decide which reservation history endpoint is canonical (`/api/my-reservations` vs `/api/user/reservations`) and remove the other.
+2. Align REST authentication with the mobile app strategy (OAuth recommended).
 3. Test booking creation, confirmation, and cancellation with real email delivery.
 4. Review final copy for all outgoing emails in English or Portuguese as needed.
 5. Give the app team the final endpoint contract from this README.

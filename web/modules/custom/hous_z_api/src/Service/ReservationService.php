@@ -241,6 +241,14 @@ class ReservationService {
         return ['success' => FALSE, 'error' => 'Booking not found.'];
       }
 
+      // Only the booking owner or an admin may delete a booking.
+      $is_admin = $this->currentUser->hasPermission('manage housz bookings');
+      $owner_email = strtolower(trim((string) $booking->get('field_requester_email')->value));
+      $caller_email = strtolower(trim((string) $this->currentUser->getEmail()));
+      if (!$is_admin && $caller_email !== $owner_email) {
+        return ['success' => FALSE, 'error' => 'Access denied.'];
+      }
+
       if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
         $event = $booking->get('booking_event_reference')->entity;
         if ($event) {
@@ -375,27 +383,34 @@ class ReservationService {
         return ['available' => FALSE, 'message' => "No beds of type {$bed_type}."];
       }
 
-      $start = new \DateTime($check_in_date);
-      $end = new \DateTime($check_out_date);
-      $end->modify('+1 day');
       $interval = new \DateInterval('P1D');
+
+      // Range covers only the nights being booked: check-in (inclusive) to
+      // check-out (exclusive). DatePeriod end is already exclusive, so no
+      // +1 day is needed. Example: 01/05 → 03/05 generates 01/05 and 02/05.
+      $start = new \DateTime($check_in_date);
+      $end   = new \DateTime($check_out_date);
       $range = new \DatePeriod($start, $interval, $end);
 
+      // Overlap condition: existing event must START before our check-out
+      // AND END after our check-in (strict inequality excludes events that
+      // merely touch the boundary, allowing back-to-back bookings).
       $event_ids = $this->entityTypeManager->getStorage('bat_event')->getQuery()
         ->accessCheck(FALSE)
         ->condition('type', 'availability_daily')
         ->condition('event_bat_unit_reference', $unit_id)
         ->condition('field_bed_type', $bed_type)
-        ->condition('event_dates.value', $check_out_date, '<=')
-        ->condition('event_dates.end_value', $check_in_date, '>=')
+        ->condition('event_dates.value',     $check_out_date, '<')
+        ->condition('event_dates.end_value', $check_in_date,  '>')
         ->execute();
 
       $occupied = [];
       if (!empty($event_ids)) {
         foreach ($this->entityTypeManager->getStorage('bat_event')->loadMultiple($event_ids) as $event) {
           $inner_start = new \DateTime($event->get('event_dates')->value);
+          // end_value is the check-out date of the existing booking, which is
+          // not an occupied night — keep DatePeriod exclusive (no +1 day).
           $inner_end = new \DateTime($event->get('event_dates')->end_value);
-          $inner_end->modify('+1 day');
           foreach (new \DatePeriod($inner_start, $interval, $inner_end) as $day) {
             $key = $day->format('Y-m-d');
             $occupied[$key] = ($occupied[$key] ?? 0) + 1;

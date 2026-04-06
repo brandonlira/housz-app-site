@@ -80,8 +80,8 @@ class RoomsResource extends ResourceBase implements ContainerFactoryPluginInterf
     $checkInDate  = $request->query->get('checkInDate');
     $checkOutDate = $request->query->get('checkOutDate');
 
-    // Minimum stay nights (static value; can be moved to config).
-    $minStay = 2;
+    // Minimum stay nights — comes from config, defaults to 2.
+    $minStay = (int) \Drupal::config('hous_z_api.settings')->get('min_stay') ?: 2;
 
     // Load all active units.
     $storage = \Drupal::entityTypeManager()->getStorage('bat_unit');
@@ -121,6 +121,7 @@ class RoomsResource extends ResourceBase implements ContainerFactoryPluginInterf
 
       $result[] = [
         'room' => [
+          'unitId'        => (int) $unit->id(),
           'roomName'      => $unit->label(),
           'description'   => $description,
           'imageUrl'      => $image_url,
