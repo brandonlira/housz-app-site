@@ -337,7 +337,7 @@ class ReservationService {
         ],
         'status' => $state?->get('machine_name')->value ?? '',
         'details' => $booking->hasField('field_booking_details') ? (string) $booking->get('field_booking_details')->value : '',
-        'createdAt' => $this->formatCreatedAt($booking->getCreatedTime()),
+        'createdAt' => $this->extractCreatedAt($booking),
       ];
     }
 
@@ -526,6 +526,17 @@ class ReservationService {
    */
   private function formatCreatedAt(int $timestamp): string {
     return gmdate('Y-m-d\TH:i:s\Z', $timestamp);
+  }
+
+  /**
+   * Extracts the booking creation timestamp safely.
+   */
+  private function extractCreatedAt(EntityInterface $booking): string {
+    if ($booking->hasField('created') && !$booking->get('created')->isEmpty()) {
+      return $this->formatCreatedAt((int) $booking->get('created')->value);
+    }
+
+    return $this->formatCreatedAt(time());
   }
 
 }
