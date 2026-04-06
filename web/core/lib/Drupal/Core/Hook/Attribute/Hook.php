@@ -32,8 +32,14 @@ use Drupal\Core\Hook\Order\OrderInterface;
  *   }
  *   @endcode
  *
- * Ordering hook implementations can be done by implementing
- * hook_module_implements_alter.
+ * Ordering hook implementations can be done by using the order parameter.
+ * See Drupal\Core\Hook\Order\OrderInterface for more information.
+ *
+ * Removing hook implementations can be done by using the attribute
+ * \Drupal\Core\Hook\Attribute\RemoveHook.
+ *
+ * Ordering hook implementations in other modules can be done by using the
+ * attribute \Drupal\Core\Hook\Attribute\ReorderHook.
  *
  * Classes that use this annotation on the class or on their methods are
  * automatically registered as autowired services with the class name as the
@@ -72,13 +78,14 @@ use Drupal\Core\Hook\Order\OrderInterface;
  * - hook_install_tasks()
  * - hook_install_tasks_alter()
  * - hook_post_update_NAME()
+ * - hook_removed_post_updates()
  * - hook_schema()
  * - hook_uninstall()
+ * - hook_update_dependencies()
  * - hook_update_last_removed()
  * - hook_update_N()
  *
- * Theme hooks:
- * - hook_preprocess_HOOK()
+ * Hooks implemented by themes must remain procedural.
  *
  * @section sec_backwards_compatibility Backwards-compatibility
  *
@@ -91,28 +98,12 @@ use Drupal\Core\Hook\Order\OrderInterface;
  */
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class Hook implements HookAttributeInterface {
-  /**
-   * The hook prefix such as `form`.
-   *
-   * @var string
-   */
-  public const string PREFIX = '';
-
-  /**
-   * The hook suffix such as `alter`.
-   *
-   * @var string
-   */
-  public const string SUFFIX = '';
 
   /**
    * Constructs a Hook attribute object.
    *
    * @param string $hook
    *   The short hook name, without the 'hook_' prefix.
-   *   $hook is only optional when Hook is extended and a PREFIX or SUFFIX is
-   *   defined. When using the [#Hook] attribute directly $hook is required.
-   *   See Drupal\Core\Hook\Attribute\Preprocess.
    * @param string $method
    *   (optional) The method name. If this attribute is on a method, this
    *   parameter is not required. If this attribute is on a class and this
@@ -123,32 +114,13 @@ class Hook implements HookAttributeInterface {
    *   to implement a hook on behalf of another module. Defaults to the module
    *   the implementation is in.
    * @param \Drupal\Core\Hook\Order\OrderInterface|null $order
-   *   (optional) Set the order of the implementation. This parameter is
-   *   supported in Drupal 11.2 and greater. It will have no affect in Drupal
-   *   11.1.
+   *   (optional) Set the order of the implementation.
    */
   public function __construct(
-    public string $hook = '',
+    public string $hook,
     public string $method = '',
     public ?string $module = NULL,
-    public OrderInterface|null $order = NULL,
-  ) {
-    $this->hook = implode('_', array_filter([static::PREFIX, $hook, static::SUFFIX]));
-    if ($this->hook === '') {
-      throw new \LogicException('The Hook attribute or an attribute extending the Hook attribute must provide the $hook parameter, a PREFIX or a SUFFIX.');
-    }
-  }
-
-  /**
-   * Set the method the hook should apply to.
-   *
-   * @param string $method
-   *   The method that the hook attribute applies to.
-   *   This only needs to be set when the attribute is on the class.
-   */
-  public function setMethod(string $method): static {
-    $this->method = $method;
-    return $this;
-  }
+    public ?OrderInterface $order = NULL,
+  ) {}
 
 }
