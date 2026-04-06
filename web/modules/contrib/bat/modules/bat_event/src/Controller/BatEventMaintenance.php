@@ -27,7 +27,7 @@ class BatEventMaintenance extends ControllerBase {
    *
    * @var \Drupal\bat_event\Util\EventMaintenance
    */
-  protected $batEventMAintenance;
+  protected $batEventMaintenance;
 
 
   /**
@@ -46,7 +46,7 @@ class BatEventMaintenance extends ControllerBase {
    *   The database connection.
    */
   public function __construct(EventMaintenance $eventMaintenance, Connection $database) {
-    $this->batEventMAintenance = $eventMaintenance;
+    $this->batEventMaintenance = $eventMaintenance;
     $this->database = $database;
   }
 
@@ -69,7 +69,7 @@ class BatEventMaintenance extends ControllerBase {
   public function main() {
 
     $links = $data = [];
-    $data['batTables'] = $this->batEventMAintenance->batTables([]);
+    $data['batTables'] = $this->batEventMaintenance->batTables([]);
     $report = [];
 
     foreach ($data['batTables']['main'] as $k => $v) {
@@ -113,13 +113,15 @@ class BatEventMaintenance extends ControllerBase {
     $config = \Drupal::configFactory()->get('bat_event.settings');
     $bat_event_config = $config->get("bat_event");
 
+
+
     if ($bat_event_config == NULL) {
       \Drupal::messenger()->addMessage(t('Set up BAT Event preference'));
       (new RedirectResponse('/admin/bat/config/bat_event'))->send();
       exit();
     }
 
-    if ($this->batEventMAintenance->deleteOldBatEvents($bat_event_config['delete_old'])) {
+    if ($this->batEventMaintenance->deleteOldBatEvents($bat_event_config['delete_old'])) {
       $this->messenger()->addStatus($this->t('Old events deleted.'));
     }
     else {
@@ -135,7 +137,7 @@ class BatEventMaintenance extends ControllerBase {
   public function fixTablesIntegrity() {
 
     $data = [];
-    $data['batTables'] = $this->batEventMAintenance->batTables([]);
+    $data['batTables'] = $this->batEventMaintenance->batTables([]);
 
     foreach ($data['batTables']['main'] as $k => $v) {
       $data['event_table']['name'] = $k;

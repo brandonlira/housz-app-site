@@ -267,23 +267,37 @@ class Event extends ContentEntityBase implements EventInterface {
 
       $data['event_target_entity_reference'] = $this->getTranslation($data['langcode'])->get($data['target_field_name']);
 
-      // https://git.drupalcode.org/issue/bat-3395073/-/compare/8.x-1.x...8.x-1.x?from_project_id=59843
-      $data['references'] = $data['event_target_entity_reference']->referencedEntities();
-      if ($data['references'] != []) {
-        $data['target_entity_id'] = $data['event_target_entity_reference']->referencedEntities()[0]->id();
-        if ($data['target_entity'] = \Drupal::entityTypeManager()->getStorage($data['event_type']->getTargetEntityType())->load($data['target_entity_id'])) {
-          $data['unit'] = new Unit($data['target_entity_id'], $data['target_entity']->getEventDefaultValue($data['event_type']->id()));
-
-          $this->batStoreSave($data['unit'],
-            $this->getStartDate(),
-            $this->getEndDate()->sub(new \DateInterval('PT1M')),
-            $data['event_type']->id(),
-            $data['event_type']->getEventGranularity(),
-            $data['event_value'],
-            $this->get('id')->value
-          );
-        }
+      // Fix for entity reference target_id type consistency.
+      // Fix applied: 2024-10-16.
+      // In PHP 8.4, EntityStorageBase->loadMultiple() requires integer IDs.
+      // This loop ensures all target_id values are properly cast to integers
+      // to prevent warnings when entity references are loaded.
+      // To be removed once issue below is fixed.
+      // https://www.drupal.org/project/drupal/issues/3048490#comment-16306306
+      foreach ($data['event_target_entity_reference'] as $k => $v) {
+        $data['event_target_entity_reference'][$k] = ['target_id' => (int) $v->target_id];
       }
+
+
+      $data['references'] = $data['event_target_entity_reference']->referencedEntities();
+
+        if ($data['references'] != []) {
+          $data['target_entity_id'] = $data['event_target_entity_reference']->referencedEntities()[0]->id();
+          if ($data['target_entity'] = \Drupal::entityTypeManager()->getStorage($data['event_type']->getTargetEntityType())->load($data['target_entity_id'])) {
+            $data['unit'] = new Unit($data['target_entity_id'], $data['target_entity']->getEventDefaultValue($data['event_type']->id()));
+
+            $this->batStoreSave($data['unit'],
+              $this->getStartDate(),
+              $this->getEndDate()->sub(new \DateInterval('PT1M')),
+              $data['event_type']->id(),
+              $data['event_type']->getEventGranularity(),
+              $data['event_value'],
+              $this->get('id')->value
+            );
+          }
+        }
+
+
     }
   }
 

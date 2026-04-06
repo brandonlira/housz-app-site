@@ -9,4 +9,4 @@ services:
     arguments: ['@logger.factory', '@entity_type.manager', '@database', '@renderer']
   bat_event.util.event_maintenance:
     class: Drupal\bat_event\Util\EventMaintenance
-    arguments: ['@entity_type.manager']
+    arguments: ['@entity_type.manager', '@database']

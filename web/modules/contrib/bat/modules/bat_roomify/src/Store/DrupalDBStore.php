@@ -72,8 +72,8 @@ class DrupalDBStore extends SqlDBStore {
 
     $queries  = $this->buildQueries($start_date, $end_date, $unit_ids);
 
-    $results = array();
-    // Run each query and store results
+    $results = [];
+    // Run each query and store results.
     foreach ($queries as $type => $query) {
       $results[$type] = \Drupal\Core\Database\Database::getConnection()->query($query);
     }

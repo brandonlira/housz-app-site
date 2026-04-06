@@ -134,12 +134,15 @@ abstract class AbstractCalendar implements CalendarInterface {
    * @return CalendarResponse
    */
   public function getMatchingUnits(\DateTime $start_date, \DateTime $end_date, $valid_states, $constraints = [], $intersect = FALSE, $reset = TRUE) {
-    $units = [];
-    $response = new CalendarResponse($start_date, $end_date, $valid_states);
-    $keyed_units = $this->keyUnitsById();
 
-    $states = $this->getStates($start_date, $end_date, $reset);
-    foreach ($states as $unit => $unit_states) {
+    $data = [];
+
+    $d['units'] = [];
+    $d['response'] = new CalendarResponse($start_date, $end_date, $valid_states);
+    $d['keyed_units'] = $this->keyUnitsById();
+    $d['states'] = $this->getStates($start_date, $end_date, $reset);
+
+    foreach ($d['states'] as $unit => $unit_states) {
       // Create an array with just the states
       $current_states = array_keys($unit_states);
 
@@ -154,19 +157,19 @@ abstract class AbstractCalendar implements CalendarInterface {
       if ((count($remaining_states) == 0 && !$intersect) || (count($remaining_states) > 0 && $intersect)) {
         // Unit is in a state that is within the set of valid states so add to result set
         $units[$unit] = $unit;
-        $response->addMatch($keyed_units[$unit], CalendarResponse::VALID_STATE);
+        $d['response']->addMatch($d['keyed_units'][$unit], CalendarResponse::VALID_STATE);
       }
       else {
-        $response->addMiss($keyed_units[$unit], CalendarResponse::INVALID_STATE);
+        $d['response']->addMiss($d['keyed_units'][$unit], CalendarResponse::INVALID_STATE);
       }
 
-      $unit_constraints = $keyed_units[$unit]->getConstraints();
-      $response->applyConstraints($unit_constraints);
+      $unit_constraints = $d['keyed_units'][$unit]->getConstraints();
+      $d['response']->applyConstraints($unit_constraints);
     }
 
-    $response->applyConstraints($constraints);
+    $d['response']->applyConstraints($constraints);
 
-    return $response;
+    return $d['response'];
   }
 
   /**
@@ -186,11 +189,6 @@ abstract class AbstractCalendar implements CalendarInterface {
     $keyed_units = $this->keyUnitsById();
 
     $db_events = $this->store->getEventData($start_date, $end_date, array_keys($keyed_units));
-
-    // dump (__METHOD__);
-    // dump ("\$db_events");
-    // dump ($db_events);
-    //exit;
 
     // Create a mock itemized event for the period in question - since event data is either
     // in the database or the default value we first create a mock event and then fill it in
@@ -224,31 +222,17 @@ abstract class AbstractCalendar implements CalendarInterface {
 
     }
 
-    // dump ("\$events A");
-    // dump ($events);
-    // Check to see if any events came back from the db
-
     foreach ($keyed_units as $id => $unit) {
-
-      // dump ("\$id");
-      // dump ($id);
-      // dump ("\$unit");
-      // dump ($unit);
 
       // OLD Comment :If we don't have any db events add mock events (itemized)
       // mar25 question to comment:  Why?
       if ((isset($events[$id]) && count($events[$id]) == 0) || !isset($events[$id])) {
         $empty_event = new Event($start_date, $end_date, $unit, $unit->getDefaultValue());
 
-        // Mar25: do we need empty events from mock??
-        //$events[$id] = $empty_event->itemize(new EventItemizer($empty_event, $granularity));
+        $events[$id] = $empty_event->itemize(new EventItemizer($empty_event, $granularity));
 
       }
     }
-
-    // dump ("\$events B");
-    // dump ($events);
-    // exit;
 
     return $events;
   }

@@ -91,8 +91,8 @@ class FullCalendarFixedStateEventFormatter extends AbstractEventFormatter {
     $this->eventLabel($data);
 
     $formatted_event = [
-      'start' => $event->startYear() . '-' . $event->startMonth('m') . '-' . $event->startDay('d') . 'T' . $event->startHour('H') . ':' . $event->startMinute() . ':00',
-      'end' => $event->endYear() . '-' . $event->endMonth('m') . '-' . $event->endDay('d') . 'T' . $event->endHour('H') . ':' . $event->endMinute() . ':00',
+      'start' => $event->startYear() . '-' . $event->startMonth('m') . '-' . $event->startDay('d') . 'T' . $event->startHour('H') . ':' . $event->startMinute() . ':00Z',
+      'end' => $event->endYear() . '-' . $event->endMonth('m') . '-' . $event->endDay('d') . 'T' . $event->endHour('H') . ':' . $event->endMinute() . ':00Z',
       'title' => $data['calendar_label'],
       'color' => isset($data['state_info']) ? $data['state_info']->getColor() : '#B4B4B4',
       'blocking' => 1,

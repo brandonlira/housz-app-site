@@ -9,7 +9,7 @@ Please report bugs in the [issue queue](https://www.drupal.org/project/issues/ba
 
 [Project](https://www.drupal.org/project/bat)
 
-[Documentation](@todo)
+[Documentation] https://www.drupal.org/node/3512952
 
 [Issue Tracker](https://www.drupal.org/project/issues/bat)
 
@@ -20,6 +20,3 @@ Use [Composer](https://getcomposer.org/) to get Drupal + BAT with all dependenci
 ```
 composer create-project drupalcommerce/project-base mysite --stability dev --no-interaction
 ```
-
-See the [install documentation](@todo) for more details.
-

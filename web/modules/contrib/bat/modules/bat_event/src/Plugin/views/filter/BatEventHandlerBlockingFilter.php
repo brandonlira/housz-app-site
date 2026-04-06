@@ -15,18 +15,15 @@ use Drupal\views\ViewExecutable;
 class BatEventHandlerBlockingFilter extends BooleanOperator {
 
   /**
-   * Stores the available options.
-   *
-   * @var array
+   * The value title.
    */
-  protected $valueOptions;
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
+  public string $value_value;
 
   /**
-   * Value title.
-   *
-   * @var string
+   * The value options.
    */
-  protected $value_value;
+  public ?array $valueOptions;
 
   /**
    * {@inheritdoc}
