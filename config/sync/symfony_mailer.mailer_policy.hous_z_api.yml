@@ -1,0 +1,8 @@
+uuid: 65f394aa-bafd-4e18-b750-6424ced1b17e
+langcode: en
+status: true
+dependencies:
+  module:
+    - hous_z_api
+id: hous_z_api
+configuration: {  }
