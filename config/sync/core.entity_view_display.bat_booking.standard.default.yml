@@ -19,14 +19,6 @@ targetEntityType: bat_booking
 bundle: standard
 mode: default
 content:
-  field_event_state:
-    type: entity_reference_label
-    label: above
-    settings:
-      link: true
-    third_party_settings: {  }
-    weight: 2
-    region: content
   field_booking_details:
     type: basic_string
     label: above
@@ -49,6 +41,14 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     weight: 6
+    region: content
+  field_event_state:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 2
     region: content
   field_requester_email:
     type: string
