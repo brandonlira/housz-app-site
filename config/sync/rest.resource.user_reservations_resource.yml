@@ -1,0 +1,18 @@
+uuid: c2c2bdd8-d57a-49e3-b4fd-fbd0471a2f13
+langcode: en
+status: true
+dependencies:
+  module:
+    - hous_z_api
+    - rest
+    - serialization
+id: user_reservations_resource
+plugin_id: user_reservations_resource
+granularity: resource
+configuration:
+  methods:
+    - POST
+  formats:
+    - json
+  authentication:
+    - cookie

@@ -1,4 +1,8 @@
 services:
   hous_z_api.reservation:
     class: Drupal\hous_z_api\Service\ReservationService
-    arguments: ['@entity_type.manager', '@logger.factory', '@file_url_generator']
+    arguments: ['@entity_type.manager', '@logger.factory', '@file_url_generator', '@current_user']
+
+  hous_z_api.booking_notifier:
+    class: Drupal\hous_z_api\Service\BookingNotifier
+    arguments: ['@plugin.manager.mail', '@language_manager', '@logger.factory']

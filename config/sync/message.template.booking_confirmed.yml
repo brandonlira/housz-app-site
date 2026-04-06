@@ -1,0 +1,19 @@
+uuid: 863eec1f-3e49-4ea8-8566-2ada7baa09e5
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.basic_html
+template: booking_confirmed
+label: 'Booking Confirmed'
+description: 'Sent to the requester when the booking status is changed to Confirmed.'
+text:
+  -
+    value: '<p>Hello [booking:field_requester_email],</p><p>Your booking for <strong>[unit:label]</strong> has been <strong>confirmed</strong>!</p><ul><li><strong>Dates:</strong> [booking:booking_start_date:value:custom:d/m/Y] – [booking:booking_end_date:value:custom:d/m/Y]</li><li><strong>Booking ID:</strong> [booking:id]</li></ul><p>Address: [unit:field_address]</p><p>If you need to change or cancel, just reply to this email.</p><p>See you soon!<br>Hous‑Z</p>'
+    format: basic_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

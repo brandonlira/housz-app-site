@@ -1,0 +1,17 @@
+uuid: b61cdecc-0fee-4ea0-a321-ca84967a86a3
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_subject
+    - message.template.booking_created
+id: message.booking_created.mail_subject
+targetEntityType: message
+bundle: booking_created
+mode: mail_subject
+content:
+  partial_0:
+    weight: 0
+    region: content
+hidden:
+  partial_1: true

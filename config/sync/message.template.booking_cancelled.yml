@@ -1,0 +1,19 @@
+uuid: 5fcf6f87-715e-406b-886b-2944669cd347
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+template: booking_cancelled
+label: 'Booking Cancelled'
+description: 'Sent to the requester when the booking is cancelled.'
+text:
+  -
+    value: '<p>Hello,</p><p>Your booking (ID <strong>[booking:id]</strong>) for room <strong>[unit:label]</strong> has been <strong>cancelled</strong>.</p><ul><li><strong>Original dates:</strong> [booking:booking_start_date:value:custom:d/m/Y] – [booking:booking_end_date:value:custom:d/m/Y]</li></ul><p><strong>Reason / notes (if any):</strong><br>[arguments:details]</p><p>Please contact us if you have any questions.</p><p>— Hous‑Z Team</p>'
+    format: full_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

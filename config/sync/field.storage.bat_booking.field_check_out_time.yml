@@ -1,0 +1,21 @@
+uuid: 92ded57a-5f04-45d7-8b91-79bff7d0bd88
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_booking
+id: bat_booking.field_check_out_time
+field_name: field_check_out_time
+entity_type: bat_booking
+type: string
+settings:
+  max_length: 32
+  case_sensitive: false
+  is_ascii: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -24,6 +24,8 @@
         "drupal/core-recommended": "^11.1",
         "drupal/jsonapi_extras": "^3.26",
         "drupal/mailsystem": "^4.5",
+        "drupal/message": "^1.8",
+        "drupal/message_notify": "^1.5",
         "drupal/paragraphs": "^1.19",
         "drupal/search_api": "^1.38",
         "drupal/simple_oauth": "^6.0",

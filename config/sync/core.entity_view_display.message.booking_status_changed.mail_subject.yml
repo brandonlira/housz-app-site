@@ -1,0 +1,17 @@
+uuid: fb434f55-c9aa-4e14-ac74-62579a24c0d8
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_subject
+    - message.template.booking_status_changed
+id: message.booking_status_changed.mail_subject
+targetEntityType: message
+bundle: booking_status_changed
+mode: mail_subject
+content:
+  partial_0:
+    weight: 0
+    region: content
+hidden:
+  partial_1: true

@@ -1,0 +1,17 @@
+uuid: ba0e3970-edd0-40c0-9b9f-3dda072ad2cc
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.message.mail_body
+    - message.template.booking_created
+id: message.booking_created.mail_body
+targetEntityType: message
+bundle: booking_created
+mode: mail_body
+content:
+  partial_1:
+    weight: 0
+    region: content
+hidden:
+  partial_0: true

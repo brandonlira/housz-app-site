@@ -5,13 +5,13 @@ namespace Drupal\hous_z_api\Service;
 use Drupal\bat_booking\BookingInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\Core\File\FileUrlGenerator;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Psr\Log\LoggerInterface;
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
 /**
- * Service for reservation/booking management operations.
+ * Service for reservation and booking operations.
  */
 class ReservationService {
 
@@ -20,7 +20,7 @@ class ReservationService {
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The logger.
@@ -34,229 +34,462 @@ class ReservationService {
    *
    * @var \Drupal\Core\File\FileUrlGenerator
    */
-  protected $fileUrlGenerator;
+  protected FileUrlGenerator $fileUrlGenerator;
 
   /**
-   * Constructs a ReservationService object.
+   * The current user.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
-   *   The logger factory.
-   * @param \Drupal\Core\File\FileUrlGenerator $file_url_generator
-   *   The file URL generator.
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected AccountProxyInterface $currentUser;
+
+  /**
+   * Constructs the service.
    */
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
     LoggerChannelFactoryInterface $logger_factory,
-    FileUrlGenerator $file_url_generator
+    FileUrlGenerator $file_url_generator,
+    AccountProxyInterface $current_user,
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger_factory->get('hous_z_api');
     $this->fileUrlGenerator = $file_url_generator;
+    $this->currentUser = $current_user;
   }
 
   /**
-   * Create a new reservation.
-   *
-   * @param array $data
-   *   The reservation data.
-   *
-   * @return array
-   *   Array with 'success' boolean and 'data' or 'error' message.
+   * Creates a new reservation.
    */
   public function createReservation(array $data): array {
     try {
-      // Validate required fields.
-      $required_fields = ['unitId', 'bedType', 'checkInDate', 'checkOutDate'];
-      foreach ($required_fields as $field) {
+      foreach (['unitId', 'bedType', 'checkInDate', 'checkOutDate', 'email'] as $field) {
         if (empty($data[$field])) {
           return [
             'success' => FALSE,
-            'error' => 'Required: unitId, bedType, checkInDate, checkOutDate',
+            'error' => 'Required fields: unitId, bedType, checkInDate, checkOutDate, email.',
           ];
         }
       }
 
-      // Load unit.
-      $unit = $this->entityTypeManager->getStorage('bat_unit')->load((int) $data['unitId']);
-      if (!$unit) {
-        return ['success' => FALSE, 'error' => 'Unit not found'];
+      $email = strtolower(trim((string) $data['email']));
+      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return ['success' => FALSE, 'error' => 'Valid email is required.'];
       }
 
-      // Check availability.
+      $unit = $this->entityTypeManager->getStorage('bat_unit')->load((int) $data['unitId']);
+      if (!$unit) {
+        return ['success' => FALSE, 'error' => 'Unit not found.'];
+      }
+
       $availability = $this->checkAvailability(
-        $data['unitId'],
-        $data['bedType'],
-        $data['checkInDate'],
-        $data['checkOutDate']
+        (int) $data['unitId'],
+        (string) $data['bedType'],
+        (string) $data['checkInDate'],
+        (string) $data['checkOutDate'],
       );
       if (!$availability['available']) {
         return ['success' => FALSE, 'error' => $availability['message']];
       }
 
-      // Get pending state.
-      $pending_state = $this->getStateByName('Pending');
+      $pending_state = $this->getStateByMachineName('pending') ?? $this->getStateByName('Pending');
       if (!$pending_state) {
-        return ['success' => FALSE, 'error' => 'Could not find the "Pending" state'];
+        return ['success' => FALSE, 'error' => 'Pending state not found.'];
       }
 
-      // Validate email.
-      if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-        return ['success' => FALSE, 'error' => 'A valid email is required'];
-      }
+      $start_value = (new \DateTime((string) $data['checkInDate']))->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
+      $end_value = (new \DateTime((string) $data['checkOutDate']))->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
 
-      // Format dates.
-      $start_value = (new \DateTime($data['checkInDate']))
-        ->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
-      $end_value = (new \DateTime($data['checkOutDate']))
-        ->format(DateTimeItemInterface::DATETIME_STORAGE_FORMAT);
-
-      // Create event.
       $event = $this->entityTypeManager->getStorage('bat_event')->create([
         'type' => 'availability_daily',
         'event_dates' => ['value' => $start_value, 'end_value' => $end_value],
         'event_bat_unit_reference' => ['target_id' => (int) $data['unitId']],
-        'field_bed_type' => $data['bedType'],
+        'field_bed_type' => (string) $data['bedType'],
         'event_state_reference' => ['target_id' => $pending_state->id()],
       ]);
       $event->save();
 
-      // Create booking.
-      $booking = $this->entityTypeManager->getStorage('bat_booking')->create([
+      $booking_values = [
         'type' => 'standard',
         'booking_event_reference' => ['target_id' => $event->id()],
-        'uid' => ['target_id' => \Drupal::currentUser()->id()],
-        'field_requester_email' => ['value' => $data['email']],
+        'field_requester_email' => ['value' => $email],
         'status' => 1,
         'field_event_state' => ['target_id' => $pending_state->id()],
         'booking_start_date' => ['value' => $start_value],
         'booking_end_date' => ['value' => $end_value],
-      ]);
-      $booking->save();
+      ];
 
-      $summary = [];
-
-      if ($booking instanceof BookingInterface) {
-        // Build response summary.
-        $summary = $this->buildReservationSummary($unit, $data, $booking->id());
-
-        // Send notification email.
-        $this->sendNotificationEmail($unit, $summary);
+      $user_id = $this->resolveUserIdByEmail($email);
+      if ($user_id !== NULL) {
+        $booking_values['uid'] = ['target_id' => $user_id];
       }
 
-      return ['success' => TRUE, 'data' => $summary];
+      $booking = $this->entityTypeManager->getStorage('bat_booking')->create($booking_values);
+      $this->setBookingExtraFields($booking, $data);
+      $booking->save();
+
+      if (!$booking instanceof BookingInterface) {
+        return ['success' => FALSE, 'error' => 'Booking could not be created.'];
+      }
+
+      return [
+        'success' => TRUE,
+        'data' => $this->buildReservationSummary($unit, $booking, $data),
+      ];
     }
     catch (\Exception $e) {
-      $this->logger->error('Error creating reservation: @message', [
-        '@message' => $e->getMessage(),
-      ]);
-      return ['success' => FALSE, 'error' => 'Internal server error'];
+      $this->logger->error('Error creating reservation: @message', ['@message' => $e->getMessage()]);
+      return ['success' => FALSE, 'error' => 'Internal server error.'];
     }
   }
 
   /**
-   * Update an existing booking.
-   *
-   * @param int $booking_id
-   *   The booking ID.
-   * @param array $data
-   *   The data to update.
-   *
-   * @return array
-   *   Array with 'success' boolean and 'data' or 'error' message.
+   * Legacy booking update endpoint.
    */
   public function updateBooking(int $booking_id, array $data): array {
     try {
       $booking = $this->entityTypeManager->getStorage('bat_booking')->load($booking_id);
       if (!$booking) {
-        return ['success' => FALSE, 'error' => 'Booking not found'];
+        return ['success' => FALSE, 'error' => 'Booking not found.'];
       }
 
-      // Update event state if provided.
-      if (!empty($data['state'])) {
-        $state = $this->getStateByMachineName($data['state']);
+      if (!empty($data['status']) || !empty($data['state'])) {
+        $status = strtolower(trim((string) ($data['status'] ?? $data['state'])));
+        $state = $this->getStateByMachineName($status);
         if (!$state) {
-          return ['success' => FALSE, 'error' => 'Invalid state'];
+          return ['success' => FALSE, 'error' => 'Invalid status.'];
         }
 
         $booking->set('field_event_state', ['target_id' => $state->id()]);
-
-        // Update associated event state.
-        if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
-          $event_id = $booking->get('booking_event_reference')->target_id;
-          $event = $this->entityTypeManager->getStorage('bat_event')->load($event_id);
-          if ($event) {
-            $event->set('event_state_reference', ['target_id' => $state->id()]);
-            $event->save();
-          }
+        $event = $booking->get('booking_event_reference')->entity ?? NULL;
+        if ($event) {
+          $event->set('event_state_reference', ['target_id' => $state->id()]);
+          $event->save();
         }
       }
 
-      // Update email if provided.
-      if (!empty($data['email'])) {
-        $booking->set('field_requester_email', ['value' => $data['email']]);
+      if (!empty($data['email']) && filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        $booking->set('field_requester_email', ['value' => strtolower(trim((string) $data['email']))]);
       }
 
+      $this->setBookingExtraFields($booking, $data);
       $booking->save();
 
-      return ['success' => TRUE, 'data' => ['booking_id' => $booking->id()]];
+      return ['success' => TRUE, 'data' => ['booking_id' => (int) $booking->id()]];
     }
     catch (\Exception $e) {
-      $this->logger->error('Error updating booking: @message', [
-        '@message' => $e->getMessage(),
-      ]);
-      return ['success' => FALSE, 'error' => 'Internal server error'];
+      $this->logger->error('Error updating booking: @message', ['@message' => $e->getMessage()]);
+      return ['success' => FALSE, 'error' => 'Internal server error.'];
     }
   }
 
   /**
-   * Delete a booking.
-   *
-   * @param int $booking_id
-   *   The booking ID.
-   *
-   * @return array
-   *   Array with 'success' boolean and 'error' message if failed.
+   * Updates a booking status for the new API contract.
+   */
+  public function updateBookingStatus(array $data): array {
+    try {
+      $booking_id = isset($data['bookingId']) ? (int) $data['bookingId'] : 0;
+      $status = strtolower(trim((string) ($data['status'] ?? '')));
+
+      if ($booking_id < 1 || !in_array($status, ['confirmed', 'cancelled'], TRUE)) {
+        return ['success' => FALSE, 'error' => 'Invalid or missing parameters.'];
+      }
+
+      $booking = $this->entityTypeManager->getStorage('bat_booking')->load($booking_id);
+      if (!$booking) {
+        return ['success' => FALSE, 'error' => 'Booking not found.'];
+      }
+
+      $state = $this->getStateByMachineName($status);
+      if (!$state) {
+        return ['success' => FALSE, 'error' => 'Invalid or missing parameters.'];
+      }
+
+      $booking->set('field_event_state', ['target_id' => $state->id()]);
+      if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
+        $event = $booking->get('booking_event_reference')->entity;
+        if ($event) {
+          $event->set('event_state_reference', ['target_id' => $state->id()]);
+          $event->save();
+        }
+      }
+
+      $booking->save();
+
+      return [
+        'success' => TRUE,
+        'data' => [
+          'bookingId' => $booking_id,
+          'status' => $status,
+          'message' => 'Booking status updated successfully.',
+        ],
+      ];
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error updating booking status: @message', ['@message' => $e->getMessage()]);
+      return ['success' => FALSE, 'error' => 'Internal server error.'];
+    }
+  }
+
+  /**
+   * Deletes a booking.
    */
   public function deleteBooking(int $booking_id): array {
     try {
       $booking = $this->entityTypeManager->getStorage('bat_booking')->load($booking_id);
       if (!$booking) {
-        return ['success' => FALSE, 'error' => 'Booking not found'];
+        return ['success' => FALSE, 'error' => 'Booking not found.'];
       }
 
-      // Delete associated event.
       if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
-        $event_id = $booking->get('booking_event_reference')->target_id;
-        $event = $this->entityTypeManager->getStorage('bat_event')->load($event_id);
+        $event = $booking->get('booking_event_reference')->entity;
         if ($event) {
           $event->delete();
         }
       }
 
       $booking->delete();
-
       return ['success' => TRUE];
     }
     catch (\Exception $e) {
-      $this->logger->error('Error deleting booking: @message', [
-        '@message' => $e->getMessage(),
-      ]);
-      return ['success' => FALSE, 'error' => 'Internal server error'];
+      $this->logger->error('Error deleting booking: @message', ['@message' => $e->getMessage()]);
+      return ['success' => FALSE, 'error' => 'Internal server error.'];
     }
   }
 
   /**
-   * Get state by machine name.
-   *
-   * @param string $machine_name
-   *   The state machine name.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface|null
-   *   The state entity or NULL.
+   * Returns all bookings for admin usage, optionally filtered by email.
    */
-  private function getStateByMachineName(string $machine_name): ?\Drupal\Core\Entity\EntityInterface {
+  public function getBookingsData(?string $email = NULL): array {
+    $booking_storage = $this->entityTypeManager->getStorage('bat_booking');
+    $query = $booking_storage->getQuery()->accessCheck(TRUE)->sort('id', 'DESC');
+
+    if ($email !== NULL) {
+      $query->condition('field_requester_email', strtolower(trim($email)));
+    }
+
+    $booking_ids = $query->execute();
+    if (empty($booking_ids)) {
+      return [];
+    }
+
+    $bookings = $booking_storage->loadMultiple($booking_ids);
+    $data = [];
+
+    foreach ($bookings as $booking) {
+      $event = $booking->get('booking_event_reference')->entity ?? NULL;
+      $unit = $event?->get('event_bat_unit_reference')->entity ?? NULL;
+      $state = $booking->get('field_event_state')->entity ?? NULL;
+
+      $data[] = [
+        'reservationId' => (int) $booking->id(),
+        'roomName' => $unit?->label(),
+        'bedType' => $event?->get('field_bed_type')->value,
+        'checkInDate' => $this->formatStorageDate($booking->get('booking_start_date')->value ?? ''),
+        'checkOutDate' => $this->formatStorageDate($booking->get('booking_end_date')->value ?? ''),
+        'checkInTime' => $booking->hasField('field_check_in_time') ? $booking->get('field_check_in_time')->value : '',
+        'checkOutTime' => $booking->hasField('field_check_out_time') ? $booking->get('field_check_out_time')->value : '',
+        'status' => $state?->get('machine_name')->value,
+        'email' => $booking->get('field_requester_email')->value ?? '',
+        'details' => $booking->hasField('field_booking_details') ? $booking->get('field_booking_details')->value : '',
+      ];
+    }
+
+    return $data;
+  }
+
+  /**
+   * Returns the new user reservations response format.
+   */
+  public function getUserReservationsByEmail(string $email): array {
+    $email = strtolower(trim($email));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      return ['success' => FALSE, 'error' => 'Valid email is required.'];
+    }
+
+    $booking_storage = $this->entityTypeManager->getStorage('bat_booking');
+    $booking_ids = $booking_storage->getQuery()
+      ->accessCheck(TRUE)
+      ->condition('field_requester_email', $email)
+      ->sort('id', 'DESC')
+      ->execute();
+
+    $reservations = [];
+    foreach ($booking_storage->loadMultiple($booking_ids) as $booking) {
+      $event = $booking->get('booking_event_reference')->entity ?? NULL;
+      $unit = $event?->get('event_bat_unit_reference')->entity ?? NULL;
+      $state = $booking->get('field_event_state')->entity ?? NULL;
+
+      $reservations[] = [
+        'bookingId' => (int) $booking->id(),
+        'room' => [
+          'unitId' => $unit ? (int) $unit->id() : NULL,
+          'roomName' => $unit?->label() ?? '',
+          'bedType' => $event?->get('field_bed_type')->value ?? '',
+          'address' => $unit?->get('field_address')->value ?? '',
+          'managerEmail' => $unit?->get('field_manager_email')->value ?? '',
+        ],
+        'dates' => [
+          'checkInDate' => $this->formatStorageDate($booking->get('booking_start_date')->value ?? ''),
+          'checkInTime' => $booking->hasField('field_check_in_time') ? (string) $booking->get('field_check_in_time')->value : '',
+          'checkOutDate' => $this->formatStorageDate($booking->get('booking_end_date')->value ?? ''),
+          'checkOutTime' => $booking->hasField('field_check_out_time') ? (string) $booking->get('field_check_out_time')->value : '',
+        ],
+        'status' => $state?->get('machine_name')->value ?? '',
+        'details' => $booking->hasField('field_booking_details') ? (string) $booking->get('field_booking_details')->value : '',
+        'createdAt' => $this->extractCreatedAt($booking),
+      ];
+    }
+
+    return [
+      'success' => TRUE,
+      'data' => [
+        'user' => [
+          'email' => $email,
+          'totalReservations' => count($reservations),
+        ],
+        'reservations' => $reservations,
+      ],
+    ];
+  }
+
+  /**
+   * Checks unit availability for the period.
+   */
+  private function checkAvailability(int $unit_id, string $bed_type, string $check_in_date, string $check_out_date): array {
+    try {
+      $unit = $this->entityTypeManager->getStorage('bat_unit')->load($unit_id);
+      if (!$unit) {
+        return ['available' => FALSE, 'message' => 'Unit not found.'];
+      }
+
+      $total_beds = 0;
+      foreach ($unit->get('field_beds') as $item) {
+        if ($item->entity && $item->entity->get('field_bed_type')->value === $bed_type) {
+          $total_beds = (int) $item->entity->get('field_bed_quantity')->value;
+          break;
+        }
+      }
+
+      if ($total_beds < 1) {
+        return ['available' => FALSE, 'message' => "No beds of type {$bed_type}."];
+      }
+
+      $start = new \DateTime($check_in_date);
+      $end = new \DateTime($check_out_date);
+      $end->modify('+1 day');
+      $interval = new \DateInterval('P1D');
+      $range = new \DatePeriod($start, $interval, $end);
+
+      $event_ids = $this->entityTypeManager->getStorage('bat_event')->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('type', 'availability_daily')
+        ->condition('event_bat_unit_reference', $unit_id)
+        ->condition('field_bed_type', $bed_type)
+        ->condition('event_dates.value', $check_out_date, '<=')
+        ->condition('event_dates.end_value', $check_in_date, '>=')
+        ->execute();
+
+      $occupied = [];
+      if (!empty($event_ids)) {
+        foreach ($this->entityTypeManager->getStorage('bat_event')->loadMultiple($event_ids) as $event) {
+          $inner_start = new \DateTime($event->get('event_dates')->value);
+          $inner_end = new \DateTime($event->get('event_dates')->end_value);
+          $inner_end->modify('+1 day');
+          foreach (new \DatePeriod($inner_start, $interval, $inner_end) as $day) {
+            $key = $day->format('Y-m-d');
+            $occupied[$key] = ($occupied[$key] ?? 0) + 1;
+          }
+        }
+      }
+
+      foreach ($range as $day) {
+        $key = $day->format('Y-m-d');
+        if (($occupied[$key] ?? 0) >= $total_beds) {
+          return ['available' => FALSE, 'message' => "No {$bed_type} beds available on {$key}."];
+        }
+      }
+
+      return ['available' => TRUE];
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Error checking availability: @message', ['@message' => $e->getMessage()]);
+      return ['available' => FALSE, 'message' => 'Error checking availability.'];
+    }
+  }
+
+  /**
+   * Builds the creation response payload.
+   */
+  private function buildReservationSummary(EntityInterface $unit, EntityInterface $booking, array $data): array {
+    $images = [];
+    if ($unit->hasField('field_cover_image') && !$unit->get('field_cover_image')->isEmpty()) {
+      $image = $unit->get('field_cover_image')->entity;
+      if ($image) {
+        $images[] = $this->fileUrlGenerator->generateAbsoluteString($image->getFileUri());
+      }
+    }
+
+    return [
+      'room' => [
+        'roomName' => $unit->label(),
+        'bedType' => (string) $data['bedType'],
+        'imageUrls' => $images,
+        'imageCount' => count($images),
+        'address' => $unit->get('field_address')->value ?? '',
+        'managerEmail' => $unit->get('field_manager_email')->value ?? '',
+      ],
+      'bookingInfo' => [
+        'email' => $booking->get('field_requester_email')->value ?? '',
+        'checkIn' => [
+          'date' => (string) $data['checkInDate'],
+          'time' => (string) ($data['checkInTime'] ?? ''),
+        ],
+        'checkOut' => [
+          'date' => (string) $data['checkOutDate'],
+          'time' => (string) ($data['checkOutTime'] ?? ''),
+        ],
+      ],
+      'details' => (string) ($data['details'] ?? ''),
+    ];
+  }
+
+  /**
+   * Sets additional optional booking fields when they exist.
+   */
+  private function setBookingExtraFields(EntityInterface $booking, array $data): void {
+    if ($booking->hasField('field_booking_details')) {
+      $booking->set('field_booking_details', ['value' => (string) ($data['details'] ?? '')]);
+    }
+    if ($booking->hasField('field_check_in_time')) {
+      $booking->set('field_check_in_time', ['value' => (string) ($data['checkInTime'] ?? '')]);
+    }
+    if ($booking->hasField('field_check_out_time')) {
+      $booking->set('field_check_out_time', ['value' => (string) ($data['checkOutTime'] ?? '')]);
+    }
+  }
+
+  /**
+   * Resolves a booking owner from email or current user.
+   */
+  private function resolveUserIdByEmail(string $email): ?int {
+    $accounts = $this->entityTypeManager->getStorage('user')->loadByProperties(['mail' => $email]);
+    $account = reset($accounts);
+    if ($account) {
+      return (int) $account->id();
+    }
+
+    if ($this->currentUser->isAuthenticated()) {
+      return (int) $this->currentUser->id();
+    }
+
+    return NULL;
+  }
+
+  /**
+   * Gets a state by machine name.
+   */
+  private function getStateByMachineName(string $machine_name): ?EntityInterface {
     $states = $this->entityTypeManager->getStorage('state')->loadByProperties([
       'machine_name' => $machine_name,
       'event_type' => 'availability_daily',
@@ -265,289 +498,45 @@ class ReservationService {
   }
 
   /**
-   * Get state by name.
-   *
-   * @param string $name
-   *   The state name.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface|null
-   *   The state entity or NULL.
+   * Gets a state by label.
    */
-  private function getStateByName(string $name): ?\Drupal\Core\Entity\EntityInterface {
-    $states = $this->entityTypeManager->getStorage('state')->loadByProperties([
-      'name' => $name,
-    ]);
+  private function getStateByName(string $name): ?EntityInterface {
+    $states = $this->entityTypeManager->getStorage('state')->loadByProperties(['name' => $name]);
     return reset($states) ?: NULL;
   }
 
   /**
-   * Check availability for a unit and bed type.
-   *
-   * @param int $unit_id
-   *   The unit ID.
-   * @param string $bed_type
-   *   The bed type.
-   * @param string $check_in_date
-   *   The check-in date.
-   * @param string $check_out_date
-   *   The check-out date.
-   *
-   * @return array
-   *   Array with 'available' boolean and 'message' if not available.
+   * Formats a stored date for API responses.
    */
-  private function checkAvailability(int $unit_id, string $bed_type, string $check_in_date, string $check_out_date): array {
+  private function formatStorageDate(string $value): string {
+    if ($value === '') {
+      return '';
+    }
+
     try {
-      // Load unit and get total beds
-      $unit = $this->entityTypeManager->getStorage('bat_unit')->load($unit_id);
-      if (!$unit) {
-        return ['available' => FALSE, 'message' => 'Unit not found'];
-      }
-
-      $total_beds = 0;
-      foreach ($unit->get('field_beds') as $item) {
-        if ($p = $item->entity) {
-          if ($p->get('field_bed_type')->value === $bed_type) {
-            $total_beds = (int) $p->get('field_bed_quantity')->value;
-            break;
-          }
-        }
-      }
-
-      if ($total_beds < 1) {
-        return ['available' => FALSE, 'message' => "No beds of type $bed_type"];
-      }
-
-      // Parse dates
-      $in = new \DateTime($check_in_date);
-      $out = new \DateTime($check_out_date);
-      $out->modify('+1 day');
-      $interval = new \DateInterval('P1D');
-      $range = new \DatePeriod($in, $interval, $out);
-
-      // Check existing events
-      $storage = $this->entityTypeManager->getStorage('bat_event');
-      $query = $storage->getQuery()
-        ->accessCheck(FALSE)
-        ->condition('type', 'availability_daily')
-        ->condition('event_bat_unit_reference', $unit_id)
-        ->condition('field_bed_type', $bed_type)
-        ->condition('event_dates.value', $check_out_date, '<=')
-        ->condition('event_dates.end_value', $check_in_date, '>=');
-      $ids = $query->execute();
-
-      // Count occupied beds per day
-      $occupied = [];
-      if (!empty($ids)) {
-        $events = $storage->loadMultiple($ids);
-        foreach ($events as $ev) {
-          $s = new \DateTime($ev->get('event_dates')->value);
-          $e = new \DateTime($ev->get('event_dates')->end_value);
-          $e->modify('+1 day');
-          $inner = new \DatePeriod($s, $interval, $e);
-          foreach ($inner as $d) {
-            $key = $d->format('Y-m-d');
-            $occupied[$key] = ($occupied[$key] ?? 0) + 1;
-          }
-        }
-      }
-
-      // Check each day
-      foreach ($range as $d) {
-        $key = $d->format('Y-m-d');
-        if (($occupied[$key] ?? 0) >= $total_beds) {
-          return ['available' => FALSE, 'message' => "No $bed_type beds available on $key"];
-        }
-      }
-
-      return ['available' => TRUE];
+      return (new \DateTime($value))->format('Y-m-d');
     }
-    catch (\Exception $e) {
-      $this->logger->error('Error checking availability: @message', ['@message' => $e->getMessage()]);
-      return ['available' => FALSE, 'message' => 'Error checking availability'];
+    catch (\Exception) {
+      return $value;
     }
   }
 
   /**
-   * Build reservation summary.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $unit
-   *   The unit entity.
-   * @param array $data
-   *   The reservation data.
-   *
-   * @return array
-   *   The reservation summary.
+   * Formats booking timestamps in ISO-8601 UTC.
    */
-  private function buildReservationSummary(EntityInterface $unit, array $data, $booking_id): array {
-    $images = [];
-    if ($img = $unit->get('field_cover_image')->entity) {
-      $images[] = $this->fileUrlGenerator->generateAbsoluteString($img->getFileUri());
-    }
-
-    return [
-      'room' => [
-        'roomName' => $unit->label(),
-        'bedType' => $data['bedType'],
-        'imageUrls' => $images,
-        'imageCount' => count($images),
-        'address' => $unit->get('field_address')->value,
-        'managerEmail' => $unit->get('field_manager_email')->value,
-      ],
-      'bookingInfo' => [
-        'checkIn' => ['date' => $data['checkInDate'], 'time' => $data['checkInTime'] ?? ''],
-        'checkOut' => ['date' => $data['checkOutDate'], 'time' => $data['checkOutTime'] ?? ''],
-      ],
-      'booking_id' => $booking_id,
-      'requesterEmail' => $data['email'],
-      'details' => $data['details'] ?? '',
-    ];
+  private function formatCreatedAt(int $timestamp): string {
+    return gmdate('Y-m-d\TH:i:s\Z', $timestamp);
   }
 
   /**
-   * Send notification email.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $unit
-   *   The unit entity.
-   * @param array $summary
-   *   The reservation summary.
+   * Extracts the booking creation timestamp safely.
    */
-  private function sendNotificationEmail(\Drupal\Core\Entity\EntityInterface $unit, array $summary): void {
-    $to = $unit->get('field_manager_email')->value;
-    \Drupal::service('plugin.manager.mail')->mail(
-      'hous_z_api',
-      'booking_notification',
-      $to,
-      \Drupal::languageManager()->getDefaultLanguage()->getId(),
-      ['summary' => $summary]
-    );
-  }
-
-  /**
-   * Get bookings data, optionally filtered by requester email.
-   *
-   * @param string|null $email
-   *   The email address to filter bookings by, or NULL to return all bookings.
-   *
-   * @return array
-   *   Array of booking data.
-   */
-  public function getBookingsData(?string $email = NULL): array {
-    $booking_storage = $this->entityTypeManager->getStorage('bat_booking');
-
-    $query = $booking_storage->getQuery()
-      ->accessCheck(TRUE)
-      ->sort('id', 'DESC');
-
-    if ($email) {
-      $email = strtolower(trim($email));
-      $query->condition('field_requester_email', $email);
+  private function extractCreatedAt(EntityInterface $booking): string {
+    if ($booking->hasField('created') && !$booking->get('created')->isEmpty()) {
+      return $this->formatCreatedAt((int) $booking->get('created')->value);
     }
 
-    $booking_ids = $query->execute();
-
-    if (empty($booking_ids)) {
-      return [];
-    }
-
-    $bookings = $booking_storage->loadMultiple($booking_ids);
-
-    $data = [];
-
-    foreach ($bookings as $booking) {
-      $booking_data = [
-        'reservationId' => (int) $booking->id(),
-        'roomName' => NULL,
-        'bedType' => NULL,
-        'checkInDate' => NULL,
-        'checkOutDate' => NULL,
-        'status' => NULL,
-        'email' => $booking->get('field_requester_email')?->value,
-      ];
-
-      if ($booking->hasField('booking_start_date') && !$booking->get('booking_start_date')->isEmpty()) {
-        $start_date = $booking->get('booking_start_date')->value;
-        $booking_data['checkInDate'] = date('Y-m-d', strtotime($start_date));
-      }
-
-      if ($booking->hasField('booking_end_date') && !$booking->get('booking_end_date')->isEmpty()) {
-        $end_date = $booking->get('booking_end_date')->value;
-        $booking_data['checkOutDate'] = date('Y-m-d', strtotime($end_date));
-      }
-
-      if ($booking->hasField('field_event_state') && !$booking->get('field_event_state')->isEmpty()) {
-        $state_id = $booking->get('field_event_state')->target_id;
-        $booking_data['status'] = $this->getStateLabel($state_id);
-      }
-
-      if ($booking->hasField('booking_event_reference') && !$booking->get('booking_event_reference')->isEmpty()) {
-        $event_id = $booking->get('booking_event_reference')->target_id;
-        $roomDetails = $this->getRoomDetailsFromEvent($event_id);
-        $booking_data['roomName'] = $roomDetails['name'];
-        $booking_data['bedType'] = $roomDetails['bed'];
-      }
-
-      $data[] = $booking_data;
-    }
-
-    return $data;
-  }
-
-  /**
-   * Get room details from event entity.
-   *
-   * @param int $event_id
-   *   The event ID.
-   *
-   * @return array|null
-   *   The room details or NULL if not found.
-   */
-  private function getRoomDetailsFromEvent(int $event_id): ?array {
-    try {
-      $event = $this->entityTypeManager->getStorage('bat_event')->load($event_id);
-
-      $event_exists = $event && $event->hasField('event_bat_unit_reference') &&
-        !$event->get('event_bat_unit_reference')->isEmpty();
-
-      if ($event_exists) {
-        $unit_id = $event->get('event_bat_unit_reference')->target_id;
-        $unit = $this->entityTypeManager->getStorage('bat_unit')->load($unit_id);
-
-        if ($unit) {
-          return [
-            'id' => (int) $unit->id(),
-            'name' => $unit->label(),
-            'bed' => $event->get('field_bed_type')->value,
-          ];
-        }
-      }
-    }
-    catch (\Exception $e) {
-      $this->logger->warning('Could not load event @id or related unit: @message', [
-        '@id' => $event_id,
-        '@message' => $e->getMessage(),
-      ]);
-    }
-
-    return NULL;
-  }
-
-  /**
-   * Get state label by state ID.
-   *
-   * @param int $state_id
-   *   The state ID.
-   *
-   * @return string|null
-   *   The state label or NULL if not found.
-   */
-  private function getStateLabel(int $state_id): ?string {
-    $state_labels = [
-      7 => 'Pending',
-      8 => 'Cancelled',
-      9 => 'Confirmed',
-    ];
-
-    return $state_labels[$state_id] ?? NULL;
+    return $this->formatCreatedAt(time());
   }
 
 }

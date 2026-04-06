@@ -1,0 +1,19 @@
+uuid: 423b7d37-bcba-493b-9043-0cb79ee33b29
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.full_html
+template: booking_created
+label: 'Booking Created'
+description: ''
+text:
+  -
+    value: '<p>Hello,</p><p>A new booking was created for room <strong>[unit:label]</strong>.</p><ul><li><strong>Booking ID:</strong> [booking:id]</li><li><strong>Requester:</strong> [booking:field_requester_email]</li><li><strong>Check‑in:</strong> [booking:booking_start_date:value:custom:d/m/Y]</li><li><strong>Check‑out:</strong> [booking:booking_end_date:value:custom:d/m/Y]</li><li><strong>Current status:</strong> Pending</li></ul><p><strong>Additional details:</strong><br>[arguments:details]</p><p>Room address: [unit:field_address]</p><p>— Hous‑Z Booking System</p>'
+    format: full_html
+settings:
+  'token options':
+    clear: false
+    'token replace': true
+  purge_override: false
+  purge_methods: {  }

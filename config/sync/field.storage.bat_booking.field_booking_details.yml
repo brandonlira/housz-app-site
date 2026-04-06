@@ -1,0 +1,19 @@
+uuid: 1cf31e59-cf42-4b0f-829f-6955665df131
+langcode: en
+status: true
+dependencies:
+  module:
+    - bat_booking
+id: bat_booking.field_booking_details
+field_name: field_booking_details
+entity_type: bat_booking
+type: string_long
+settings:
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
