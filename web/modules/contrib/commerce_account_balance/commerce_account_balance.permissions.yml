@@ -1,0 +1,9 @@
+view account balance:
+  title: 'View account balance'
+  description: 'View the account balance for their own account.'
+view any account balance:
+  title: 'View any account balance'
+  description: 'View the account balance for any user.'
+administer account balances:
+  title: 'Administer account balances'
+  description: 'Create, update, and delete account balances.'

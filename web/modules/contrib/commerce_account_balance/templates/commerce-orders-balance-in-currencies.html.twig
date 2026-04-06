@@ -1,0 +1,8 @@
+<div class='currencies title'>
+    {{'You balance is also accepted in more currencies (cash)' | t}}
+</div>
+<ul class='currencies values'>
+    {% for key, value in balance_in_currencies %}
+    <li> {{ value['code'] }}: {{ value['value'] }}</li>
+    {% endfor %}
+</ul>

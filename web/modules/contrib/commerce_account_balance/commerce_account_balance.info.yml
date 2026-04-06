@@ -1,0 +1,19 @@
+name: Commerce Account Balance
+type: module
+description: 'Manages user account balances for Drupal Commerce.'
+package: Commerce
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - drupal:commerce
+  - drupal:commerce_price
+  - drupal:user
+
+# Information added by Drupal.org packaging script on 2025-06-24
+# version: '1.0.1'
+# project: 'commerce_account_balance'
+# datestamp: 1750795602
+
+# Information added by Drupal.org packaging script on 2025-09-20
+version: '1.0.4'
+project: 'commerce_account_balance'
+datestamp: 1758383484

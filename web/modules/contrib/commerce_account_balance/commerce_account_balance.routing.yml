@@ -1,0 +1,11 @@
+commerce_account_balance.account_balance:
+  path: '/account/balance/{order}'
+  defaults:
+    _title: 'Account Balance'
+    _controller: '\Drupal\commerce_account_balance\Controller\AccountBalanceController::viewBalance'
+  requirements:
+    _permission: 'administer account balances'
+  options:
+    parameters:
+      order:
+        type: entity:commerce_order

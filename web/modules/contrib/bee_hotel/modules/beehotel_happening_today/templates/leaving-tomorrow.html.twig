@@ -1,0 +1,101 @@
+<section class="daily-report__section daily-report__section--leavingtomorrow">
+  <h2 class="daily-report__section-title">
+    <span class="icon" aria-hidden="true">📅</span>
+    {{ 'Leaving Tomorrow'|t }}
+    <span class="badge" aria-label="{{ 'Number of guests leaving tomorrow'|t }}: {{ are_leaving_tomorrow|length }}">
+      {{ are_leaving_tomorrow|length }}
+    </span>
+  </h2>
+
+  {% if are_leaving_tomorrow %}
+    <div class="daily-report__grid" role="list" aria-label="{{ 'Guests leaving tomorrow'|t }}">
+      {% for is_leaving_tomorrow in are_leaving_tomorrow %}
+        <div class="daily-report__card" role="listitem">
+          <div class="daily-report__card-header">
+            <h3 class="daily-report__room-name">{{ is_leaving_tomorrow.unit_name }}</h3>
+            <span class="daily-report__time">
+              <span class="icon" aria-hidden="true">💡</span>
+              <span class="visually-hidden">{{ 'Reminder'|t }}</span>
+            </span>
+          </div>
+
+          <div class="daily-report__guest-info">
+            {% if is_leaving_tomorrow.guest_name %}
+              <strong>{{ is_leaving_tomorrow.guest_name }}</strong>
+            {% endif %}
+            <div class="daily-report__stay-duration">
+              <span class="visually-hidden">{{ 'Number of nights stayed'|t }}:</span>
+              {{ 'Nights'|t }}: {{ is_leaving_tomorrow.nights_stayed }}
+            </div>
+
+            <div class="daily-report__stay-people">
+              <span class="visually-hidden">{{ 'Number of people'|t }}:</span>
+              {{ 'People'|t }}: {{ is_leaving_tomorrow.people }}
+            </div>
+
+            {% if is_leaving_tomorrow.guest_phone %}
+              <div class="daily-report__contact">
+                <span class="icon" aria-hidden="true">📞</span>
+                <span class="visually-hidden">{{ 'Phone number'|t }}:</span>
+                {{ is_leaving_tomorrow.guest_phone }}
+              </div>
+            {% endif %}
+            {% if is_leaving_tomorrow.guest_email %}
+              <div class="daily-report__contact">
+                <span class="icon" aria-hidden="true">📧</span>
+                <span class="visually-hidden">{{ 'Email address'|t }}:</span>
+                {{ is_leaving_tomorrow.guest_email }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="daily-report__booking-info">
+            <ul>
+              <li>
+                <span class="visually-hidden">{{ 'Stay end date'|t }}:</span>
+                {{ 'Stay until'|t }}: {{ is_leaving_tomorrow.end_date|date('d/m/Y') }}
+                <a href="{{ is_leaving_tomorrow.booking_link }}"
+                   class=""
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="{{ 'View booking details for'|t }} {{ is_leaving_tomorrow.booking_id }}">
+                  {{ is_leaving_tomorrow.booking_id }}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="daily-report__followup-actions">
+            <a class="button"
+               href="{{ is_leaving_tomorrow.booking_guest_messages }}"
+               aria-label="{{ 'Send checkout directions for'|t }} {{ is_leaving_tomorrow.unit_name }}">
+              {{ 'Send checkout directions'|t }}
+            </a>
+          </div>
+
+          <div class="daily-report__comments">
+            <ul>
+              <li>
+                <a href="{{ is_leaving_tomorrow.booking_link }}"
+                   class=""
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   data-comments="{{ is_leaving_tomorrow.comment_count }}"
+                   aria-label="{{ 'View order comments'|t }} ({{ is_leaving_tomorrow.comment_count }} {{ 'comments'|t }})">
+                  {{ 'Comments'|t }}
+                  {% if is_leaving_tomorrow.comment_count > 0 %}
+                    <span class="visually-hidden">({{ is_leaving_tomorrow.comment_count }})</span>
+                  {% endif %}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="daily-report__empty">
+      <p>{{ 'No one is leaving tomorrow'|t }}</p>
+    </div>
+  {% endif %}
+</section>

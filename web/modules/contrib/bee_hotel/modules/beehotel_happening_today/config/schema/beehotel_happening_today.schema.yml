@@ -1,0 +1,19 @@
+beehotel_happening_today.settings:
+  type: config_object
+  label: 'BeeHotel Happening Today settings'
+  mapping:
+    send_time:
+      type: string
+      label: 'Daily report send time'
+    recipients:
+      type: sequence
+      label: 'Email recipients'
+      sequence:
+        type: string
+        label: 'Email address'
+    enabled:
+      type: boolean
+      label: 'Enable daily reports'
+    email_subject:
+      type: string
+      label: 'Email subject template'

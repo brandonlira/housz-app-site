@@ -2,40 +2,16 @@
 
 namespace Drupal\beehotel_pricealterators\Plugin\PriceAlterator;
 
-use Drupal\beehotel_utils\BeeHotelCommerce;
-use Drupal\beehotel_pricealterator\PriceAlteratorBase;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Extension\ExtensionList;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\beehotel_utils\BeeHotelCommerce;
+use Drupal\beehotel_pricealterator\PriceAlteratorBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a "Occupants" Price Alterator for BeeHotel.
- *
- * Because the plugin manager class for our plugins uses annotated class
- * discovery, Price Alterators only needs to exist within the
- * Plugin\PriceAlterator namespace, and provide a PriceAlterator
- * annotation to be declared as a plugin. This is defined in
- * \Drupal\beehotel_pricealterator\PriceAlteratorPluginManager::__construct().
- *
- * The following is the plugin annotation. This is parsed by Doctrine to make
- * the plugin definition. Any values defined here will be available in the
- * plugin definition.
- *
- * This should be used for metadata that is specifically required to instantiate
- * the plugin, or for example data that might be needed to display a list of all
- * available plugins where the user selects one. This means many plugin
- * annotations can be reduced to a plugin ID, a label and perhaps a description.
- *
- *
- *  The weight Key is the weight for this alterator.
- * Legenda for the 'weight' key:
- * -9999 : heaviest, to be used as very first (reserved)
- * -9xxx : heavy, to be used as first (reserved)
- *     0 : no need to be weighted
- *  1xxx : allowed in custom modules (@TODO)
- *  xxxx : everything else
- *  9xxx : light, to be used as last (reserved)
- *  9999 : lightest, to be used as very last (reserved)
  *
  * @PriceAlterator(
  *   description = @Translation("Promote reservations with preferred number of Guests."),
@@ -63,28 +39,35 @@ class Occupants extends PriceAlteratorBase {
   protected $renderer;
 
   /**
+   * The extension list module service.
+   *
+   * @var \Drupal\Core\Extension\ExtensionList
+   */
+  protected $extensionListModule;
+
+  /**
    * Price alterator Status.
    *
-   * @var bool
+   * @var bool|null
    */
   private $status;
 
   /**
-   * Price alterator Increase.
+   * Price alterator Increase (array per occupant count).
    *
-   * @var float
+   * @var array
    */
   private $increase;
 
   /**
    * Price alterator Enabled.
    *
-   * @var bool
+   * @var bool|null
    */
   private $enabled;
 
   /**
-   * Constructs a new alterator object.
+   * Constructs a new Occupants alterator.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -92,24 +75,36 @@ class Occupants extends PriceAlteratorBase {
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    * @param \Drupal\beehotel_utils\BeeHotelCommerce $beehotel_commerce
    *   BeeHotel Commerce Utils.
    * @param \Drupal\Core\Render\RendererInterface $renderer
-   *   The renderer.
+   *   The renderer service.
+   * @param \Drupal\Core\Extension\ExtensionList $extension_list_module
+   *   The extension list module service.
    */
   public function __construct(
     array $configuration,
     $plugin_id,
     $plugin_definition,
+    ConfigFactoryInterface $config_factory,
     BeeHotelCommerce $beehotel_commerce,
     RendererInterface $renderer,
+    ExtensionList $extension_list_module
   ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $config_factory);
+
     $this->beehotelCommerce = $beehotel_commerce;
     $this->renderer = $renderer;
-    $config = \Drupal::config($this->configName());
-    $this->status = $config->get('status');
+    $this->extensionListModule = $extension_list_module;
 
-    // @todo increase should mnatch max quantity of product attribute guests.
+    // Load plugin-specific configuration.
+    $config = $this->configFactory->get($this->configName());
+    $this->status = $config->get('status');
+    $this->enabled = $config->get('enabled');
+
+    // @todo increase should match max quantity of product attribute guests.
     $this->increase = [
       '1' => $config->get('increase_1'),
       '2' => $config->get('increase_2'),
@@ -118,7 +113,6 @@ class Occupants extends PriceAlteratorBase {
       '5' => $config->get('increase_5'),
       '6' => $config->get('increase_6'),
     ];
-    $this->enabled = $config->get('enabled');
   }
 
   /**
@@ -129,15 +123,18 @@ class Occupants extends PriceAlteratorBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('config.factory'),
       $container->get('beehotel_utils.beehotelcommerce'),
       $container->get('renderer'),
+      $container->get('extension.list.module')
     );
   }
 
   /**
    * Reference to the Alterator (as plugin).
    *
-   *   This value matches the ID in the @PriceAlterator annotation.
+   * @return string
+   *   The plugin ID.
    */
   public function pluginId() {
     $tmp = explode("\\", __CLASS__);
@@ -145,56 +142,45 @@ class Occupants extends PriceAlteratorBase {
   }
 
   /**
-   * Alter a price.
-   *
-   * Every Alterator needs to have an  alter method.
-   *
-   * @param array $data
-   *   Array of data related to this price.
-   * @param array $pricetable
-   *   Array of prices by week day.
-   *
-   * @return array
-   *   An updated $data array.
+   * {@inheritdoc}
    */
-  public function alter(array $data, array $pricetable) {
-
+  public function alter(array $data, array $pricetable): array {
     $data['tmp']['price'] = $this->elaborate($data);
-
     $data['alterator'][] = __CLASS__;
     return $data;
   }
 
   /**
    * Elaborate values.
+   *
+   * @param array $data
+   *   The data array.
+   *
+   * @return float|string
+   *   Elaborated price or empty string.
    */
-  private function elaborate($data) {
-    $elaborated = "";
-    if (isset($data['tmp']['price'])) {
-      if (isset($data['adults']) && $data['adults'] > 0) {
-        $increase = (int) $this->increase[$data['adults']] + 1;
-        $elaborated = $data['tmp']['price'] + ($data['tmp']['price'] / 100 * $increase);
-      }
+  private function elaborate(array $data) {
+    if (isset($data['tmp']['price']) && isset($data['adults']) && $data['adults'] > 0) {
+      $increase = (int) ($this->increase[$data['adults']] ?? 0) + 1;
+      return $data['tmp']['price'] + ($data['tmp']['price'] / 100 * $increase);
     }
-    return $elaborated;
+    return '';
   }
 
   /**
    * Current value.
    *
-   * Get current value for this alterator. We can use this
-   * method to get info and settings for the alterator.
+   * Get current value for this alterator.
    *
    * @param array $data
    *   Array of data related to this price.
    * @param array $pricetable
    *   Array of prices by week day.
    *
-   * @return Drupal\Core\StringTranslation\TranslatableMarkup
-   *   A translatable object containing the current value
+   * @return string
+   *   Rendered output.
    */
-  public function currentValue(array $data, array $pricetable) {
-
+  public function currentValue(array $data, array $pricetable): string {
     $data = [];
     $data[1] = [];
     $data[2] = [];
@@ -210,8 +196,8 @@ class Occupants extends PriceAlteratorBase {
         $data[$i]['value'] = (int) $this->increase[$i];
         $data[$i]['simulation'] = $data['misc']['simulation']['base'] + ($data['misc']['simulation']['base'] / 100 * (int) $this->increase[$i]);
         $data[$i]['html'] = new TranslatableMarkup(
-          "<span class='%class'><span class='value'>%increase</span><span class='smaller'>%</span>
-          </span>", [
+          "<span class='%class'><span class='value'>%increase</span><span class='smaller'>%</span></span>",
+          [
             '%class' => $data[$i]['class'],
             '%increase' => $this->increase[$i],
           ]
@@ -226,12 +212,11 @@ class Occupants extends PriceAlteratorBase {
       '#third' => $data[3] ?: '---',
       '#fourth' => $data[4] ?: '---',
       '#misc' => $data['misc'] ?: '---',
-      '#path' => \Drupal::service('extension.list.module')->getPath('beehotel_pricealterators'),
+      '#path' => $this->extensionListModule->getPath('beehotel_pricealterators'),
       '#enabled' => $this->enabled,
     ];
 
-    $current_value = $this->renderer->renderPlain($occupants);
-    return $current_value;
+    return $this->renderer->renderPlain($occupants);
   }
 
 }

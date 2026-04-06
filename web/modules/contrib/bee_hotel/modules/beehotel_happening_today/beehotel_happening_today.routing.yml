@@ -1,0 +1,23 @@
+beehotel_happening_today.admin_settings:
+  path: '/admin/beehotel/config/services/beehotel-happening-today'
+  defaults:
+    _form: '\Drupal\beehotel_happening_today\Form\SettingsForm'
+    _title: 'BeeHotel Happening Today Settings'
+  requirements:
+    _permission: 'configure beehotel settings'
+
+# beehotel_happening_today.daily_report:
+#   path: '/admin/beehotel/happening-today'
+#   defaults:
+#     _controller: '\Drupal\beehotel_happening_today\Controller\DailyReportController::dailyReport'
+#     _title: 'Happening Today'
+#   requirements:
+#     _permission: 'configure beehotel settings'
+
+beehotel_happening_today.daily_report:
+  path: '/admin/beehotel/happening-today'
+  defaults:
+    _title: 'Happening Today'
+    _controller: '\Drupal\beehotel_happening_today\Controller\DailyReportController::dailyReport'
+  requirements:
+    _permission: 'configure beehotel settings'

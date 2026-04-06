@@ -8,7 +8,7 @@ namespace Drupal\beehotel_pricealterator;
 interface PriceAlteratorInterface {
 
   /**
-   * Alter price into \$data.
+   * Alters price data.
    *
    * @param array $data
    *   Array of data related to this price.
@@ -18,6 +18,6 @@ interface PriceAlteratorInterface {
    * @return array
    *   An updated $data array.
    */
-  public function alter(array $data, array $pricetable);
+  public function alter(array $data, array $pricetable): array;
 
 }

@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * @file
+ * Currencyapi.com module features.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_cron().
+ */
+function currencyapi_cron() {
+  \Drupal::service('currencyapi.cron')->cron();
+}
+
+/**
+ * Implements hook_theme().
+ */
+function currencyapi_theme() {
+  return [
+    'buy_100' => [
+      'variables' => [
+        'amount' => 0.00,
+        'base_currency' => FALSE,
+        'last_update' => FALSE,
+        'list' => [],
+        'rates' => [],
+      ],
+      'template' => 'buy-100',
+    ],
+    'currency_rates' => [
+      'variables' => [
+        'rates' => [],
+        'base_currency' => FALSE,
+      ],
+      'template' => 'currency-rates',
+    ],
+    'currency_exchange' => [
+      'variables' => [
+        'rates' => [],
+        'amount' => 0.00,
+        'list' => [],
+        'base_currency' => FALSE,
+      ],
+      'template' => 'currency-exchange',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_help().
+ */
+function currencyapi_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.currencyapi':
+      return t('Displays currency exchange rates from external APIs.');
+  }
+}

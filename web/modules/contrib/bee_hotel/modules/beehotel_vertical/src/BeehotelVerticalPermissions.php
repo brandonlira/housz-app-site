@@ -77,6 +77,14 @@ class BeehotelVerticalPermissions implements ContainerInjectionInterface {
       'title' => $this->t('Access to the Vertical settings form', []),
     ];
 
+    $permissions['access_vertical_basic'] = [
+      'title' => $this->t('Access Vertical Calendar - Basic', []),
+    ];
+
+    $permissions['access_vertical_full'] = [
+      'title' => $this->t('Access Vertical Calendar - Full', []),
+    ];
+
     return $permissions;
   }
 

@@ -1,0 +1,5 @@
+orders_balance:
+  version: 1.0
+  css:
+    theme:
+      assets/css/commerce-orders-balance.css: {}

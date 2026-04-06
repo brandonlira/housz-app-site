@@ -51,6 +51,7 @@ function bee_hotel_requirements($phase) {
  * Implements hook_install().
  */
 function bee_hotel_install() {
+  bee_hotel_create_styles();
   bee_hotel_update_modules_weight();
 }
 
@@ -58,13 +59,74 @@ function bee_hotel_install() {
  * Implements hook_entity_uninstall().
  */
 function bee_hotel_uninstall() {
+
+  \Drupal::configFactory()->getEditable('beehotel.settings')->delete();
+
   bee_hotel_clean_config();
+}
+
+
+/**
+ * Implements hook_schema().
+ */
+function bee_hotel_schema() {
+  $schema['bee_hotel_log'] = [
+    'description' => 'Generic log for operations (email sends, etc.).',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary key: unique log entry ID.',
+      ],
+      'entity_type' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Entity type related to the log (e.g., node, commerce_order).',
+      ],
+      'entity_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Entity ID related to the log.',
+      ],
+      'operation' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'Operation performed (e.g., email_sent, whatsapp_sent).',
+      ],
+      'details' => [
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Additional details (e.g., recipient, subject, status).',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Timestamp when the log was created.',
+      ],
+      'uid' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'User ID who performed the operation (0 for system).',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'entity' => ['entity_type', 'entity_id'],
+      'operation' => ['operation'],
+      'created' => ['created'],
+    ],
+  ];
+
+  return $schema;
 }
 
 /**
  * Update all config settings (beehotel unit image cover field now defined)
  */
-function bee_hotel_update_8001() {
+function bee_hotel_update_8001(&$sandbox) {
   $data = [];
   $data['module_path'] = \Drupal::service('extension.list.module')->getPath('bee_hotel');
   $data['yml'] = Yaml::decode(file_get_contents($data['module_path'] . '/config/install/beehotel.settings.yml'));
@@ -78,9 +140,72 @@ function bee_hotel_update_8001() {
 /**
  * Enable beehotel_utils module.
  */
-function bee_hotel_update_8002() {
+function bee_hotel_update_8002(&$sandbox) {
   if (!\Drupal::service('module_handler')->moduleExists('beehotel_utils')) {
     \Drupal::service('module_installer')->install(['beehotel_utils']);
   }
   drupal_flush_all_caches();
+}
+
+/**
+ * Ewelink integration with role and permission.
+ */
+function bee_hotel_update_8003(&$sandbox) {
+  // @todo 21lug2025.
+  // Check ewelink module is enabled.
+  // Create a Role named open_the_door_user.
+  // Assign Role open_the_door_user ewelink : "access ewelink open-the-door".
+  drupal_flush_all_caches();
+}
+
+
+/**
+ * Set default check-in/check-out times for existing sites.
+ */
+function bee_hotel_update_8004(&$sandbox) {
+  $config = \Drupal::service('config.factory')->getEditable('beehotel.settings');
+
+  if (!$config->get('dateandtime.default_checkin_time')) {
+    $config->set('dateandtime.default_checkin_time', '15:00');
+  }
+
+  if (!$config->get('dateandtime.default_checkout_time')) {
+    $config->set('dateandtime.default_checkout_time', '10:00');
+  }
+
+  $config->save();
+
+  return t('Default check-in and check-out times have been set.');
+}
+
+
+
+/**
+ * Set default check-in/check-out times for existing sites.
+ */
+function bee_hotel_update_8005(&$sandbox) {
+
+  # @todo:  delete old config array
+  $config = \Drupal::service('config.factory')->getEditable('bee_hotel.settings');
+
+  $config->delete();
+
+  return t('Remove old configurations. <br/>IMPORTANT: check your values at /admin/beehotel/settings');
+}
+
+
+/**
+ * Create the bee_hotel_log table.
+ */
+function bee_hotel_update_8006(&$sandbox) {
+  $schema = \Drupal::database()->schema();
+  $table_schema = bee_hotel_schema();
+
+  if (!$schema->tableExists('bee_hotel_log')) {
+    $schema->createTable('bee_hotel_log', $table_schema['bee_hotel_log']);
+    return t('Created bee_hotel_log table.');
+  }
+  else {
+    return t('Table bee_hotel_log already exists.');
+  }
 }

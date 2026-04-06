@@ -1,0 +1,10 @@
+daily_report:
+  version: 1.x
+  css:
+    theme:
+      assets/css/daily-report.css: {}
+  js:
+    assets/js/daily-report.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery

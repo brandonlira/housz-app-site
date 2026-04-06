@@ -30,6 +30,7 @@ function beehotel_vertical_theme() {
         'spacer_content' => NULL,
         'b_class' => NULL,
         'b_content' => NULL,
+        'td_classes' => NULL,
         'season' => [],
         'state' => NULL,
         'extra' => NULL,
@@ -47,14 +48,15 @@ function beehotel_vertical_theme() {
     'vertical_order_item' => [
       'variables' => [
         'balance' => NULL,
+        'classes' => NULL,
         'comments' => NULL,
-        'hidden_text' => NULL,
         'extra' => NULL,
         'mail' => NULL,
         'name' => NULL,
         'order_id' => NULL,
         'order_number' => NULL,
         'payments' => NULL,
+        'show_text' => NULL,
         'surname' => NULL,
         'total' => NULL,
       ],
@@ -70,6 +72,7 @@ function beehotel_vertical_theme() {
     ],
   ];
   return $theme;
+
 }
 
 /**

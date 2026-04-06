@@ -2,38 +2,14 @@
 
 namespace Drupal\beehotel_pricealterators\Plugin\PriceAlterator;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\beehotel_utils\BeeHotelCommerce;
 use Drupal\beehotel_pricealterator\PriceAlteratorBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a "One Night Only" Price Alterator for BeeHotel.
- *
- * Because the plugin manager class for our plugins uses annotated class
- * discovery, Price Alterators only needs to exist within the
- * Plugin\PriceAlterator namespace, and provide a PriceAlterator
- * annotation to be declared  as a plugin. This is defined in
- * \Drupal\beehotel_pricealterator\PriceAlteratorPluginManager::__construct().
- *
- * The following is the plugin annotation. This is parsed by Doctrine to make
- * the plugin definition. Any values defined here will be available in the
- * plugin definition.
- *
- * This should be used for metadata that is specifically required to instantiate
- * the plugin, or for example data that might be needed to display a list of all
- * available plugins where the user selects one. This means many plugin
- * annotations can be reduced to a plugin ID, a label and perhaps a description.
- *
- *
- *  The weight Key is the weight for this alterator.
- * Legenda for the 'weight' key:
- * -9999 : heaviest, to be used as very first (reserved)
- * -9xxx : heavy, to be used as first (reserved)
- *     0 : no need to be weighted
- *  1xxx : allowed in custom modules (@TODO)
- *  xxxx : everything else
- *  9xxx : light, to be used as last (reserved)
- *  9999 : lightest, to be used as very last (reserved)
  *
  * @PriceAlterator(
  *   description = @Translation("When a single night staying is requested, price rises."),
@@ -55,7 +31,49 @@ class OneNightOnly extends PriceAlteratorBase {
   protected $beehotelCommerce;
 
   /**
-   * Constructs a new alterator object.
+   * The renderer service.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
+   * Price alterator Status.
+   *
+   * @var bool|null
+   */
+  private $status;
+
+  /**
+   * Price alterator Enabled.
+   *
+   * @var bool|null
+   */
+  private $enabled;
+
+  /**
+   * Price alterator fixed amount.
+   *
+   * @var float|null
+   */
+  private $fixed;
+
+  /**
+   * Price alterator percentage.
+   *
+   * @var int|null
+   */
+  private $percentage;
+
+  /**
+   * Global slider value (unused but kept for compatibility).
+   *
+   * @var array|null
+   */
+  private $globalslider;
+
+  /**
+   * Constructs a new OneNightOnly alterator.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -63,16 +81,33 @@ class OneNightOnly extends PriceAlteratorBase {
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    * @param \Drupal\beehotel_utils\BeeHotelCommerce $beehotel_commerce
    *   BeeHotel Commerce Utils.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, BeeHotelCommerce $beehotel_commerce) {
-    $config = \Drupal::config($this->configName());
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    ConfigFactoryInterface $config_factory,
+    BeeHotelCommerce $beehotel_commerce,
+    RendererInterface $renderer
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $config_factory);
+
+    $this->beehotelCommerce = $beehotel_commerce;
+    $this->renderer = $renderer;
+
+    // Load plugin-specific configuration.
+    $config = $this->configFactory->get($this->configName());
     $this->status = $config->get('status');
     $this->enabled = $config->get('enabled');
-    $this->globalslider = [$config->get('globalslider')];
-    $this->beehotelCommerce = $beehotel_commerce;
-    $this->enabled = $config->get('enabled');
+    $this->fixed = $config->get('fixed');
+    $this->percentage = $config->get('percentage');
+    $this->globalslider = $config->get('globalslider') ? [$config->get('globalslider')] : [];
   }
 
   /**
@@ -83,14 +118,17 @@ class OneNightOnly extends PriceAlteratorBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('config.factory'),
       $container->get('beehotel_utils.beehotelcommerce'),
+      $container->get('renderer')
     );
   }
 
   /**
    * Reference to the Alterator (as plugin).
    *
-   *   This value matches the ID in the @PriceAlterator annotation.
+   * @return string
+   *   The plugin ID.
    */
   public function pluginId() {
     $tmp = explode("\\", __CLASS__);
@@ -98,29 +136,16 @@ class OneNightOnly extends PriceAlteratorBase {
   }
 
   /**
-   * Alter a price.
-   *
-   * Every Alterator needs to have an  alter method.
-   *
-   * @param array $data
-   *   Array of data related to this price.
-   * @param array $pricetable
-   *   Array of prices by week day.
-   *
-   * @return array
-   *   An updated $data array.
+   * {@inheritdoc}
    */
-  public function alter(array $data, array $pricetable) {
-
+  public function alter(array $data, array $pricetable): array {
     if ($data['norm']['dates_from_search_form']['days'] < 2) {
-
       if (isset($this->fixed) && $this->fixed != 0) {
         $data['tmp']['price'] += (float) $this->fixed;
       }
       elseif (isset($this->percentage) && $this->percentage != 0) {
         $data['tmp']['price'] += $data['tmp']['price'] / 100 * $this->percentage;
       }
-
     }
     $data['alterator'][] = __CLASS__;
     return $data;
@@ -129,44 +154,39 @@ class OneNightOnly extends PriceAlteratorBase {
   /**
    * Current value.
    *
-   * Get current value for this alterator. We can use this
-   * method to get info and settings for the alterator.
+   * Get current value for this alterator.
    *
    * @param array $data
    *   Array of data related to this price.
    * @param array $pricetable
    *   Array of prices by week day.
    *
-   * @return array
-   *   A render array as expected by the renderer
+   * @return string
+   *   Rendered output.
    */
-  public function currentValue(array $data, array $pricetable) {
+  public function currentValue(array $data, array $pricetable): string {
+    $class = '';
+    $value = '';
+    $type = '';
 
-    $data = [];
-    $data['class'] = "";
-    $data['value'] = $this->fixed;
-    $data['currency'] = $this->beehotelCommerce->currentStoreCurrency()->get('symbol');
-    $data['percentage'] = "%";
-    $data['type'] = "";
-
-    if (isset($this->fixed) && $this->fixed != "") {
-      $data['value'] = $this->fixed;
-      $data['class'] = $this->polarity($this->fixed) ?: "";
-      $data['type'] = $data['currency'] ?: "";
+    if (isset($this->fixed) && $this->fixed != 0) {
+      $value = $this->fixed;
+      $class = $this->polarity($this->fixed) ?: "";
+      $type = $this->beehotelCommerce->currentStoreCurrency()->get('symbol') ?: "";
     }
     elseif (isset($this->percentage) && $this->percentage != 0) {
-      $data['value'] = $this->percentage;
-      $data['class'] = $this->polarity($this->percentage) ?: "";
-      $data['type'] = "%";
+      $value = $this->percentage;
+      $class = $this->polarity($this->percentage) ?: "";
+      $type = "%";
     }
 
     $current_value = [
       '#theme' => 'beehotel_pricealterator_current_value',
-      '#class' => $data['class'],
-      '#string' => $data['value'],
-      '#type' => $data['type'],
+      '#class' => $class,
+      '#string' => $value,
+      '#type' => $type,
     ];
-    return \Drupal::service('renderer')->renderPlain($current_value);
+    return $this->renderer->renderPlain($current_value);
   }
 
 }

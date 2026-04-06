@@ -1,0 +1,19 @@
+<div class="currency-exchange">
+  <h3>{{ 'you can buy '|t }} {{ amount }} {{ base_currency }} at:</h3>
+  <ul class="currency-exchange__list">
+    {% for currency, item in list %}
+      {% if rate.is_default == false %}
+        <li class="currency-exchange__item">
+          {#{ dump (list) }#}
+          <span class="currency-exchange__buy">{{ item.sell|number_format(2, '.', ',') }}</span>
+          <span class="currency-exchange__currency">{{ item.code }}</span>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+
+  <div class="currency-exchange__updated">
+    {{ 'Last update: @time'| t({'@time':  last_update |date('Y-m-d H:i')}) }}
+  </div>
+
+</div>

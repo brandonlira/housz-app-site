@@ -1,0 +1,24 @@
+#edit-buyrate-table {
+  max-width: 90%;
+  margin: auto;
+}
+
+#edit-buyrate-table input[type="text"] {
+  height: 10px;
+  width: 80px;
+}
+
+#edit-buyrate-table,
+#edit-buyrate-table .form-text,
+.table-suffix {
+  font-size: 14px;
+}
+
+td .form-item ,
+td .suffix {
+  display: inline;
+}
+
+td span .currency {
+  font-size: 0.68em;
+}

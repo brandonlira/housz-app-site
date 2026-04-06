@@ -29,7 +29,7 @@ class BeeHotelBat {
   protected $database;
 
   /**
-   * Constructs a new UnitsSeach object.
+   * Constructs a new BeeHotelBat object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
@@ -52,10 +52,33 @@ class BeeHotelBat {
   }
 
   /**
-   * NOTE: this only work when an order exists.
+   * Checks if a BAT event exists for a specific unit on a given date.
+   *
+   * This method queries BAT events availability table to determine if an event
+   * exists for specified unit and date. The method only checks for existence
+   * of an event record, regardless of the event's status or whether a related
+   * commerce order exists.
+   *
+   * @param array $data
+   *   An associative array containing date and unit info with following keys:
+   *   - 'day': An array containing date components:
+   *     - 'd': The day of the month (1-31)
+   *     - 'month': The month (1-12)
+   *     - 'year': The year (four digits)
+   *   - 'unit': An array containing unit information:
+   *     - 'bid': The unit ID (bat_unit bundle ID)
+   *     - 'title': The unit title (for debugging purposes)
+   *
+   * @return int|null
+   *   Returns event ID as integer if an event exists for given parameters,
+   *   or NULL if no event is found.
+   *
+   * @ingroup bat_events
+   *
+   * @see bat_event_availability_daily_day_event
+   * @see \Drupal\bat_event\Entity\Event
    */
-  public function getUnitDateBatEventId($data) {
-
+  public function getUnitDateBatEventId(array $data) {
     $query = $this->database->select('bat_event_availability_daily_day_event', 'montlytable');
 
     // Fields.
@@ -72,20 +95,27 @@ class BeeHotelBat {
       $day = ($data['day']['d'] * 1);
       $d = "d" . $day;
       if (!empty($event_id = $result->$d)) {
-        return $event_id;
+        return (int) $event_id;
       }
     }
 
+    return NULL;
   }
 
   /**
    * Retrieve Order details for a given event.
+   *
+   * @param int $event_id
+   *   The BAT event ID.
+   *
+   * @return object|null
+   *   Order object with details or NULL if not found.
    */
   public function getOrderFromEvent($event_id) {
-
     $query = $this->database->select('bat_booking__booking_event_reference', 'bbber');
 
     $order = new \stdClass();
+    $order->is_blocking = "-";
 
     // Join.
     $query->join('commerce_order_item__field_booking', 'coifb', 'bbber.entity_id = coifb.field_booking_target_id');
@@ -108,18 +138,19 @@ class BeeHotelBat {
     // Fields and orConditionGroup.
     $query->addField('beadde', 'year', 'year');
     $query->addField('beadde', 'month', 'month');
-    $orGroup = $query->orConditionGroup();
+    $or_group = $query->orConditionGroup();
 
     for ($d = 1; $d <= 31; $d++) {
       $query->addField('beadde', 'd' . $d, 'd' . $d);
-      $orGroup->condition('beadde.d' . $d, $event_id, '=');
+      $or_group->condition('beadde.d' . $d, $event_id, '=');
     }
 
     // Add the group to the query.
-    $query->condition($orGroup);
+    $query->condition($or_group);
 
     $result = $query->execute()->fetchAll();
 
+    $magicnumber = [];
     foreach ($result as $record) {
       foreach ($record as $d_key => $day) {
         if ($day == $event_id) {
@@ -132,13 +163,14 @@ class BeeHotelBat {
     }
 
     if (empty($magicnumber)) {
-      return;
+      return NULL;
     }
 
     $m = $magicnumber[$event_id];
     asort($m);
 
     $ddt = new DrupalDateTime();
+
     $tmp = $ddt->createFromFormat('Ymd', $m[0]);
 
     if (!empty($order)) {
@@ -152,17 +184,51 @@ class BeeHotelBat {
       rsort($m);
       $order->lastnight = $m[0];
 
-      $checkout = new DrupalDateTime($order->lastnight);
+      // From 24oct2025 - Add modify +1 day.
+      // This is because BeeHotel reservations (orders) work by the night.
+      $checkout_object = new DrupalDateTime($order->lastnight)->modify('+1 day');
 
+      // *****
+      // pre 24oct2025
       // This is tricky... @todo check how time of
       // Checkout is set $checkout->modify('+1 day');.
-      $order->checkout = $checkout->format('Y-m-d');
-
+      // $order->checkout = $checkout->format('Y-m-d');
+      $order->checkout = $checkout_object->format('Y-m-d');
+      // ******
       $order->last_comment = $obj->get("field_order_comments")->value;
 
-    }
+      $order->is_blocking = $this->orderHasBlockingEvent($obj);
+      $order->bat_event = \Drupal::service('bee_hotel.order')->getOrderFirstItemEvent($obj);
 
+      // Add 1 for hotel reservation purpose.
+      $order->nights = ($tmp->diff($checkout_object)->days + 1);
+
+    }
     return $order;
+  }
+
+  /**
+   * Is this Order blocking calendar?
+   *
+   * We need this to show order or not on the calendar.
+   *
+   * @param object $order
+   *   The commerce order object.
+   *
+   * @return bool
+   *   TRUE if the order has a blocking event, FALSE otherwise.
+   */
+  private function orderHasBlockingEvent($order) {
+    $data = [];
+    $data['OrderFirstItemEvent']['object'] = \Drupal::service('bee_hotel.order')->getOrderFirstItemEvent($order);
+    $data['OrderFirstItemEvent']['state']['id'] = $data['OrderFirstItemEvent']['object']->get('event_state_reference')->target_id;
+    $data['OrderFirstItemEvent']['state']['object'] = $this->entityTypeManager
+      ->getStorage('state')
+      ->load($data['OrderFirstItemEvent']['state']['id']);
+    $data['OrderFirstItemEvent']['state']['blocking'] = $data['OrderFirstItemEvent']['state']['object']
+      ->get('blocking')
+      ->value;
+    return $data['OrderFirstItemEvent']['state']['blocking'];
   }
 
 }

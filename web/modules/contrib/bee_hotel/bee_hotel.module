@@ -5,24 +5,85 @@
  * Contains global features for bee hotel.
  */
 
-use Drupal\bee_hotel\BeeHotelGuestMessageTokens;
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
 
+use Drupal\Core\Breadcrumb\Breadcrumb;
+use Drupal\Core\Link;
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\symfony_mailer\EmailInterface;
+
+const SETTINGS = 'beehotel.settings';
+
 /**
  * Implements hook_page_attachments().
  */
 function bee_hotel_page_attachments(array &$page) {
 
-  if (\Drupal::service('bee_hotel.beehotel')->isAdmin()) {
+  $config = \Drupal::config(SETTINGS);
+
+  if (\Drupal::service('beehotel_utils.beehotel')->isAdmin()) {
     $page['#attached']['library'][] = 'bee_hotel/extra';
     $page['#attached']['library'][] = 'bee_hotel/admin';
   }
 
+  $page['#attached']['library'][] = 'bee_hotel/main';
   $page['#attached']['library'][] = 'bee_hotel/beehotel-guestmessages';
+
+  $is_promo_enabled = isset($config->get('beehotel')['bybeehotel_promo_enabled']) &&
+                    $config->get('beehotel')['bybeehotel_promo_enabled'] == TRUE;
+
+  if ($is_promo_enabled) {
+    $page['#attached']['library'][] = 'bee_hotel/beehotel-promo';
+
+    // Messaggio di conferma per admin (opzionale)
+    if (\Drupal::currentUser()->hasPermission('administer beehotel settings') &&
+        !isset($_SESSION['beehotel_promo_confirmed'])) {
+      $messenger = \Drupal::messenger();
+      // $messenger->addStatus(
+      //   t('BeeHotel promotion banner is active! You are supporting open-source development and enhancing your e-commerce credibility.')
+      // );
+
+      $messenger->addMessage(
+        t('BeeHotel promotion banner is active. You are supporting open-source development and enhancing your e-commerce credibility.')
+      );
+
+      $_SESSION['beehotel_promo_confirmed'] = TRUE;
+    }
+  } else {
+    // Messaggio di promemoria per admin quando il banner è disabilitato
+    if (\Drupal::currentUser()->hasPermission('administer beehotel settings')) {
+      $messenger = \Drupal::messenger();
+
+      // Mostra il messaggio solo una volta per sessione o occasionalmente
+      if (!isset($_SESSION['beehotel_promo_reminder_shown']) ||
+          $_SESSION['beehotel_promo_reminder_shown'] < time() - 0) { // Ogni 24 ore
+
+          $message = \Drupal\Core\Render\Markup::create('
+            <strong>Boost Your E-commerce Visibility</strong><br/>
+            The BeeHotel promotion banner is currently disabled. By enabling it:
+            <ul style="margin: 5px 0 5px 20px;">
+              <li>Support open-source development</li>
+              <li>Enhance your site\'s professional image</li>
+              <li>Show commitment to quality solutions</li>
+              <li>Gain visibility in the Drupal community</li>
+            </ul>
+            <a href="/admin/beehotel/settings#edit-ui-settings" class="button button--primary" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: #0073ba; color: white; text-decoration: none; border-radius: 4px;">
+              Enable Promotion Banner
+            </a>
+         ');
+
+        $messenger->addWarning($message);
+
+        $_SESSION['beehotel_promo_reminder_shown'] = time();
+      }
+    }
+  }
 }
 
 /**
@@ -34,7 +95,7 @@ function bee_hotel_menu_local_tasks_alter(&$data, $route_name, RefinableCacheabl
     $isBeehotel = \Drupal::service('beehotel_utils.beehotelunit')->isThisNodeBeeHotel($node);
     if ($isBeehotel == 1) {
       // @todo more granular permission.
-      if (\Drupal::currentUser()->hasPermission('administer bee_hotel')) {
+      if (\Drupal::currentUser()->hasPermission('configure beehotel settings')) {
         $data['tabs'][0]['bee_hotel.node.related_product'] = [
           '#theme' => 'menu_local_task',
           '#link' => [
@@ -59,31 +120,23 @@ function bee_hotel_menu_local_tasks_alter(&$data, $route_name, RefinableCacheabl
  */
 function bee_hotel_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
 
-  if ($form_id == 'node_guest_message_form') {
+  if ($form_id == 'node_guest_message_form' || $form_id == 'node_guest_message_edit_form') {
 
-    // Add the token tree UI.
     $tmp = t("Drupal stadard tokens are also supported.");
-    $beeHotelGuestMessageTokens = new BeeHotelGuestMessageTokens();
+
+    $beeHotelGuestMessageTokens = \Drupal::service('beehotel.guest_message_tokens');
 
     $tmp = "<ul>";
-    foreach ($beeHotelGuestMessageTokens->guestMessageTokensSchema() as $key => $token) {
-      $tmp .= "<li><span class='token-id'>[" . $key . "]</span> " . $token['description'];
+    foreach ($beeHotelGuestMessageTokens->readTokens() as $key => $token) {
+      $tmp .= "<li><span class='token-id'>[" . $token['#value']['id'] . "]</span> " . $token['#value']['description'];
     }
     $tmp .= "</ul>";
 
     $form['field_message']['beehotel_tokens'] = [
-      '#description' => t("Drupal stadard tokens are also supported.") . $tmp,
+      '#description' => t("Drupal standard tokens are also supported.") . $tmp,
       '#type' => 'details',
       '#open' => TRUE,
       '#weight' => 90,
-    ];
-
-    $form['field_message']['token_tree'] = [
-      '#prefix' => t("Drupal stadard tokens are also supported."),
-      '#theme' => 'token_tree_link',
-      '#token_types' => ['user'],
-      '#show_restricted' => TRUE,
-      '#weight' => 91,
     ];
   }
 }
@@ -92,10 +145,15 @@ function bee_hotel_form_alter(array &$form, FormStateInterface $form_state, $for
  * Implements hook_preprocess_html().
  */
 function bee_hotel_preprocess_html(&$variables) {
+
   $path = \Drupal::service('path.current')->getPath();
-  if (\Drupal::service('path.matcher')->matchPath($path, '/admin/beehotel')) {
-    $variables['attributes']['class'][] = 'beehotel';
+
+  if (isset($path)) {
+    if (\Drupal::service('path.matcher')->matchPath($path, '/admin/beehotel')) {
+      $variables['attributes']['class'][] = 'beehotel';
+    }
   }
+
 }
 
 /**
@@ -110,7 +168,7 @@ function bee_hotel_preprocess_page(&$variables) {
     return;
   }
 
-  $config = \Drupal::config('bee_hotel.settings');
+  $config = \Drupal::config('beehotel.settings');
 
   $page = &$variables['page'];
 
@@ -185,7 +243,7 @@ function bee_hotel_node_view(array &$build, EntityInterface $node, EntityViewDis
     $config = \Drupal::service('config.factory')->getEditable('beehotel.settings');
 
     if ($config->get('beehotel.setup_mode') == 1) {
-      $beeHotel = \Drupal::service('bee_hotel.beehotel');
+      $beeHotel = \Drupal::service('beehotel_utils.beehotel');
       $beeHotel->checkBeeHotelSetupNode($node);
       $beeHotel->checkLibraries();
     }
@@ -240,12 +298,6 @@ function bee_hotel_theme($existing, $type, $theme, $path) {
       ],
     ],
 
-    'beehotel_guest_messages' => [
-      'variables' => [
-        'table' => NULL,
-      ],
-    ],
-
     'beehotel_guest_messages_value' => [
       'variables' => [
         'value' => NULL,
@@ -259,6 +311,19 @@ function bee_hotel_theme($existing, $type, $theme, $path) {
         'footer' => NULL,
       ],
     ],
+    'beehotel_guest_messages_tokens_othercurrencies' => [
+      'variables' => [
+        'list' => NULL,
+      ],
+    ],
+
+
+
+     'beehotel_guest_messages_mail_preview' => [
+      'render element' => 'form',
+      'template' => 'beehotel-guest-messages-mail-preview',
+      'path' => $path . '/templates',
+    ],
 
   ];
 }
@@ -269,6 +334,11 @@ function bee_hotel_theme($existing, $type, $theme, $path) {
 function bee_hotel_cron() {
   $beehotelunit = \Drupal::service('beehotel_utils.beehotelunit');
   $beehotelunit->beeHotelUnitsEnableAcceptReservations();
+
+  // Give active Guests access to the "Ewelink: Open the Door" page.
+  $role_manager = \Drupal::service('bee_hotel.ewelink_role_manager');
+  $role_manager->updateRolesFromReservations();
+
 }
 
 /**
@@ -392,6 +462,57 @@ function bee_hotel_get_module_weight($module) {
   return $extension_config->get("module." . $module);
 }
 
+
+/**
+ * Create custom image styles required by the bee_hotel module.
+ *
+ * This function creates the cover_image_teaser image style with
+ * scale and crop effect (300x200, centered). This style is used
+ * for teaser images throughout the hotel listings.
+ *
+ * @todo 11 march 2026
+ * @todo Verify dimensions meet design requirements
+ * @todo Test with various image aspect ratios
+ * @todo Consider adding additional effects if needed
+ */
+function bee_hotel_create_styles() {
+
+  // Alert message for testing
+  \Drupal::messenger()->addWarning(t('TO BE TESTED: Image style creation in progress. Please verify cover_image_teaser after installation.'));
+
+  // Log the operation for debugging
+  \Drupal::logger('bee_hotel')->notice('Creating cover_image_teaser image style');
+
+  // Create cover_image_teaser image style.
+  $style = Drupal\image\Entity\ImageStyle::create([
+    'name' => 'cover_image_teaser',
+    'label' => 'Cover Image Teaser',
+  ]);
+
+  // Add effects (adjust parameters as needed).
+  $style->addImageEffect([
+    'id' => 'image_scale_and_crop',
+    'data' => [
+      'width' => 300,
+      'height' => 200,
+      'anchor' => 'center-center',
+    ],
+    'weight' => 0,
+  ]);
+
+  // Save the style.
+  $style->save();
+
+  // Ensure the styles directory exists (optional).
+  $directory = \Drupal::config('system.file')->get('default_scheme') . '://styles';
+  \Drupal::service('file_system')->prepareDirectory($directory, \Drupal\Core\File\FileSystemInterface::CREATE_DIRECTORY);
+
+  // Confirmation message
+  \Drupal::messenger()->addStatus(t('Cover image teaser style has been created. Please test thoroughly.'));
+}
+
+
+
 /**
  * BEE Hotels is heavier than BEE module.
  */
@@ -439,3 +560,137 @@ function bee_hotel_preprocess_commerce_order(&$variables) {
   ];
 
 }
+
+
+
+function bee_hotel__mail_alter(&$message) {
+  // Log the full message to the watchdog for debugging.
+  \Drupal::logger('mymodule')->debug('<pre>@message</pre>', ['@message' => print_r($message, TRUE)]);
+
+  // If your email key is being altered, restore it.
+  if ($message['key'] == 'your_key') {
+    // Remove any multipart headers added by other modules.
+    unset($message['headers']['Content-Type']);
+    $message['headers']['Content-Type'] = 'text/html; charset=UTF-8';
+    // If the body was turned into an array or altered, set it back.
+    $message['body'] = $your_original_html_string;
+    // Optionally tell any multipart module to skip conversion.
+    $message['params']['mimemail'] = FALSE;
+    $message['params']['htmlmail'] = FALSE;
+
+
+    dump ($message);
+    exit;
+
+    exit;
+
+  }
+}
+
+
+
+/**
+ * Implements hook_mail().
+ */
+// function bee_hotel_mail($key, &$message, $params) {
+//
+//   // dump ($key);
+//   // exit;
+//
+//   switch ($key) {
+//     case 'guest_message':
+//       $message['subject'] = $params['subject'];
+//
+//       // Set the email to HTML format
+//       // $message['headers']['Content-Type'] = 'text/html; charset=UTF-8';
+//       // $message['headers']['MIME-Version'] = '1.0';
+//       $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed; delsp=yes';
+//       // Set HTML headers FIRST
+//
+//       // Add CC recipient if provided in params
+//       if (!empty($params['cc_recipient'])) {
+//         // Handle both string and array formats for CC
+//         if (is_array($params['cc_recipient'])) {
+//           foreach ($params['cc_recipient'] as $cc_email) {
+//             if (\Drupal::service('email.validator')->isValid($cc_email)) {
+//               $message['headers']['Cc'] = !empty($message['headers']['Cc'])
+//                 ? $message['headers']['Cc'] . ', ' . $cc_email
+//                 : $cc_email;
+//             }
+//           }
+//         } elseif (\Drupal::service('email.validator')->isValid($params['cc_recipient'])) {
+//           $message['headers']['Cc'] = $params['cc_recipient'];
+//         }
+//       }
+//
+//       // Create HTML email template - FIXED: Don't double encode
+//       $order_number = $params['order']->getOrderNumber();
+//       $hotel_name = $params['node']->label();
+//       $current_date = \Drupal::service('date.formatter')->format(time());
+//
+//       // FIX: The message already contains HTML from the text_format field
+//       // We need to preserve it but ensure it's safe
+//       $formatted_message = $params['message']; // Don't use htmlspecialchars again
+//
+//       // Add CC notice if CC recipients exist
+//       if (!empty($params['cc_recipient'])) {
+//         $cc_list = is_array($params['cc_recipient'])
+//           ? implode(', ', $params['cc_recipient'])
+//           : $params['cc_recipient'];
+//         $html_body .= '
+//             <div class="cc-notice">
+//               <strong>' . t('Note') . ':</strong> ' .
+//               t('This message has been copied to: @cc_list', ['@cc_list' => htmlspecialchars($cc_list, ENT_QUOTES, 'UTF-8')]) . '
+//             </div>';
+//       }
+//
+//       // Set the HTML body as the email content
+//       // $message['body'][] = $html_body;
+//       $message['body'][] = $params['message'];
+//
+//       break;
+//   }
+// }
+
+
+/**
+ * Implements hook_mail().
+ */
+function bee_hotel_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'guest_message':
+      // Forza l'header a HTML
+      $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed; delsp=yes';
+
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = $params['subject'];
+
+      // Il body deve essere passato come Markup per non essere "sanificato" in testo semplice
+      $message['body'][] = \Drupal\Core\Render\Markup::create($params['message']);
+
+      // Gestione opzionale del CC (se il tuo mailer lo supporta)
+      if (isset($params['cc_recipient'])) {
+        $cc = is_array($params['cc_recipient']) ? implode(',', $params['cc_recipient']) : $params['cc_recipient'];
+        $message['headers']['Cc'] = $cc;
+      }
+
+      // --- GESTIONE BCC (Copia Nascosta) ---
+      if (isset($params['bcc_recipient'])) {
+        $bcc = is_array($params['bcc_recipient']) ? implode(',', $params['bcc_recipient']) : $params['bcc_recipient'];
+        $message['headers']['Bcc'] = $bcc;
+      }
+
+      break;
+  }
+}
+
+// function bee_hotel_symfony_mailer_builder($key, EmailInterface $email) {
+//   if ($key == 'bee_hotel_guest_message') {
+//     $params = $email->getParams();
+//     if (!empty($params['html_body'])) {
+//       $email->setHtmlBody($params['html_body']);
+//       $email->setPlainBody(strip_tags($params['html_body']));
+//     }
+//   }
+// }
+

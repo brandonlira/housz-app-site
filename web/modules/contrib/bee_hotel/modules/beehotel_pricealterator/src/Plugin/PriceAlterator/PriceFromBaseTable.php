@@ -2,37 +2,14 @@
 
 namespace Drupal\beehotel_pricealterator\Plugin\PriceAlterator;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\beehotel_utils\BeeHotelCommerce;
 use Drupal\beehotel_pricealterator\PriceAlteratorBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Get the Base Price from the BaseTable.
- *
- * Because the plugin manager class for our plugins uses annotated class
- * discovery, Price Alterators only needs to exist within the
- * Plugin\PriceAlterator namespace, and provide a PriceAlterator annotation
- * to be declared as a plugin. This is defined in
- * \Drupal\beehotel_pricealterator\PriceAlteratorPluginManager::__construct().
- *
- * The following is the plugin annotation. This is parsed by Doctrine to make
- * the plugin definition. Any values defined here will be available in the
- * plugin definition.
- *
- * This should be used for metadata that is specifically required to instantiate
- * the plugin, or for example data that might be needed to display a list of all
- * available plugins where the user selects one. This means many plugin
- * annotations can be reduced to a plugin ID, a label and perhaps a description.
- *
- *
- * The weight Key is the weight for this alterator
- * -9999 : heaviest, to be used as very first (reserved)
- * -9xxx : heavy, to be used as first (reserved)
- *     0 : no need to be weighted
- *  1xxx : allowed in custom modules (@TODO)
- *  xxxx : everything else
- *  9xxx : ligh, to be used as last (reserved)
- *  9999 : lighest, to be used as very last (reserved)
  *
  * @PriceAlterator(
  *   description = @Translation("Get prices from the  Weekly Unit Price Table. Every Unit has a Weekly Unit Price Table. This price alterator *MUST* be on the top of the alterators chain."),
@@ -44,13 +21,19 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class PriceFromBaseTable extends PriceAlteratorBase {
 
-
   /**
    * The BeeHotel commerce Util.
    *
    * @var \Drupal\beehotel_utils\BeeHotelCommerce
    */
   protected $beehotelCommerce;
+
+  /**
+   * The renderer service.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
 
   /**
    * Price alterator Status.
@@ -74,7 +57,7 @@ class PriceFromBaseTable extends PriceAlteratorBase {
   private $enabled;
 
   /**
-   * Constructs a new alterator object.
+   * Constructs a new PriceFromBaseTable alterator.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -82,16 +65,28 @@ class PriceFromBaseTable extends PriceAlteratorBase {
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    * @param \Drupal\beehotel_utils\BeeHotelCommerce $beehotel_commerce
    *   BeeHotel Commerce Utils.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer service.
    */
   public function __construct(
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    BeeHotelCommerce $beehotel_commerce) {
+    ConfigFactoryInterface $config_factory,
+    BeeHotelCommerce $beehotel_commerce,
+    RendererInterface $renderer
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $config_factory);
+
     $this->beehotelCommerce = $beehotel_commerce;
-    $config = \Drupal::config($this->configName());
+    $this->renderer = $renderer;
+
+    // Load plugin-specific configuration.
+    $config = $this->configFactory->get($this->configName());
     $this->status = $config->get('status');
     $this->increase = $config->get('increase');
     $this->enabled = $config->get('enabled');
@@ -105,7 +100,9 @@ class PriceFromBaseTable extends PriceAlteratorBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('config.factory'),
       $container->get('beehotel_utils.beehotelcommerce'),
+      $container->get('renderer')
     );
   }
 
@@ -120,22 +117,30 @@ class PriceFromBaseTable extends PriceAlteratorBase {
   }
 
   /**
-   * Alter a price.
-   *
-   * Every Alterator must have an alter method.
-   *
-   * @param array $data
-   *   Array of data related to this price.
-   * @param array $basetable
-   *   Array of prices by week day.
-   *
-   * @return array
-   *   An updated $data array.
+   * {@inheritdoc}
    */
-  public function alter(array $data, array $basetable) {
-    // Set the base price for this request.
-    $data['tmp']['day_of_the_week'] = strtolower(date("D", $data['tmp']['night_timestamp']));
-    $data['tmp']['price'] = $basetable[$data['nid']][$data['season']][$data['tmp']['day_of_the_week']];
+  public function alter(array $data, array $basetable): array {
+    // Determine the day of the week.
+    $day = strtolower(date("D", $data['tmp']['night_timestamp']));
+    $data['tmp']['day_of_the_week'] = $day;
+
+    $nid = $data['nid'] ?? NULL;
+    $season = $data['season'] ?? NULL;
+
+    // Verify the key hierarchy exists before assigning.
+    if (isset($basetable[$nid][$season][$day])) {
+      $data['tmp']['price'] = $basetable[$nid][$season][$day];
+    }
+    else {
+      // Log the missing price.
+      \Drupal::logger('beehotel_pricealterator')->warning(
+        'Price missing in BaseTable for NID: @nid, Season: @season, Day: @day',
+        ['@nid' => $nid, '@season' => $season, '@day' => $day]
+      );
+
+      // Set a fallback price if needed.
+      $data['tmp']['price'] = $data['tmp']['price'] ?? 0;
+    }
 
     return $data;
   }
@@ -151,10 +156,10 @@ class PriceFromBaseTable extends PriceAlteratorBase {
    * @param array $pricetable
    *   Array of prices by week day.
    *
-   * @return Drupal\Core\StringTranslation\TranslatableMarkup
-   *   A translatable object containing the current value
+   * @return string
+   *   Rendered output.
    */
-  public function currentValue(array $data, array $pricetable) {
+  public function currentValue(array $data, array $pricetable): string {
     $current_value = [
       '#theme' => 'beehotel_pricealterator_current_value',
       '#class' => "",
@@ -162,7 +167,7 @@ class PriceFromBaseTable extends PriceAlteratorBase {
       '#type' => "",
       '#description' => $this->t("to update base price"),
     ];
-    return \Drupal::service('renderer')->renderPlain($current_value);
+    return $this->renderer->renderPlain($current_value);
   }
 
 }

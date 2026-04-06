@@ -8,7 +8,10 @@ use Drupal\beehotel_utils\BeeHotelUnit;
 use Drupal\beehotel_vertical\BeehotelVertical;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Ajax\AlertCommand;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\CssCommand;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -23,8 +26,8 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Url;
+use Drupal\user\Entity\Role;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -67,13 +70,6 @@ class Vertical extends ControllerBase {
    * @var \CommerceGuys\Intl\Formatter\CurrencyFormatterInterface
    */
   protected $currencyFormatter;
-
-  /**
-   * Representation of the current HTTP request.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  public $requestStack;
 
   /**
    * The config object.
@@ -130,11 +126,9 @@ class Vertical extends ControllerBase {
    *   The entity type manager.
    * @param \CommerceGuys\Intl\Formatter\CurrencyFormatterInterface $currency_formatter
    *   The currency formatter.
-   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
-   *   The request stack.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory service.
-   * @param Drupal\bee_hotel\Event $beehotel_event
+   * @param \Drupal\bee_hotel\Event $beehotel_event
    *   The Bee Hotel Event util.
    * @param \Drupal\beehotel_utils\BeeHotelUnit $bee_hotel_unit
    *   The BeeHotel Unit Utility.
@@ -143,13 +137,12 @@ class Vertical extends ControllerBase {
    * @param \Drupal\Component\Plugin\PluginManagerInterface $beehotelVerticalManager
    *   The BeeHotel Vertical manager.
    */
-  public function __construct(RendererInterface $renderer, FormBuilder $form_builder, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, CurrencyFormatterInterface $currency_formatter, RequestStack $request_stack, ConfigFactoryInterface $config_factory, Event $beehotel_event, BeeHotelUnit $bee_hotel_unit, BeehotelVertical $beehotel_vertical, PluginManagerInterface $beehotelVerticalManager) {
+  public function __construct(RendererInterface $renderer, FormBuilder $form_builder, DateFormatterInterface $date_formatter, EntityTypeManagerInterface $entity_type_manager, CurrencyFormatterInterface $currency_formatter, ConfigFactoryInterface $config_factory, Event $beehotel_event, BeeHotelUnit $bee_hotel_unit, BeehotelVertical $beehotel_vertical, PluginManagerInterface $beehotelVerticalManager) {
     $this->renderer = $renderer;
     $this->formBuilder = $form_builder;
     $this->dateFormatter = $date_formatter;
     $this->entityTypeManager = $entity_type_manager;
     $this->currencyFormatter = $currency_formatter;
-    $this->requestStack = $request_stack;
     $this->config = $config_factory;
     $this->event = $beehotel_event;
     $this->beehotelUnit = $bee_hotel_unit;
@@ -167,12 +160,11 @@ class Vertical extends ControllerBase {
       $container->get('date.formatter'),
       $container->get('entity_type.manager'),
       $container->get('commerce_price.currency_formatter'),
-      $container->get('request_stack'),
       $container->get('config.factory'),
       $container->get('bee_hotel.event'),
       $container->get('beehotel_utils.beehotelunit'),
       $container->get('beehotel_vertical.beehotelvertical'),
-      $container->get('plugin.manager.beehotel.pricealterator')
+      $container->get('plugin.manager.beehotel.pricealterator'),
     );
   }
 
@@ -180,20 +172,48 @@ class Vertical extends ControllerBase {
    * Produce the table.
    */
   public function result($data) {
+    $output = $this->buildTable($data);
+    $output['#prefix'] = $this->displayTimeRangeForm();
+    return $this->renderer->render($output);
+  }
+
+  /**
+   * Returns only the rendered table HTML (without the time range form).
+   * Used for AJAX updates.
+   *
+   * @param array $data
+   *   An array with report related data.
+   *
+   * @return string
+   *   The rendered table HTML.
+   */
+  public function renderTable($data) {
+    $output = $this->buildTable($data);
+    return $this->renderer->render($output);
+  }
+
+  /**
+   * Builds the table render array (without the time range form).
+   *
+   * @param array $data
+   *   An array with report related data.
+   *
+   * @return array
+   *   A render array for the table.
+   */
+  protected function buildTable(array $data) {
     $data['rows'] = $this->rows($data);
     $data['header'] = $this->header($data);
 
-    $output['table'] = [
+    return [
       '#type' => 'table',
       '#attributes' => [
         'class' => ['vertical-table'],
       ],
-      '#prefix' => $this->displayTimeRangeForm(),
       '#header' => $data['header'],
       '#rows' => $data['rows'],
       '#empty' => $this->t('Your table is empty'),
     ];
-    return $this->renderer->render($output);
   }
 
   /**
@@ -202,24 +222,97 @@ class Vertical extends ControllerBase {
   private function header($data) {
     $data['units'] = $this->beehotelUnit->getBeeHotelUnits($options = []);
     $header = [];
+
     $url = Url::fromRoute('beehotel_vertical.admin_settings', []);
     $link = Link::fromTextAndUrl($this->t('Day'), $url);
     $link = $link->toRenderable();
     $link['#attributes'] = ['class' => ['button', 'gear']];
 
-    $header[] = Markup::create("<h3 class='settings'>" . $this->renderer->render($link) . "</strong>");
+    $header[] = Markup::create("<h3 class='settings'>" . $this->renderer->render($link) . "</h3>");
+
+    $config = $this->config('beehotel_vertical.settings');
+    $header_fields = $config->get('vertical.header_fields') ?: ['title'];
+    $header_format = $config->get('vertical.header_format') ?: '[node:title]';
 
     if (!empty($data['units'])) {
       foreach ($data['units'] as $unit) {
+        $header_text = $this->generateUnitHeader($unit, $header_format, $header_fields);
+
         $url = Url::fromRoute('entity.node.edit_form', ['node' => $unit->Id()]);
-        $unit_link = Link::fromTextAndUrl($unit->GetTitle(), $url);
-        $unit_link = $unit_link->toRenderable();
-        $unit_link['#attributes'] = ['class' => ['button', 'link']];
-        $header[] = Markup::create("<h3 class='unit'>" . $this->renderer->render($unit_link) . "</h3>");
+
+        $unit_link = [
+          '#type' => 'link',
+          '#title' => Markup::create($header_text),
+          '#url' => $url,
+          '#attributes' => ['class' => ['button', 'link']],
+        ];
+
+        $rendered_link = $this->renderer->render($unit_link);
+        $header[] = Markup::create("<h3 class='unit'>" . $rendered_link . "</h3>");
       }
     }
+
     $data['header'] = $header;
     return $data['header'];
+  }
+
+  private function generateUnitHeader($unit, $header_format, $header_fields) {
+    $header_text = $header_format;
+
+    foreach ($header_fields as $field_name) {
+      if ($field_name && $field_name !== '0') {
+        $token = '[node:' . $field_name . ']';
+        $value = $this->getFieldValue($unit, $field_name);
+
+        if (!empty($value)) {
+          $css_class = str_replace('_', '-', $field_name);
+          $wrapped_value = '<span class="header-field header-field--' . $css_class . '">' . $value . '</span>';
+          $header_text = str_replace($token, $wrapped_value, $header_text);
+        } else {
+          $header_text = str_replace($token, '', $header_text);
+        }
+      }
+    }
+
+    return trim($header_text) ?: $unit->getTitle(); // Fallback al titolo se vuoto
+  }
+
+  private function getFieldValue($node, $field_name) {
+    if ($field_name == 'title') {
+      return $node->getTitle();
+    }
+
+    if (!$node->hasField($field_name) || $node->get($field_name)->isEmpty()) {
+      return '';
+    }
+
+    $field = $node->get($field_name);
+    $field_type = $field->getFieldDefinition()->getType();
+
+    switch ($field_type) {
+      case 'entity_reference':
+        $entity = $field->entity;
+        return $entity ? $entity->label() : '';
+
+      case 'datetime':
+      case 'date':
+        return $field->date ? $field->date->format('d/m/Y') : '';
+
+      case 'boolean':
+        return $field->value ? $this->t('Yes') : $this->t('No');
+
+      case 'list_string':
+        $value = $field->value;
+        $allowed_values = $field->getFieldDefinition()->getSetting('allowed_values');
+        return $allowed_values[$value] ?? $value;
+
+      case 'text_with_summary':
+      case 'text_long':
+        return strip_tags($field->value);
+
+      default:
+        return $field->value;
+    }
   }
 
   /**
@@ -324,8 +417,13 @@ class Vertical extends ControllerBase {
    * Get time range for current report.
    */
   public function requestedRange() {
+
+    $beeHotelUtil = \Drupal::service('beehotel_utils.beehotel');
+
     $data = [];
-    $data['session'] = $this->getSession();
+
+    $data['session'] = $beeHotelUtil->getSession();
+
     $data['tmp']['a'] = $data['session']->get('beehotel_requested_range');
     $data['tmp']['b'] = $this->defaultTimeRange();
     $data['range'] = $data['session']->get('beehotel_requested_range') ?? $this->defaultTimeRange();
@@ -383,7 +481,7 @@ class Vertical extends ControllerBase {
       $order['order_balance'] = number_format($order['order_balance'], 2, ',', ' ');
 
       // No text for same order on following days.
-      $order['hidden_text'] = FALSE;
+      $order['show_text'] = FALSE;
 
       if (isset($data['occupancy'][$tmp['day']][$tmp['unit']]['order'])) {
         if ($data['occupancy'][$tmp['day']][$tmp['unit']]['order']->object->billing_profile->entity) {
@@ -394,7 +492,7 @@ class Vertical extends ControllerBase {
       }
 
       if ($tmp['currentday_order_id'] != $tmp['daybefore_order_id']) {
-        $order['hidden_text'] = TRUE;
+        $order['show_text'] = TRUE;
       }
       return $order;
     }
@@ -424,6 +522,10 @@ class Vertical extends ControllerBase {
    */
   private function verticalTableTrTd($data, $options) {
 
+    $beeHotelUtil = \Drupal::service('beehotel_utils.beehotel');
+    $data['session'] = $beeHotelUtil->getSession();
+    $beehotel_data = $data['session']->get('beehotel_data');
+
     // A.
     $a_attributes = $this->verticalTableTrTdAttributes($data, $options = ['div' => "a"]);
     $a_class = implode(" ", $a_attributes['class']);
@@ -438,12 +540,35 @@ class Vertical extends ControllerBase {
     $b_class = implode(" ", $b_attributes['class']);
     $b_content = $this->verticalTableTrTdOrderOrState($data, $options = ['div' => "b"]);
 
+    $td_classes = ['vertical-tr-td'];
+
+    if (isset($data['tmp']['order']->is_blocking) && $data['tmp']['order']->is_blocking != 1) {
+      $td_classes[] = 'not-blocking';
+    }
+
+    if (isset($beehotel_data) && isset($beehotel_data['not_blocking_order_events_by_date_nid'])) {
+
+      $not_blocking_order_events_by_date_nid = $beehotel_data['not_blocking_order_events_by_date_nid'];
+
+      if (isset($not_blocking_order_events_by_date_nid[$data['day']['daybefore']['ISO8601']][$data['unit']['nid']])) {
+        $td_classes[] = 'not-blocking';
+      }
+    }
+
+    if (isset($data['tmp']['order']->bat_event)) {
+      $data['current_order_event_id'] = $data['tmp']['order']->bat_event->get('id')->value;
+      if (isset($beehotel_data['not-blocking-order-events'][$data['current_order_event_id']])) {
+        $td_classes[] = 'not-blocking';
+      }
+    }
+
     $output = [
       '#theme' => 'vertical_table_tr_td',
       '#a_class' => $a_class,
       '#a_content' => $a_content,
       '#b_class' => $b_class,
       '#b_content' => $b_content,
+      '#td_classes' => $td_classes,
     ];
 
     // what's this?
@@ -461,27 +586,123 @@ class Vertical extends ControllerBase {
 
     if (!isset($content)) {
       $content = $this->verticalTableTrTdState($data, $options);
+      // return "";
       return $content;
     }
     return $content;
   }
 
   /**
-   * Card base price from weekly table.
-   */
-  private function verticalTableTrTdPrice($data, $options) {
-    $unit = $this->beehotelUnit->getUnitFromBid($data['unit']['bid']);
+  * Generates price markup for vertical table cells with currency formatting.
+  *
+  * This function retrieves the price for a specific unit on a given day and
+  * season, formats it with the currency symbol from the store, and displays
+  * it with the currency symbol at the beginning and decimal parts as superscript.
+  *
+  * @param array $data
+  *   An associative array containing:
+  *   - 'unit': Unit data with 'bid' and 'nid'.
+  *   - 'day': Day data with 'timestamp'.
+  *   - 'season': Season identifier.
+  * @param array $options
+  *   Optional array of formatting options (currently unused but kept for
+  *   compatibility with calling patterns).
+  *
+  * @return array
+  *   A render array with '#markup' containing the formatted price HTML.
+  *   Includes appropriate cache metadata for currency and store context.
+  */
+  private function verticalTableTrTdPrice(array $data, array $options): array {
+    // Initialize the price render array.
     $price = [];
+
+    // Retrieve the unit data using the business ID.
+    $unit = $this->beehotelUnit->getUnitFromBid($data['unit']['bid']);
+
+    // Get the price configuration settings.
     $config = $this->config->get('beehotel_pricealterator.settings');
+
+    // Build the unique key for price lookup based on node, day, and season.
     $node_id = $data['unit']['nid'];
-    $day = strtolower(date('D', $data['day']['timestamp']));
+    $day = strtolower(date('D', (int) $data['day']['timestamp']));
     $season = $data['season'];
     $key = $node_id . "_" . $day . "_" . $season;
-    if (isset($key)) {
-      $price['#markup'] = "<div class=\"price\">
-      " . $config->get($key) . "  <span class='smaller'>" . $unit['store']->getDefaultCurrencyCode() . "</span>
-      </div>";
+
+    // Check if the price key exists and has a value.
+    if (isset($key) && ($price_value = $config->get($key))) {
+      // Get the store from the unit to determine the currency.
+      $store = $unit['store'];
+      $currency_code = $store->getDefaultCurrencyCode();
+
+      // Get the currency symbol using Commerce's currency formatter service.
+      $currency_formatter = \Drupal::service('commerce_price.currency_formatter');
+      // $symbol = $currency_formatter->getSymbol($currency_code, 'narrow');
+
+      $currency = \Drupal\commerce_price\Entity\Currency::load($currency_code);
+
+      if ($currency) {
+          $symbol = $currency->getSymbol();
+          // Se il simbolo è troppo lungo (es: "USD"), usa il codice
+          if (mb_strlen($symbol) > 3) {
+              $symbol = $currency_code;
+          }
+      } else {
+          $symbol = $currency_code;
+      }
+
+      // Fallback to standard symbol if narrow symbol is not available.
+      if (empty($symbol)) {
+        $symbol = $currency_formatter->getSymbol($currency_code);
+      }
+
+      // Final fallback to currency code if no symbol is found.
+      if (empty($symbol)) {
+        $symbol = $currency_code;
+      }
+
+      // Format the price value to ensure exactly two decimal places.
+      $formatted_price = number_format((float) $price_value, 2, '.', '');
+      list($integer_part, $decimal_part) = explode('.', $formatted_price);
+
+      // Only show decimal superscript if decimal part is not "00".
+      $decimal_markup = '';
+      if ($decimal_part !== '00') {
+        $decimal_markup = '<sup class="price__decimal">'
+          . htmlspecialchars($decimal_part, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
+          . '</sup>';
+      }
+
+      // Build the HTML markup for the formatted price.
+      $price_markup = sprintf(
+        '<div class="price price--formatted" data-currency="%s" data-value="%s">
+          <span class="price__currency">%s</span>
+          <span class="price__integer">%s</span>
+          %s
+        </div>',
+        htmlspecialchars($currency_code, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+        htmlspecialchars($price_value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+        htmlspecialchars($symbol, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+        htmlspecialchars($integer_part, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+        $decimal_markup
+      );
+
+      $price['#markup'] = $price_markup;
+
+      // Add cache contexts for currency and language interface.
+      $price['#cache']['contexts'][] = 'commerce_currency';
+      $price['#cache']['contexts'][] = 'languages:language_interface';
+
+      // Add store-specific cache tags for proper cache invalidation.
+      if ($store) {
+        $price['#cache']['tags'] = $store->getCacheTags();
+      }
     }
+    else {
+      // Display a placeholder when no price is available.
+      $price['#markup'] = '<div class="price price--empty" title="Price not available">-</div>';
+      $price['#attributes']['class'][] = 'no-price';
+    }
+
     return $price;
   }
 
@@ -497,24 +718,37 @@ class Vertical extends ControllerBase {
      * 1 Available #42f649 AV Not blocking Availability Daily.
      * 2 Not available #f04b4b N/A  Blocking Availability Daily.
      * 3 Booked #4b3cea BOOK Blocking Availability Daily.
+     *
      */
+
+    $data['has_full_access'] = \Drupal::currentUser()->hasPermission('beehotel_vertical_access_full_vertical');
+
+    if ($data['has_full_access'] != TRUE) {
+      return;
+    }
+
+    // Full content below.
     $card = $this->verticalTableTrTdCard($data, $options);
 
     if (isset($card['#id'])) {
-      $build[0]['link'] = [
+      $build[]['link'] = [
         '#type' => 'link',
         '#title' => ['#markup' => $card['#markup']],
-        '#attached' => ['library' => ['core/drupal.ajax']],
-        '#attributes' => ['class' => ['use-ajax', 'state-link']],
+        '#attached' => [
+          'library' => [
+            'core/drupal.ajax',
+            'core/jquery',
+          ],
+        ],
+        '#attributes' => [
+          'class' => ['use-ajax', 'state-link'],
+          'data-dialog-type' => 'ajax',
+          'data-ajax-progress' => 'none', // Disable default progress indicator
+        ],
         '#url' => Url::fromRoute('beehotel_vertical.ajax_link_callback', [
-          'nojs' => 'nojs',
+          'nojs' => 'ajax',
           'card_id' => $card['#id'],
         ]),
-      ];
-
-      $build[0]['destination'] = [
-        '#type' => 'container',
-        '#attributes' => ['id' => ['ajax-beehotel-vertical-destination-div']],
       ];
     }
 
@@ -526,7 +760,7 @@ class Vertical extends ControllerBase {
     $price = $this->verticalTableTrTdPrice($data, $options);
     $url_object = Url::fromRoute('beehotel_pricealterator.mandatory.basepricetable', ['node' => $data['unit']['nid']]);
 
-    $build[1]['link'] = [
+    $build[]['link'] = [
       '#type' => 'link',
       '#title' => ['#markup' => $price['#markup']],
       '#attributes' => ['class' => ['price-link']],
@@ -536,28 +770,20 @@ class Vertical extends ControllerBase {
     return $build;
   }
 
-  /**
-   * Produce a flip card.
-   *
-   * With no reservation, we produce a flippable card to swap availability.
-   */
   private function verticalTableTrTdCard($data, $options) {
-
     $state = $card = [];
     $state['id'] = $this->event->getNightState($data);
     $data['event']['id'] = $this->event->getNightEvent($data);
-    $data['event']['lenght'] = "";
+    $data['event']['length'] = "";
+
     if (isset($data['event']['id'])) {
       $data['event']['object'] = bat_event_load($data['event']['id'], $reset = FALSE);
-      $data['event']['lenght'] = $this->event->getEventLength($data['event']['object'], ['output' => "timestamp"]);
+      $data['event']['length'] = $this->event->getEventLength($data['event']['object'], ['output' => "timestamp"]);
     }
 
     if (isset($state['id'])) {
-      /* Events with no reservation longer than
-       * one day not supported by VertiCal UI.
-       */
-      if ($data['event']['lenght'] == 86400 || $data['event']['lenght'] == "") {
-
+      // Events with no reservation longer than one day not supported by VertiCal UI
+      if ($data['event']['length'] == 86400 || $data['event']['length'] == "") {
         if ($state['id'] == 1) {
           $state['card']['front']['label'] = $this->t("AV");
           $state['card']['front']['css'] = "green";
@@ -565,33 +791,49 @@ class Vertical extends ControllerBase {
           $state['card']['back']['css'] = "red";
         }
         else {
+          $state['card']['front']['css'] = "red";
+          $state['card']['front']['label'] = $this->t("NO");
           $state['card']['back']['label'] = $this->t("AV");
           $state['card']['back']['css'] = "green";
-          $state['card']['front']['label'] = $this->t("NO");
-          $state['card']['front']['css'] = "red";
         }
-
-        $card['#id'] = implode("-", [
-          "card",
-          $data['unit']['bid'],
-          $data['day']['year'],
-          $data['day']['month'],
-          $data['day']['day'],
-        ]);
-
-        $card['#markup'] = "<div class=\"state state-card\">
-          <div class=\"card\" id=\"" . $card['#id'] . "\">
-            <div class=\"card__face card__face--front " . $state['card']['front']['css'] . "\">" . $state['card']['front']['label'] . "</div>
-            <div class=\"card__face card__face--back " . $state['card']['back']['css'] . "\">" . $state['card']['back']['label'] . " </div>
-          </div>
-        </div>";
       }
     }
+    else {
+      // ND = not defined
+      $state['card']['front']['label'] = $this->t("ND");
+      $state['card']['front']['css'] = "grey";
+      $state['card']['back']['label'] = $this->t("AV");
+      $state['card']['back']['css'] = "green";
+    }
+
+    $card['#id'] = implode("-", [
+      "card",
+      $data['unit']['bid'],
+      $data['day']['year'],
+      $data['day']['month'],
+      $data['day']['day'],
+    ]);
+
+    $card['#markup'] = "";
+    if (isset($state['card'])) {
+      // Generate proper HTML structure
+      $card['#markup'] = '<div class="state state-card">
+        <div class="card" id="' . $card['#id'] . '">
+          <div class="card__face card__face--front ' . $state['card']['front']['css'] . '">' .
+            $state['card']['front']['label'] .
+          '</div>
+          <div class="card__face card__face--back ' . $state['card']['back']['css'] . '">' .
+            $state['card']['back']['label'] .
+          '</div>
+        </div>
+      </div>';
+    }
+
     return $card;
   }
 
   /**
-   * Callback for link example.
+   * Callback for card.
    *
    * Takes different logic paths based on whether Javascript was enabled.
    * If $type == 'ajax', it tells this function that ajax.js has rewritten
@@ -611,7 +853,6 @@ class Vertical extends ControllerBase {
 
     // Determine whether the request is coming from AJAX or not.
     if ($nojs == 'ajax') {
-      // $output = $this->t("This is some content delivered via AJAX");
       $response = new AjaxResponse();
 
       // Create a $data array to feed the set function.
@@ -648,15 +889,34 @@ class Vertical extends ControllerBase {
       $event->set('event_bat_unit_reference', $data['unit']['bid']);
       $event->save();
 
-      // A jQuery selector.
       $selector = "#" . $card_id;
 
-      // The name of a jQuery method to invoke.
-      $method = 'toggleClass';
+      // Get the new state
+      $newState = $data['new_state'];
 
-      // (Optional) An array of arguments to pass to the method.
-      $arguments = ['is-flipped'];
-      $response->addCommand(new InvokeCommand($selector, $method, $arguments));
+      // Determine new colors and text
+      if ($newState == 1) {
+        $frontColor = 'green';
+        $frontText = $this->t('AV');
+        $backColor = 'red';
+        $backText = $this->t('NO');
+      } else {
+        $frontColor = 'red';
+        $frontText = $this->t('NO');
+        $backColor = 'green';
+        $backText = $this->t('AV');
+      }
+
+      // Update back face
+      $backHtml = '<div class="card__face card__face--back ' . $backColor . '">' . $backText . '</div>';
+      $response->addCommand(new HtmlCommand($selector . ' .card__face--back', $backHtml));
+
+      // Update front face using HtmlCommand (more reliable)
+      $frontHtml = '<div class="card__face card__face--front ' . $frontColor . '">' . $frontText . '</div>';
+      $response->addCommand(new HtmlCommand($selector . ' .card__face--front', $frontHtml));
+
+      // Toggle the flip class AFTER updating content
+      $response->addCommand(new InvokeCommand($selector, 'toggleClass', ['is-flipped']));
 
       return $response;
     }
@@ -681,9 +941,11 @@ class Vertical extends ControllerBase {
   /**
    * Build up order info.
    *
-   *   Returns null when no reservation is fund.
+   *  Returns null when no reservation is fund.
    */
   private function verticalOrderItem($data, $opt) {
+
+    $beeHotelUtil = \Drupal::service('beehotel_utils.beehotel');
 
     $order = [];
     $config = $this->config->get('beehotel_vertical.settings');
@@ -715,28 +977,68 @@ class Vertical extends ControllerBase {
         $this->messenger()->addWarning($this->t('IMPORTANT: You have money to collect'));
       }
 
-      $items = $this->entityTypeManager->getStorage('commerce_payment')->loadByProperties(['order_id' => $order['order_id']]);
+      // Jan 26 Error is payment doen not exists
+      //$items = $this->entityTypeManager->getStorage('commerce_payment')->loadByProperties(['order_id' => $order['order_id']]);
 
-      $payments = [];
-      foreach ($items as $item) {
-        if ($item->get('state')->value == "completed") {
-          $payments[] = [
-            'amount' => number_format($item->get('amount')->number, 2, ',', ' '),
-            'payment_id' => $item->get('payment_id')->value,
-            'date' => $this->dateFormatter->format($item->get('completed')->value, 'custom', 'd/m/Y'),
-          ];
+      try {
+        $storage = $this->entityTypeManager->getStorage('commerce_payment');
+        $items = $storage->loadByProperties(['order_id' => $order['order_id']]);
+
+        if (empty($items)) {
+          // No item exists for this order.
+        } else {
+          $payments = [];
+          foreach ($items as $item) {
+            if ($item->get('state')->value == "completed") {
+              $payments[] = [
+                'amount' => number_format($item->get('amount')->number, 2, ',', ' '),
+                'payment_id' => $item->get('payment_id')->value,
+                'date' => $this->dateFormatter->format($item->get('completed')->value, 'custom', 'd/m/Y'),
+              ];
+            }
+          }
         }
+      } catch (\Exception $e) {
+        // Entity type 'commerce_payment' doesn't exist or other error
+        \Drupal::logger('beehotel_vertical')->error('Payment entity type not found: @error', ['@error' => $e->getMessage()]);
       }
 
-      // @todo add extra info/notes
+      // @todo add extra info/notes.
       $order['extra'] = $this->verticalOrderItemExtra($data, $options);
+
+      $order['classes'] = [
+        'vertical-order-item',
+      ];
+
+      if (isset($data['tmp']['order']->is_blocking) && $data['tmp']['order']->is_blocking != 1) {
+        $order['classes'] = 'not-blocking';
+        $order['extra'] = $this->t('No-Blocking');
+        $data['not_blocking_order_events_by_date_nid'][$data['day']['day_of_elaboration']['ISO8601']][$data['unit']['nid']] = $data['tmp']['event_id'];
+        $beeHotelUtil->storeInSession($data);
+      }
+
+      $data['current_user'] = \Drupal::currentUser();
+      $data['roles'] = $data['current_user']->getRoles();
+
+      $data['entities'] = Role::loadMultiple($data['roles']);
+      $data['role_permissions'] = [];
+      foreach ($data['roles'] as $rid) {
+        $data['role_permissions'][$rid] = $data['entities'][$rid]?->getPermissions();
+      }
+
+      $data['has_full_access'] = \Drupal::currentUser()->hasPermission('beehotel_vertical_access_full_vertical');
+
+      if ($data['has_full_access'] != TRUE) {
+        $order['show_text'] = "";
+      }
 
       return [
         '#theme' => 'vertical_order_item',
         '#balance' => $order['order_balance'],
+        '#classes' => $order['classes'],
         '#comments' => $data['tmp']['order']->last_comment ?? "",
         '#extra' => $order['extra'],
-        '#hidden_text' => $order['hidden_text'],
+        '#show_text' => $order['show_text'],
         '#mail' => Unicode::truncate($mail, 8, FALSE, TRUE) ,
         '#name' => $order['name'] ?? '',
         '#surname' => $order['surname'] ?? '',
@@ -864,10 +1166,15 @@ class Vertical extends ControllerBase {
    * TimeMachine data to step back in time.
    */
   public function page() {
-    $result = $this->result($data = []);
     return [
-      '#type' => 'markup',
-      '#markup' => $result,
+      'form' => [
+        '#markup' => $this->displayTimeRangeForm(),
+      ],
+      'table_container' => [
+        '#type' => 'container',
+        '#attributes' => ['id' => 'vertical-table-container'],
+        '#markup' => $this->renderTable([]),
+      ],
     ];
   }
 
@@ -902,16 +1209,6 @@ class Vertical extends ControllerBase {
   }
 
   /**
-   * Get a fresh session object.
-   *
-   * @return \Symfony\Component\HttpFoundation\Session\SessionInterface
-   *   A session object.
-   */
-  protected function getSession() {
-    return $this->requestStack->getCurrentRequest()->getSession();
-  }
-
-  /**
    * Checks access for a specific request.
    *
    * @param \Drupal\Core\Session\AccountInterface $account
@@ -921,7 +1218,19 @@ class Vertical extends ControllerBase {
    *   The access result.
    */
   public function access(AccountInterface $account) {
-    return AccessResult::allowedIf($account->hasPermission('view beehotel_vertical all'));
+
+    $d = [];
+
+    $d['access_vertical_basic'] = $account->hasPermission('access_vertical_basic');
+    $d['access_vertical_full'] = $account->hasPermission('access_vertical_full');
+    $d['access_vertical'] = NULL;
+
+    if ($d['access_vertical_basic'] || $d['access_vertical_full']) {
+      $d['access_vertical'] = TRUE;
+    }
+
+    return AccessResult::allowedIf($d['access_vertical']);
+
   }
 
   /**

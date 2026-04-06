@@ -1,5 +1,34 @@
 services:
-  # beehotel_vertical.timerange_form:
-    # class: Drupal\beehotel_vertical\Form\TimeRangeForm
   beehotel_vertical.beehotelvertical:
     class: Drupal\beehotel_vertical\BeehotelVertical
+
+  # beehotel_vertical.card_service:
+  #   class: Drupal\beehotel_vertical\Service\CardService
+  #   arguments:
+  #     - '@date.formatter'
+  #     - '@entity_type.manager'
+  #     - '@renderer'
+
+  beehotel_vertical.controller.vertical:
+    class: Drupal\beehotel_vertical\Controller\Vertical
+    arguments:
+      - '@renderer'
+      - '@form_builder'
+      - '@date.formatter'
+      - '@entity_type.manager'
+      - '@commerce_price.currency_formatter'
+      - '@config.factory'
+      - '@bee_hotel.event'
+      - '@beehotel_utils.beehotelunit'
+      - '@beehotel_vertical.beehotelvertical'
+      - '@plugin.manager.beehotel.pricealterator'
+
+  beehotel_vertical.card_service:
+    class: Drupal\beehotel_vertical\Service\CardService
+    arguments: ['@bee_hotel.event']
+
+  # beehotel_vertical.beehotelvertical:
+  #   class: Drupal\beehotel_vertical\Controller\Vertical
+  #   arguments: ['@beehotel_vertical.card_service', '@bee_hotel.event']
+  #   tags:
+  #     - { name: controller }

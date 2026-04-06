@@ -1,0 +1,17 @@
+<div class="currency-rates">
+  <h3>{{ 'Base Currency'|t }}: {{ base_currency }}</h3>
+  <div class="currency-rates__updated">
+    {{ 'Last updated: @time'|t({'@time': 'now'|date('Y-m-d H:i')}) }}
+  </div>
+  <ul class="currency-rates__list">
+    {% for currency, rate in rates %}
+      {#{dump (rate)}#}
+      {% if rate.is_default == false %}
+        <li class="currency-rates__item">
+          <span class="currency-rates__currency">{{ rate.code }}</span>:
+          <span class="currency-rates__rate">{{ rate.value|number_format(2, '.', ',') }}</span>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</div>

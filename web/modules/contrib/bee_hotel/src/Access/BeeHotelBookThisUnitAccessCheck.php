@@ -65,7 +65,7 @@ class BeeHotelBookThisUnitAccessCheck implements AccessInterface {
    * @return string
    *   A \Drupal\Core\Access\AccessInterface constant value.
    */
-  public function access(AccountInterface $account, Node $node = NULL) {
+  public function access(AccountInterface $account, Node $node) {
 
     if (isset($node)) {
       $bee_hotel_settings = $this->configFactory->getEditable('node.type.' . $node->bundle())->get('bee');

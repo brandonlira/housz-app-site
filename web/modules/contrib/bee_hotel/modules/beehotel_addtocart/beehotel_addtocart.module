@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * @file
+ * Contains global features for beehotel_addtocart module.
+ */
+
+use Drupal\Component\Render\MarkupInterface;
+
+/**
+ * Hide "added to cart".
+ *
+ * Hide "added to cart" message when adding from these forms.
+ */
+function beehotel_addtocart_preprocess_status_messages(&$variables) {
+  $hideMessagefrom = bee_hotel_hide_message_from_these_forms();
+  if (isset($variables['message_list']['status'])) {
+    $status_messages = $variables['message_list']['status'];
+    foreach ($status_messages as $delta => $message) {
+      if ($message instanceof MarkupInterface) {
+        $session = \Drupal::request()->getSession();
+        if (isset($session->get('beehotel_data')['from'])) {
+          $from = $session->get('beehotel_data')['from'];
+          if (isset($from) && in_array($from, $hideMessagefrom)) {
+            unset($variables['message_list']['status']);
+            break;
+          }
+        }
+      }
+    }
+  }
+}

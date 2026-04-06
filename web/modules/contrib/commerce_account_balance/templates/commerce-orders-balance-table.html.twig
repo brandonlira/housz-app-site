@@ -1,0 +1,45 @@
+{#
+/**
+ * @file
+ * Theme implementation for a commerce orders table with balance.
+ *
+ * Available variables:
+ * - orders: An array of commerce order entities.
+ * - empty_message: Message to display when no orders are found.
+ * - balance_polarity: a string of: positive, negative, neutral
+ * - emai_balance: balace related to the given email (anon users)
+ */
+#}
+
+{% if orders is empty %}
+  <div class="empty-message">{{ empty_message }}</div>
+{% else %}
+
+<div class='label'>{{ label|t }}</div>
+<div class='email_balance balance {{ balance_polarity }}.'>{{ email_balance }}</div>
+
+  <table{{ attributes.addClass('commerce-orders-balance-table') }}>
+    <thead>
+      <tr>
+        <th>{{'Order ID'|t }}</th>
+        <th>{{'Date'|t }}</th>
+        <th>{{'Status'|t }}</th>
+        <th>{{'Total'|t }}</th>
+        <th>{{'Paid'|t }}</th>
+        <th>{{'Balance'|t }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+        <tr>
+          <td><a href='/admin/commerce/orders/{{ order.id() }}'>{{ order.id() }}</a></td>
+          <td>{{ order.getCreatedTime()|format_date('short') }}</td>
+          <td>{{ order.getState().getLabel() }}</td>
+          <td>{{ order.total_price.formatted }}</td>
+          <td>{{ order.total_paid.formatted }}</td>
+          <td class="balance {{ balance_polarity }}">{{ order.balance.formatted}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}

@@ -60,7 +60,11 @@ class BatBookingEventSubscriber implements EventSubscriberInterface {
   public function batBookingDeleteBooking(DeleteBatBooking $event) {
     $data = [];
     $data['batEventId'] = $event->booking->get("booking_event_reference")->target_id;
-    $data['batEvent'] = bat_event_load($data['batEventId'], $reset = FALSE);
+
+    if (isset($data['batEventId'])) {
+      $data['batEvent'] = bat_event_load($data['batEventId'], $reset = FALSE);
+    }
+
   }
 
 }

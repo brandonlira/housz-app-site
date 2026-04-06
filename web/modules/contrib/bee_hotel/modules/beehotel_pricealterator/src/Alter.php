@@ -132,71 +132,138 @@ class Alter {
   /**
    * Contains the alteration flow.
    */
-  public function alter($data) {
+  // public function alter($data) {
+  //
+  //   $this->session->set('alterators_current_stack', []);
+  //
+  //   /* 2. Loop per night.
+  //    * Drupal Commerce calls Resolver once per order item (not once per night)
+  //    * We loop nights here, providing an average price
+  //    * to be multiplied by items (nights).
+  //    * @todo keep track of every night price into the $data array.
+  //    */
+  //   for ($n = 0; $n < $data['norm']['dates_from_search_form']['days']; $n++) {
+  //
+  //     // 1. Get content.
+  //     // 1a. Base Table with base price.
+  //     $data['basetable'] = $basetable = $this->preAlter->baseTable($data);
+  //     $data['output'] = 'row';
+  //
+  //     // 1b. Available Alterators.
+  //     $alterators = $this->priceAlteratorPluginManager->alterators($data);
+  //
+  //     // 1c. Annotation status Alterators.
+  //     $alterators = $this->checkStatus($alterators);
+  //
+  //     // 1c. UI enabled  Alterators.
+  //     $alterators = $this->checkEnabled($alterators);
+  //
+  //     $data['tmp'] = NULL;
+  //     $data['tmp']['night_timestamp'] =
+  //       $data['norm']['dates_from_search_form']['checkin']['timestamp'] + (24 * 3600 * $n);
+  //
+  //     $data['tmp']['night_date'] = date('Y-m-d', $data['tmp']['night_timestamp']);
+  //
+  //     foreach ($alterators as $a) {
+  //       $alterator = new $a['class']([], [], [], $this->beehotelCommerce, $this->renderer);
+  //       $data = $alterator->alter($data, $basetable);
+  //
+  //       if (isset($data['tmp']['price'])) {
+  //
+  //         $price[$data['tmp']['night_timestamp']] = $data['tmp']['price'];
+  //
+  //         $data['alterators_current_stack'][$data['tmp']['night_date']][] = [
+  //           'id' => $a['id'],
+  //           'night' => $data['tmp']['night_date'],
+  //           'price' => $data['tmp']['price'],
+  //           'season' => $data['season'],
+  //         ];
+  //
+  //       }
+  //
+  //     }
+  //   }
+  //
+  //   $this->session->set('alterators_current_stack',
+  //
+  //   // Price is averaged across nights of reservation.
+  //   // We only expose the last day price.
+  //   // this is an issue when season changes.
+  //   end($data['alterators_current_stack'])
+  //   );
+  //
+  //   $data['price'] = $price = array_filter($price);
+  //   $average = count($price) ? array_sum($price) / count($price) : '';
+  //   $data['amount'] = $average;
+  //   return $data;
+  // }
 
-    $this->session->set('alterators_current_stack', []);
+  /**
+ * Contains the alteration flow.
+ */
+public function alter($data) {
 
-    /* 2. Loop per night.
-     * Drupal Commerce calls Resolver once per order item (not once per night)
-     * We loop nights here, providing an average price
-     * to be multiplied by items (nights).
-     * @todo keep track of every night price into the $data array.
-     */
-    for ($n = 0; $n < $data['norm']['dates_from_search_form']['days']; $n++) {
+  $this->session->set('alterators_current_stack', []);
 
-      // 1. Get content.
-      // 1a. Base Table with base price.
-      $data['basetable'] = $basetable = $this->preAlter->baseTable($data);
-      $data['output'] = 'row';
+  /* 2. Loop per night.
+   * Drupal Commerce calls Resolver once per order item (not once per night)
+   * We loop nights here, providing an average price
+   * to be multiplied by items (nights).
+   * @todo keep track of every night price into the $data array.
+   */
+  for ($n = 0; $n < $data['norm']['dates_from_search_form']['days']; $n++) {
 
-      // 1b. Available Alterators.
-      $alterators = $this->priceAlteratorPluginManager->alterators($data);
+    // 1. Get content.
+    // 1a. Base Table with base price.
+    $data['basetable'] = $basetable = $this->preAlter->baseTable($data);
+    $data['output'] = 'row';
 
-      // 1c. Annotation status Alterators.
-      $alterators = $this->checkStatus($alterators);
+    // 1b. Available Alterators.
+    $alterators = $this->priceAlteratorPluginManager->alterators($data);
 
-      // 1c. UI enabled  Alterators.
-      $alterators = $this->checkEnabled($alterators);
+    // 1c. Annotation status Alterators.
+    $alterators = $this->checkStatus($alterators);
 
-      $data['tmp'] = NULL;
-      $data['tmp']['night_timestamp'] =
-        $data['norm']['dates_from_search_form']['checkin']['timestamp'] + (24 * 3600 * $n);
+    // 1c. UI enabled Alterators.
+    $alterators = $this->checkEnabled($alterators);
 
-      $data['tmp']['night_date'] = date('Y-m-d', $data['tmp']['night_timestamp']);
+    $data['tmp'] = NULL;
+    $data['tmp']['night_timestamp'] =
+      $data['norm']['dates_from_search_form']['checkin']['timestamp'] + (24 * 3600 * $n);
 
-      foreach ($alterators as $a) {
-        $alterator = new $a['class']([], [], [], $this->beehotelCommerce, $this->renderer);
-        $data = $alterator->alter($data, $basetable);
+    $data['tmp']['night_date'] = date('Y-m-d', $data['tmp']['night_timestamp']);
 
-        if (isset($data['tmp']['price'])) {
+    foreach ($alterators as $a) {
+      // Use plugin manager to create instance.
+      $plugin_instance = $this->priceAlteratorPluginManager->createInstance($a['id'], []);
+      $data = $plugin_instance->alter($data, $basetable);
 
-          $price[$data['tmp']['night_timestamp']] = $data['tmp']['price'];
+      if (isset($data['tmp']['price'])) {
+        $price[$data['tmp']['night_timestamp']] = $data['tmp']['price'];
 
-          $data['alterators_current_stack'][$data['tmp']['night_date']][] = [
-            'id' => $a['id'],
-            'night' => $data['tmp']['night_date'],
-            'price' => $data['tmp']['price'],
-            'season' => $data['season'],
-          ];
-
-        }
-
+        $data['alterators_current_stack'][$data['tmp']['night_date']][] = [
+          'id' => $a['id'],
+          'night' => $data['tmp']['night_date'],
+          'price' => $data['tmp']['price'],
+          'season' => $data['season'],
+        ];
       }
     }
+  }
 
-    $this->session->set('alterators_current_stack',
-
+  $this->session->set('alterators_current_stack',
     // Price is averaged across nights of reservation.
     // We only expose the last day price.
     // this is an issue when season changes.
     end($data['alterators_current_stack'])
-    );
+  );
 
-    $data['price'] = $price = array_filter($price);
-    $average = count($price) ? array_sum($price) / count($price) : '';
-    $data['amount'] = $average;
-    return $data;
-  }
+  $data['price'] = $price = array_filter($price);
+  $average = count($price) ? array_sum($price) / count($price) : '';
+  $data['amount'] = $average;
+  return $data;
+}
+
 
   /**
    * Check annotation status.

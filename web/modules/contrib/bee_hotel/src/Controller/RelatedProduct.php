@@ -2,7 +2,7 @@
 
 namespace Drupal\bee_hotel\Controller;
 
-use Drupal\bee_hotel\BeeHotel;
+use Drupal\beehotel_utils\BeeHotel;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -20,7 +20,7 @@ class RelatedProduct extends ControllerBase {
   /**
    * The Bee Hotel utility.
    *
-   * @var \Drupal\bee_hotel\BeeHotel
+   * @var \Drupal\beehotel_utils\BeeHotel
    */
   protected $beehotel;
 
@@ -55,7 +55,7 @@ class RelatedProduct extends ControllerBase {
   /**
    * Constructs a new RelatedProduct object.
    *
-   * @param \Drupal\bee_hotel\BeeHotel $bee_hotel
+   * @param \Drupal\beehotel_utils\BeeHotel $bee_hotel
    *   The BeeHotel Utility.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
@@ -76,7 +76,7 @@ class RelatedProduct extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('bee_hotel.beehotel'),
+      $container->get('beehotel_utils.beehotel'),
       $container->get('entity_type.manager'),
       $container->get('renderer'),
       $container->get('config.factory')

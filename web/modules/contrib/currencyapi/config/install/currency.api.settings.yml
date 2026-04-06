@@ -1,0 +1,7 @@
+api_key: ''
+base_currency: 'EUR'
+target_currencies:
+  - 'USD'
+  - 'GBP'
+  - 'CHF'
+cache_expiration: 86400

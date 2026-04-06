@@ -2,9 +2,13 @@
 
 namespace Drupal\bee_hotel\Form;
 
-use Drupal\Core\Config\ConfigFactory;
+use Drupal\beehotel_utils\BeeHotelCommerce;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\RendererInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -14,26 +18,66 @@ class BeeHotelSettingsForm extends ConfigFormBase {
 
   /**
    * Config settings.
-   *
-   * @var string
    */
   const SETTINGS = 'beehotel.settings';
 
   /**
-   * Drupal configuration service container.
+   * The BeeHotel commerce Util.
    *
-   * @var \Drupal\Core\Config\ConfigFactory
+   * @var \Drupal\beehotel_utils\BeeHotelCommerce
    */
-  protected $configFactory;
+  protected $beehotelCommerce;
 
   /**
-   * {@inheritdoc}
+   * The module extension list.
    *
-   * @param \Drupal\Core\Config\ConfigFactory $config_factory
-   *   The config factory.
+   * @var \Drupal\Core\Extension\ModuleExtensionList
    */
-  public function __construct(ConfigFactory $config_factory) {
-    $this->configFactory = $config_factory;
+  protected $moduleExtensionList;
+
+  /**
+   * The date formatter service.
+   *
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
+   */
+  protected $dateFormatter;
+
+  /**
+   * The renderer service.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
+   * Constructs a new BeeHotelSettingsForm object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The factory for configuration objects.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typed_config_manager
+   *   The typed config manager.
+   * @param \Drupal\beehotel_utils\BeeHotelCommerce $beehotel_commerce
+   *   BeeHotel Commerce Utils.
+   * @param \Drupal\Core\Extension\ModuleExtensionList $module_extension_list
+   *   The module extension list.
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
+   *   The date formatter service.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer service.
+   */
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    $typed_config_manager,
+    BeeHotelCommerce $beehotel_commerce,
+    ModuleExtensionList $module_extension_list,
+    DateFormatterInterface $date_formatter,
+    RendererInterface $renderer
+  ) {
+    parent::__construct($config_factory, $typed_config_manager);
+    $this->beehotelCommerce = $beehotel_commerce;
+    $this->moduleExtensionList = $module_extension_list;
+    $this->dateFormatter = $date_formatter;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -42,6 +86,11 @@ class BeeHotelSettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
+      $container->get('config.typed'),
+      $container->get('beehotel_utils.beehotelcommerce'),
+      $container->get('extension.list.module'),
+      $container->get('date.formatter'),
+      $container->get('renderer')
     );
   }
 
@@ -65,17 +114,15 @@ class BeeHotelSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $config = $this->config(static::SETTINGS);
+    $path = $this->moduleExtensionList->getPath('bee_hotel');
 
-    $config = $this->config('beehotel.settings');
-    $path = \Drupal::service('extension.list.module')->getPath('bee_hotel');
-
-    // Vertical Tabs.
     $form['settings'] = [
       '#type' => 'vertical_tabs',
       '#default_tab' => 'edit-publication',
     ];
 
-    // A. Main.
+    // Main section.
     $form['main'] = [
       '#type' => 'details',
       '#title' => $this->t('Main'),
@@ -85,7 +132,6 @@ class BeeHotelSettingsForm extends ConfigFormBase {
     $form['main']['off'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Reservations OFF'),
-      '#collapsible' => FALSE,
     ];
 
     $form['main']['off']['off_value'] = [
@@ -105,51 +151,42 @@ class BeeHotelSettingsForm extends ConfigFormBase {
     $form['main']['setupmode'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('SETUP mode'),
-      '#collapsible' => FALSE,
     ];
 
     $form['main']['setupmode']['setupmode_on_value'] = [
       '#default_value' => $config->get('beehotel.setup_mode'),
       '#type' => 'checkbox',
       '#title' => $this->t('Switch the SETUP mode ON'),
-      '#description' => $this->t('When ON, a deep diagnostic check is made. With SETUP mode ON, your system maybe slower. Disable this once your BEE Hotel enviroment is working fine'),
+      '#description' => $this->t('When ON, a deep diagnostic check is made. With SETUP mode ON, your system maybe slower. Disable this once your BEE Hotel environment is working fine'),
     ];
 
-    $weight = [
-      'bee' => bee_hotel_get_module_weight('bee'),
-      'bee_hotel' => bee_hotel_get_module_weight('bee_hotel'),
-    ];
+    // Module Weights.
+    $weight_bee = bee_hotel_get_module_weight('bee');
+    $weight_bee_hotel = bee_hotel_get_module_weight('bee_hotel');
 
-    $details = "<div>";
-    $details .= "Bee HOTEL weight: " . $weight['bee_hotel'] . "<br/>";
-    $details .= "BEE weight: " . $weight['bee'] . "<br/>";
+    $weight_status = ($weight_bee <= $weight_bee_hotel)
+    ? $this->t("Please update bee_hotel weight")
+    : $this->t("Modules weight look good!");
 
-    if ($weight['bee'] <= $weight['bee_hotel']) {
-      $weight['status'] = $this->t("Please update bee_hotel weight");
-    }
-    else {
-      $weight['status'] = $this->t("Modules weight look good!");
-    }
-
-    // Book this unit.
-    $details .= $weight['status'];
-    $details .= "</div>";
+    $details_markup = '<div>' .
+    $this->t('Bee HOTEL weight: @w1', ['@w1' => $weight_bee_hotel]) . '<br/>' .
+    $this->t('BEE weight: @w2', ['@w2' => $weight_bee]) . '<br/>' .
+    $weight_status . '</div>';
 
     $form['main']['weight'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Module weight'),
       '#description' => $this->t('Bee Hotel weight matters. Check values below'),
-      '#collapsible' => FALSE,
     ];
 
     $form['main']['weight']['update'] = [
-      '#prefix' => $details,
+      '#prefix' => $details_markup,
       '#type' => 'submit',
       '#value' => $this->t('Update weight'),
-      '#submit' => ['::submitUpdateweight'],
+      '#submit' => ['::submitUpdateWeight'],
     ];
 
-    // B. Booking.
+    // Booking section.
     $form['booking'] = [
       '#type' => 'details',
       '#title' => $this->t('Booking'),
@@ -159,7 +196,6 @@ class BeeHotelSettingsForm extends ConfigFormBase {
     $form['booking']['calendar'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Calendar'),
-      '#collapsible' => FALSE,
     ];
 
     $form['booking']['calendar']['calendar_from'] = [
@@ -171,146 +207,82 @@ class BeeHotelSettingsForm extends ConfigFormBase {
         2 => $this->t('2 days'),
       ],
       '#title' => $this->t('Accept reservations from'),
-      '#description' => $this->t('Selecting today, you should be ready to checkin Guest with few hours time. This feature is currently @TODO'),
+      '#description' => $this->t('Selecting today, you should be ready to checkin Guest with few hours time.'),
     ];
 
-    $form['booking']['booking_forms'] = [
+    // Cancellation Policy.
+    $cancellation_options = [0 => $this->t('No cancellation policy')];
+    for ($i = 1; $i <= 30; $i++) {
+      $cancellation_options[$i] = $i;
+    }
+    foreach ([40, 45, 50, 60] as $day) {
+      $cancellation_options[$day] = $day;
+    }
+
+    $form['booking']['cancellation_policy'] = [
       '#type' => 'fieldset',
-      '#title' => $this->t('Booking Forms'),
-      '#description' => $this->t("Custom settings for booking forms"),
-      '#collapsible' => FALSE,
+      '#title' => $this->t('Cancellation Policy'),
     ];
 
-    $description = [];
-
-    $description['pieces'][] = $this->t("The 'Units Search' form allows Guests to search for units with given dates and occupants.");
-    $description['pieces'][] = $this->t("Options:");
-    $description['pieces'][] = $this->t('<code><<i>none</i>></code> : nothing');
-    $description['pieces'][] = $this->t('<code><<i>ct-label</i>></code> : the Content type label');
-    $description['pieces'][] = $this->t('<title><<i>title</i>></code> : the node Title');
-    $description['pieces'][] = $this->t("A 'String': the 'String' itself");
-    $description['output'] = implode("<br/>", $description['pieces']);
-
-    // Units search.
-    $form['booking']['booking_forms']['units_search'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Units Search'),
-      '#description' => $description['output'],
-      '#collapsible' => FALSE,
-    ];
-
-    $form['booking']['booking_forms']['units_search']['units_search_position'] = [
-      '#default_value' => $config->get('beehotel.units_search_position'),
-      '#options' => [
-        'none' => $this->t("none"),
-        'top' => $this->t("Top"),
-        'bottom' => $this->t("Bottom"),
-      ],
+    $form['booking']['cancellation_policy']['cancellation_policy_days'] = [
       '#type' => 'select',
-      '#title' => $this->t('Position'),
+      '#title' => $this->t('Cancellation Policy Days'),
+      '#options' => $cancellation_options,
+      '#default_value' => $config->get('beehotel.cancellation_policy_days') ?? 0,
       '#required' => TRUE,
-      '#description' => $this->t('Position inside the node display. @todo: code for the top and bottom position'),
     ];
 
-    $form['booking']['booking_forms']['units_search']['units_search_submit_label'] = [
-      '#default_value' => $config->get('beehotel.units_search_submit'),
-      '#type' => 'textfield',
-      '#title' => $this->t('Submit label'),
-      '#required' => TRUE,
-      '#description' => $this->t('The label of the submit button'),
-    ];
-
-    $form['booking']['booking_forms']['units_search']['units_search_header_label'] = [
-      '#default_value' => $config->get('beehotel.units_search_header'),
-      '#type' => 'textfield',
-      '#title' => $this->t('Header label'),
-      '#description' => $this->t('A string introducing the form'),
-    ];
-
-    $description = [];
-
-    $description['pieces'][] = $this->t("The 'Book this unit' form allows guests to book a given BeeHotelUnit");
-    $description['pieces'][] = $this->t("The Form is exposed in the node view of the Unit");
-    $description['pieces'][] = $this->t("You can here decide how this Form is introducted to the audience");
-    $description['pieces'][] = $this->t("Options:");
-    $description['pieces'][] = $this->t('<code><<i>none</i>></code> : nothing');
-    $description['pieces'][] = $this->t('<code><<i>ct-label</i>></code> : the Content type label');
-    $description['pieces'][] = $this->t('<title><<i>title</i>></code> : the node Title');
-    $description['pieces'][] = $this->t("A 'String': the 'String' itself");
-    $description['output'] = implode("<br/>", $description['pieces']);
-
-    $form['booking']['booking_forms']['book_this_unit'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Book this unit Form'),
-      '#description' => $description['output'],
-      '#collapsible' => FALSE,
-    ];
-
-    $form['booking']['booking_forms']['book_this_unit']['book_this_unit_position'] = [
-      '#default_value' => $config->get('beehotel.book_this_unit_position'),
-      '#options' => [
-        'none' => $this->t("none"),
-        'top' => $this->t("Top"),
-        'bottom' => $this->t("Bottom"),
-      ],
-      '#type' => 'select',
-      '#title' => $this->t('Position'),
-      '#required' => TRUE,
-      '#description' => $this->t('Position inside the node display. @todo: code for the top and bottom position'),
-    ];
-
-    $form['booking']['booking_forms']['book_this_unit']['book_this_unit_submit_label'] = [
-      '#default_value' => $config->get('beehotel.book_this_unit_submit'),
-      '#type' => 'textfield',
-      '#title' => $this->t('Submit label'),
-      '#required' => TRUE,
-      '#description' => $this->t('The label of the submit button'),
-    ];
-
-    $form['booking']['booking_forms']['book_this_unit']['book_this_unit_header_label'] = [
-      '#default_value' => $config->get('beehotel.book_this_unit_header'),
-      '#type' => 'textfield',
-      '#title' => $this->t('Header label'),
-      '#description' => $this->t('A string introducing the form'),
-    ];
-
-    // Vertical.
-    $form['vertical'] = [
+    // UI Settings.
+    $form['ui_settings'] = [
       '#type' => 'details',
-      '#title' => $this->t('Vertical'),
+      '#title' => $this->t('UI Settings'),
       '#group' => 'settings',
     ];
 
-    $form['vertical']['setup'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
-      '#value' => "Set up <a href='/admin/beehotel/vertical/settings'>Setup vertical</a>",
-      '#title' => $this->t('Set up Vertical'),
+    $form['ui_settings']['bybeehotel_promo_enabled'] = [
+      '#default_value' => $config->get('beehotel.bybeehotel_promo_enabled'),
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable byBeeHotel promo'),
     ];
 
     // Price Alteration.
-    $form['pricelateration'] = [
+    $form['price_alteration'] = [
       '#type' => 'details',
       '#title' => $this->t('Price Alteration'),
       '#group' => 'settings',
     ];
 
-    $form['pricelateration']['chain_chart'] = [
+    $form['price_alteration']['chain_chart'] = [
       '#type' => 'radios',
       '#title' => $this->t('Chain chart'),
       '#default_value' => $config->get('beehotel.chain_chart'),
       '#options' => [
-        'pie' => $this->t('Pie') . "<img src='/" . $path . "/assets/images/google_chart_pie.jpg' alt='Google pie chart' height=40 width=40>",
-        'combochart' => $this->t('Combo Chart') . "<img src='/" . $path . "/assets/images/google_chart_combo.jpg' alt='Google combo chart' height=40 width=120>",
+        'pie' => $this->t('Pie'),
+        'combochart' => $this->t('Combo Chart'),
       ],
-      '#description' => $this->t('This feature is ALPHA'),
     ];
 
-    $form['pricelateration']['setuppage'] = [
-      '#type' => 'html_tag',
-      '#tag' => 'div',
-      '#value' => "Set up <a href='/admin/beehotel/pricealterator/alterators'>price alterators</a>",
-      '#title' => $this->t('Setup Alter ators'),
+    // Date and Time.
+    $form['dateandtime'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Date and time'),
+      '#group' => 'settings',
+    ];
+
+    $time_options = [];
+    for ($hour = 0; $hour < 24; $hour++) {
+      for ($minute = 0; $minute < 60; $minute += 30) {
+        $time_value = sprintf('%02d:%02d', $hour, $minute);
+        $time_display = $this->dateFormatter->format(strtotime($time_value), 'custom', 'g:i A');
+        $time_options[$time_value] = $time_display;
+      }
+    }
+
+    $form['dateandtime']['default_checkin_time'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Default check-in time'),
+      '#options' => $time_options,
+      '#default_value' => $config->get('beehotel.dateandtime.default_checkin_time') ?: '14:00',
     ];
 
     return parent::buildForm($form, $form_state);
@@ -319,21 +291,28 @@ class BeeHotelSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+    $cancellation_days = $form_state->getValue('cancellation_policy_days');
+    $valid_days = array_merge(range(0, 30), [40, 45, 50, 60]);
 
-    $config = $this->configFactory->getEditable('beehotel.settings');
-    $config
+    if (!in_array($cancellation_days, $valid_days)) {
+      $form_state->setErrorByName('cancellation_policy_days', $this->t('The value is not valid.'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    $this->config(static::SETTINGS)
       ->set('beehotel.off_value', $form_state->getValue('off_value'))
       ->set('beehotel.off_text', $form_state->getValue('off_text'))
       ->set('beehotel.setup_mode', $form_state->getValue('setupmode_on_value'))
       ->set('beehotel.calendar_from', $form_state->getValue('calendar_from'))
-      ->set('beehotel.book_this_unit_header', $form_state->getValue('book_this_unit_header_label'))
-      ->set('beehotel.book_this_unit_submit', $form_state->getValue('book_this_unit_submit_label'))
-      ->set('beehotel.book_this_unit_position', $form_state->getValue('book_this_unit_position'))
-      ->set('beehotel.units_search_header', $form_state->getValue('units_search_header_label'))
-      ->set('beehotel.units_search_submit', $form_state->getValue('units_search_submit_label'))
-      ->set('beehotel.units_search_position', $form_state->getValue('units_search_position'))
-      ->set('beehotel.chain_chart', $form_state->getValue('chain_chart'))
+      ->set('beehotel.cancellation_policy_days', $form_state->getValue('cancellation_policy_days'))
+      ->set('beehotel.bybeehotel_promo_enabled', (bool) $form_state->getValue('bybeehotel_promo_enabled'))
+      ->set('beehotel.dateandtime.default_checkin_time', $form_state->getValue('default_checkin_time'))
       ->save();
 
     parent::submitForm($form, $form_state);
@@ -342,7 +321,7 @@ class BeeHotelSettingsForm extends ConfigFormBase {
   /**
    * Update modules weight.
    */
-  public function submitUpdateweight(array &$form, FormStateInterface $form_state) {
+  public function submitUpdateWeight(array &$form, FormStateInterface $form_state) {
     bee_hotel_update_modules_weight();
     $this->messenger()->addStatus($this->t('Modules weight updated'));
   }

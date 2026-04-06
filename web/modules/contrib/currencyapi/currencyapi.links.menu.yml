@@ -1,0 +1,6 @@
+currencyapi.settings:
+  title: 'Currency API'
+  route_name: currencyapi.settings
+  description: 'Configure currency exchange rate settings'
+  parent: system.admin_config_services
+  weight: 100

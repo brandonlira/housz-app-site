@@ -46,7 +46,6 @@ class SaturdayNightOnly extends ConfigFormBase {
    *   BeeHotel Commerce Utils.
    */
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, BeeHotelCommerce $beehotel_commerce) {
-    parent::__construct($config_factory);
     $this->entityTypeManager = $entity_type_manager;
     $this->beehotelCommerce = $beehotel_commerce;
   }

@@ -1,0 +1,10 @@
+id: "room_name"
+title: "Room name"
+description: "The name of the room"
+settings:
+  entity: commerce_order
+  field: order_items
+  property: target_id
+  # search for hook in code
+  hook: TRUE
+value: ''

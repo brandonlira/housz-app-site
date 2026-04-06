@@ -1,0 +1,304 @@
+<?php
+
+use Drupal\commerce_account_balance\Entity\AccountBalance;
+use Drupal\commerce_price\Price;
+use Drupal\commerce_order\Entity\OrderInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+
+/**
+ * Implements hook_user_load().
+ */
+function commerce_account_balance_user_load(array $users) {}
+
+/**
+ * Implements hook_user_presave().
+ */
+function commerce_account_balance_user_presave($user) {}
+
+/**
+ * Implements hook_theme().
+ */
+function commerce_account_balance_theme() {
+  return [
+    'account_balance' => [
+      'variables' => ['balance' => NULL, 'user' => NULL],
+      'template' => 'account-balance',
+    ],
+
+    'commerce_order_account_balance__admin' => [
+      'template' => 'commerce-order-account-balance--admin',
+      'base hook' => 'commerce_order',
+      'render element' => 'elements',
+      'currencies' => NULL,
+    ],
+
+    'commerce_orders_balance_table' => [
+      'variables' => [
+        'email_balance' => NULL,
+        'balance_polarity' => NULL,
+        'empty_message' => t('No orders found.'),
+        'label' => NULL,
+        'orders' => [],
+      ],
+    ],
+
+    'commerce_orders_balance_in_currencies' => [
+      'variables' => [
+        'balance_in_currencies' => [],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_commerce_order_view_alter().
+ */
+function commerce_account_balance_commerce_order_view_alter(array &$build, OrderInterface $order, EntityViewDisplayInterface $display) {
+
+  if (!$order->getEmail()) {
+    return;
+  }
+
+  if ($order->balance->number < 1) {
+    return;
+  }
+
+  $d = [];
+  $d['order'] = $order;
+  $d['link_builder'] = \Drupal::service('commerce_account_balance.link_builder');
+  $d['balance_link'] = $d['link_builder']->getBalanceLink($d['order']);
+
+  $d['moduleHandler'] = \Drupal::service('module_handler');
+
+  // Implement CurrencyApi.
+  if ($d['moduleHandler']->moduleExists('currencyapi')) {
+
+    $d['currencyapi']['service'] = \Drupal::service('currencyapi.service');
+    $d['currencyapi']['rates'] = $d['currencyapi']['service']->getAllRates();
+    foreach ($d['currencyapi']['rates'] as $code => $currency) {
+
+      if (isset($currency['is_default']) && $currency['is_default'] == FALSE) {
+
+        $d['balance_in_currencies'][$code]['value'] = $d['currencyapi']['service']->convert(
+          $d['order']->balance->number,
+          'EUR',
+          $code);
+
+        $d['balance_in_currencies'][$code]['code'] = $code;
+
+      }
+    }
+
+    $d['currencies'] = [
+      '#type' => 'container',
+      '#theme' => "commerce_orders_balance_in_currencies",
+      '#weight' => 0,
+      '#balance_in_currencies' => $d['balance_in_currencies'],
+      '#attributes' => [
+        'class' => ['balance-in-currencies'],
+      ],
+    ];
+
+  }
+
+  if ($d['balance_link']) {
+    $build['#attached']['library'][] = 'commerce_account_balance/order-page';
+    $build['account_balance_link'] = [
+      '#type' => 'container',
+      '#weight' => -999,
+      'link' => $d['balance_link'],
+      '#attributes' => [
+        'class' => ['account-balance-link'],
+      ],
+    ];
+
+    if (isset($d['currencies'])) {
+      $build['account_balance_link']['currencies'] = $d['currencies'];
+    }
+
+  }
+  $build['#theme'] = "commerce_order_account_balance__admin";
+}
+
+/**
+ * Theme function for commerce orders table with balance.
+ */
+function theme_commerce_orders_balance_table($variables) {
+  $orders = $variables['orders'];
+  $empty_message = $variables['empty_message'];
+
+  if (empty($orders)) {
+    return ['#markup' => '<div class="empty-message">' . $empty_message . '</div>'];
+  }
+
+  // Prepare table header.
+  $header = [
+    t('Order ID'),
+    t('Customer'),
+    t('Date'),
+    t('Status'),
+    t('Total'),
+    t('Paid'),
+    t('Balance'),
+    t('Operations'),
+  ];
+
+  // Prepare table rows.
+  $rows = [];
+  foreach ($orders as $order) {
+    $customer = $order->getCustomer();
+    $customer_name = $customer->isAnonymous() ? t('Anonymous') : $customer->getDisplayName();
+
+    // Calculate payment balance.
+    $total_price = $order->getTotalPrice();
+    $total_paid = calculate_order_paid_amount($order);
+    $balance = $total_price->subtract($total_paid);
+
+    // Determine balance display class.
+    $balance_class = '';
+    if ($balance->isPositive()) {
+      $balance_class = 'balance-positive';
+    }
+    elseif ($balance->isNegative()) {
+      $balance_class = 'balance-negative';
+    }
+    else {
+      $balance_class = 'balance-zero';
+    }
+
+    $rows[] = [
+      'data' => [
+        $order->id(),
+        $customer_name,
+        \Drupal::service('date.formatter')->format($order->getCreatedTime()),
+        $order->getState()->getLabel(),
+        format_price($total_price),
+        format_price($total_paid),
+        [
+          'data' => format_price($balance),
+          'class' => [$balance_class],
+        ],
+        [
+          'data' => [
+            '#type' => 'operations',
+            '#links' => [
+              'view' => [
+                'title' => t('View'),
+                'url' => $order->toUrl(),
+              ],
+              'payments' => [
+                'title' => t('Payments'),
+                'url' => $order->toUrl('canonical')->setRouteParameter('commerce-payment-overview', 'payments'),
+              ],
+            ],
+          ],
+        ],
+      ],
+    ];
+  }
+
+  // Build the table.
+  $build = [
+    '#type' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => $empty_message,
+    '#attributes' => [
+      'class' => ['commerce-orders-balance-table'],
+    ],
+    '#attached' => [
+      'library' => ['commerce_account_balance/orders_balance'],
+    ],
+  ];
+
+  return $build;
+}
+
+/**
+ * Helper function to calculate total amount paid for an order.
+ */
+function commerce_account_balance_calculate_order_paid_amount(OrderInterface $order) {
+  $payment_storage = \Drupal::entityTypeManager()->getStorage('commerce_payment');
+  $payments = $payment_storage->loadMultipleByOrder($order);
+
+  $total_paid = new Price('0', $order->getTotalPrice()->getCurrencyCode());
+
+  foreach ($payments as $payment) {
+    if ($payment->getState()->value == 'completed') {
+      $total_paid = $total_paid->add($payment->getAmount());
+    }
+  }
+
+  return $total_paid;
+}
+
+/**
+ * Helper function to format price with currency.
+ */
+function commerce_account_balance_format_price(Price $price) {
+  return [
+    '#type' => 'inline_template',
+    '#template' => '{{ price|commerce_price_format }}',
+    '#context' => [
+      'price' => $price,
+    ],
+  ];
+}
+
+/**
+ * Get orders by email address.
+ */
+function commerce_account_balance_get_mail_orders($mail) {
+
+  $data = [];
+  $data['mail'] = $mail;
+
+  $data['orderStorage'] = \Drupal::entityTypeManager()->getStorage('commerce_order');
+
+  $data['ids'] = $data['orderStorage']->getQuery()
+    ->condition('mail', $data['mail'])
+    ->accessCheck(TRUE)
+    ->range(0, 500)
+    ->execute();
+  $data['orders'] = $data['orderStorage']->loadMultiple($data['ids']);
+  return $data['orders'];
+}
+
+/**
+ * Get balance for a given email address.
+ */
+function commerce_account_balance_get_email_balance(array $orders) {
+
+  $data = [];
+  $data['orders'] = $orders;
+  $data['email_balance'] = 0.00;
+  foreach ($data['orders'] as $o) {
+    $data['email_balance'] += (float) $o->get("balance")->number;
+  }
+
+  $price = new Price($data['email_balance'], commerce_account_balance_currency());
+
+  $data['email_balance'] = [
+    '#type' => 'inline_template',
+    '#template' => '{{ price|commerce_price_format }}',
+    '#context' => [
+      'price' => $price,
+    ],
+  ];
+  return $data['email_balance'];
+
+}
+
+/**
+ * Get current currency.
+ *
+ * @todo use commerce functions
+ */
+function commerce_account_balance_currency() {
+
+  $data = [];
+  $data['store'] = \Drupal::service('commerce_store.current_store')->getStore();
+  $data['default_currency'] = $data['store']->getDefaultCurrencyCode();
+  return $data['default_currency'];
+
+}

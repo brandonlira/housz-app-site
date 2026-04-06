@@ -1,0 +1,3 @@
+dateandtime:
+  default_checkin_time: '15:00'
+  default_checkout_time: '10:00'

@@ -1,0 +1,13 @@
+beehotel_happening_today.happening_today:
+  title: 'Happening today'
+  route_name: 'beehotel_happening_today.daily_report'
+  parent: beehotel.admin
+  description: "What's appening today. Etc:  checkin, checkout, cleaning"
+  weight: 200
+
+beehotel_happening_today.happening_today.settings:
+  title: 'Happening today Settings'
+  route_name: 'beehotel_happening_today.admin_settings'
+  parent: beehotel.admin
+  description: 'Set up Happening Today preferences'
+  weight: 201

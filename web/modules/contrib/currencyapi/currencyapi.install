@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the currencyapi module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function currencyapi_uninstall() {
+  // Remove specific configuration.
+  \Drupal::configFactory()->getEditable('currency.api.settings')->delete();
+}

@@ -1,0 +1,43 @@
+services:
+  # beehotel_happening_today.report_generator:
+  #   class: Drupal\beehotel_happening_today\Service\DailyReportGenerator
+  #   arguments: [
+  #     '@database',
+  #     '@logger.factory',
+  #     '@bee_hotel.event',
+  #     '@beehotel_utils.beehotelunit',
+  #     '@date.formatter',
+  #     '@config.factory'
+  #   ]
+
+  # beehotel_happening_today.happening_today_mail_service:
+  #   class: Drupal\beehotel_happening_today\Service\HappeningTodayMailService
+  #   arguments: [
+  #     '@plugin.manager.mail',
+  #     '@renderer',
+  #     '@logger.factory',
+  #     '@config.factory',
+  #     '@language_manager'
+  #   ]
+
+# Refactoring
+  beehotel_happening_today.daily_report_generator:
+    class: Drupal\beehotel_happening_today\Service\DailyReportGenerator
+    arguments: ['@beehotel_happening_today.data_processor', '@beehotel_happening_today.report_builder', '@config.factory']
+
+  beehotel_happening_today.data_processor:
+    class: Drupal\beehotel_happening_today\Service\DataProcessor
+    arguments: ['@beehotel_utils.beehotelunit', '@date.formatter', '@config.factory', '@beehotel_happening_today.unit_processor']
+
+  beehotel_happening_today.unit_processor:
+    class: Drupal\beehotel_happening_today\Service\UnitProcessor
+    arguments: ['@beehotel_happening_today.order_service']
+
+  beehotel_happening_today.order_service:
+    class: Drupal\beehotel_happening_today\Service\OrderService
+
+  beehotel_happening_today.report_builder:
+    class: Drupal\beehotel_happening_today\Service\ReportBuilder
+
+  # beehotel_happening_today.bat_service:
+  #   class: Drupal\beehotel_happening_today\Service\BatService

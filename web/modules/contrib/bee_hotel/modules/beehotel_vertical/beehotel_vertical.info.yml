@@ -6,7 +6,12 @@ package: 'BEE Hotel'
 dependencies:
   - drupal:bee_hotel
 
-# Information added by Drupal.org packaging script on 2025-05-10
-version: '2.24.6'
+# Information added by Drupal.org packaging script on 2026-03-01
+# version: '2.25.10'
+# project: 'bee_hotel'
+# datestamp: 1772358454
+
+# Information added by Drupal.org packaging script on 2026-03-31
+version: '2.26.0'
 project: 'bee_hotel'
-datestamp: 1746864358
+datestamp: 1774951485

@@ -55,6 +55,24 @@ CONFIGURATION
   Thanks for your support!
 
 
+  
+GUEST MESSAGES
+--------------
+  
+Guest messages are token based messages for guests:
+
+ * How to use [todo]
+ * How to create a new message [todo]
+ * How to create a new token into the module [todo]
+ * * create a new YML file
+ * * create a new method into *file
+ * How to create a new token into a custom module [todo]
+ * How to create a new hook token [todo]
+ 
+
+  
+  
+  
 ATTRIBUTION
 -------------
 

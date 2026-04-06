@@ -1,0 +1,10 @@
+settings-form:
+  version: 1.x
+  css:
+    layout:
+      assets/css/settings-form.css: {}
+currency-exchange:
+  version: 1.x
+  css:
+    layout:
+      assets/css/currency-exchange.css: {}
