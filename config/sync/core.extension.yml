@@ -58,6 +58,7 @@ module:
   jsonapi: 0
   jsonapi_extras: 0
   link: 0
+  mailer_transport: 0
   mailsystem: 0
   menu_link_content: 0
   menu_ui: 0
@@ -78,6 +79,7 @@ module:
   serialization: 0
   shortcut: 0
   state_machine: 0
+  symfony_mailer: 0
   system: 0
   taxonomy: 0
   text: 0

@@ -89,7 +89,7 @@ class FullOccupancyResource extends ResourceBase implements \Drupal\Core\Plugin\
       }
     }
 
-    $payload = ['calendar' => ['years' => []]];
+    $payload = ['calendar' => ['years' => (object) []]];
     foreach ($unique_days as $item) {
       $Y = $item['year'];
       $M = $item['month'];

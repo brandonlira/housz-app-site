@@ -1,0 +1,10 @@
+uuid: aebe7474-ebd4-4d4e-af81-f90816a005fd
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: oUtf135g-IPzmggtfsOOX5ZINxbSe5Kno64BN2NUKn0
+id: _
+configuration:
+  mailer_inline_css: {  }
+  mailer_url_to_absolute: {  }
