@@ -1,0 +1,16 @@
+name: 'BEE Hotel Add to Cart'
+type: module
+description: Adding BEEHOTEL units To Cart Programmatically.
+package: 'BEE Hotel'
+core_version_requirement: ^9.4 || ^10 || ^11
+textdomain: beehotel
+
+# Information added by Drupal.org packaging script on 2026-03-01
+# version: '2.25.10'
+# project: 'bee_hotel'
+# datestamp: 1772358454
+
+# Information added by Drupal.org packaging script on 2026-03-31
+version: '2.26.0'
+project: 'bee_hotel'
+datestamp: 1774951485

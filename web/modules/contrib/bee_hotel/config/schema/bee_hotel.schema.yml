@@ -1,0 +1,62 @@
+# Schema for beehotel.settings configuration
+beehotel.settings:
+  type: config_object
+  label: 'Bee Hotel Settings'
+  mapping:
+    beehotel:
+      type: mapping
+      label: 'Bee Hotel Main Settings'
+      mapping:
+        off_value:
+          type: boolean
+          label: 'Reservations OFF'
+        off_text:
+          type: string
+          label: 'Reservations OFF message'
+        setup_mode:
+          type: boolean
+          label: 'SETUP mode ON'
+        calendar_from:
+          type: integer
+          label: 'Accept reservations from'
+        book_this_unit_header:
+          type: string
+          label: 'Book this unit header label'
+        book_this_unit_submit:
+          type: string
+          label: 'Book this unit submit label'
+        book_this_unit_position:
+          type: string
+          label: 'Book this unit position'
+        units_search_header:
+          type: string
+          label: 'Units search header label'
+        units_search_submit:
+          type: string
+          label: 'Units search submit label'
+        units_search_position:
+          type: string
+          label: 'Units search position'
+        chain_chart:
+          type: string
+          label: 'Chain chart type'
+        guestmessages:
+          type: mapping
+          label: 'Guest Messages Settings'
+          mapping:
+            balance_cash_subtract:
+              type: string
+              label: 'Balance cash subtract amount'
+            smartceiling:
+              type: boolean
+              label: 'Smart Ceiling enabled'
+        dateandtime:
+          type: mapping
+          label: 'Date and Time Settings'
+          mapping:
+            default_checkin_time:
+              type: string
+              label: 'Default check-in time'
+            default_checkout_time:
+              type: string
+              label: 'Default check-out time'

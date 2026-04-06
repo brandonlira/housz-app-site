@@ -1,0 +1,201 @@
+<?php
+
+/**
+ * @file
+ * Contains beehotel_happening_today.module.
+ */
+
+use Drupal\Core\Datetime\DrupalDateTime;
+
+/**
+ * Implements hook_help().
+ */
+function beehotel_happening_today_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.beehotel_happening_today':
+      return '<p>' . t('Generates daily reports and emails for hotel arrivals, departures, and daily tasks.') . '</p>';
+  }
+}
+
+function beehotel_happening_today_theme($existing, $type, $theme, $path) {
+  return [
+    'daily_report_main' => [
+      'variables' => [
+        //Global
+        'day_of_the_week' => NULL,
+        'date' => NULL,
+        'generated_time' => NULL,
+        // Sections.
+        'departures' => [],
+        'first_night_passed' => [],
+        'rooms_to_clean' => [],
+        'arrivals' => [],
+        'progress' => [],
+        'are_leaving_tomorrow' => [],
+        'special_notes' => [],
+      ],
+      'template' => 'daily-report-main',
+      'path' => $path . '/templates',
+    ],
+
+
+   'beehotel_arrived_yesterday' => [
+      'variables' => [
+        'first_night_passed' => [],
+        'section_title' => 'First Night',
+        'icon' => '🌙',
+        'empty_message' => 'No guests requiring follow-up today',
+      ],
+      'template' => 'arrived-yesterday',
+      'path' => $path . '/templates',
+    ],
+    'beehotel_arriving' => [
+      'variables' => [
+        'arrivals' => [],
+        'section_title' => 'Arrivals',
+        'icon' => '📥',
+        'empty_message' => 'No arrivals today',
+      ],
+      'template' => 'arriving',
+      'path' => $path . '/templates',
+    ],
+    'beehotel_departures' => [
+      'variables' => [
+        'departures' => [],
+        'section_title' => 'Departures',
+        'icon' => '📤',
+        'empty_message' => 'No departures today',
+      ],
+      'template' => 'departures',
+      'path' => $path . '/templates',
+    ],
+    'beehotel_leaving_tomorrow' => [
+      'variables' => [
+        'are_leaving_tomorrow' => [],
+        'section_title' => 'Leaving Tomorrow',
+        'icon' => '📅',
+        'empty_message' => 'Noone is leaving tomorrow',
+      ],
+      'template' => 'leaving-tomorrow',
+      'path' => $path . '/templates',
+    ],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ];
+}
+
+/**
+ * Implements hook_cron().
+ */
+function beehotel_happening_today_cron() {
+  $data = [];
+
+  $data['config'] = \Drupal::config('beehotel_happening_today.settings');
+  $data['state'] = \Drupal::state();
+  $data['reportGenerator'] = \Drupal::service('beehotel_happening_today.report_generator');
+
+  // Check if automatic sending is enabled.
+  if (!$data['config']->get('enabled')) {
+    return;
+  }
+
+  $data['cron'] = [
+    'enabled' => true,
+    'execution_time' => time(),
+    'scheduled_time' => $data['config']->get('report_time') ?: '07:00',
+    'last_sent' => \Drupal::state()->get('beehotel_happening_today.last_report_sent', 0),
+  ];
+
+  // Check if it's time to send the report
+  if (!beehotel_happening_today_should_send_report($data)) {
+    \Drupal::logger('beehotel_happening_today')->debug('Not yet time to send daily report');
+    return;
+  }
+
+  try {
+    $data = array_merge($data, $data['reportGenerator']->prepareData());
+    $mailService = \Drupal::service('beehotel_happening_today.happening_today_mail_service');
+    $mailService->sendHappeningTodaySummary($data);
+    \Drupal::state()->set('beehotel_happening_today.last_report_sent', $data['cron']['execution_time']);
+
+  } catch (\Exception $e) {
+    \Drupal::logger('beehotel_happening_today')->error('Error sending Happening Today report: @error', [
+      '@error' => $e->getMessage(),
+    ]);
+  }
+}
+
+/**
+ * Determines if it's time to send the daily report.
+ */
+function beehotel_happening_today_should_send_report_OLD(array $data): bool {
+
+  $hours_since_last_send = (time() - $data['cron']['last_sent']) / 3600;
+
+  if ($hours_since_last_send < 24) {
+    \Drupal::logger('beehotel_happening_today')->info('Report sent @hours hours ago', [
+      '@hours' => round($hours_since_last_send, 1),
+    ]);
+    return false;
+  }
+  return true;
+}
+
+
+/**
+ * Determines if it's time to send the daily report.
+ */
+function beehotel_happening_today_should_send_report(array $data): bool {
+
+  if (!$data['cron']['enabled']) {
+    return false;
+  }
+
+  // Extract scheduled time
+  list($scheduled_hour, $scheduled_minute) = explode(':', $data['cron']['scheduled_time']);
+  $scheduled_hour = (int) $scheduled_hour;
+  $scheduled_minute = (int) $scheduled_minute;
+
+  $current_time = $data['cron']['execution_time'];
+  $current_hour = (int) date('H', $current_time);
+  $current_minute = (int) date('i', $current_time);
+  $current_date = date('Y-m-d', $current_time);
+  $last_sent_date = date('Y-m-d', $data['cron']['last_sent']);
+
+  $is_after_scheduled_time = ($current_hour > $scheduled_hour) ||
+                             ($current_hour == $scheduled_hour && $current_minute >= $scheduled_minute);
+
+  return $is_after_scheduled_time && ($last_sent_date !== $current_date);
+
+}
+
+
+
+/**
+ * Implements hook_mail().
+ */
+function beehotel_happening_today_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'happening_today_summary':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      $message['headers']['Content-Type'] = 'text/html; charset=UTF-8;';
+      break;
+  }
+}

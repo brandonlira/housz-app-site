@@ -12,8 +12,11 @@ main:
     theme:
       assets/css/main-theme.css: {}
       assets/css/beehotel.inbox.css: {}
+      # assets/css/promo.css: {}
   js:
     assets/js/alter.js: {}
+    # assets/js/promo.js: {}
+
   dependencies:
     - core/drupal
     - core/drupalSettings
@@ -51,7 +54,6 @@ beehotel-litepicker:
     - core/once
 
 beehotel-guestmessages:
-  # header: true
   js:
     assets/js/guestmessages.js: {}
   css:
@@ -61,3 +63,15 @@ beehotel-guestmessages:
   dependencies:
     - core/drupal
     - core/drupalSettings
+
+beehotel-promo:
+  version: 1.x
+  js:
+    assets/js/promo.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+  css:
+    layout:
+      assets/css/promo.css: {}

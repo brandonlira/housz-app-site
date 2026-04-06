@@ -1,0 +1,7 @@
+services:
+  currencyapi.service:
+    class: Drupal\currencyapi\CurrencyApiService
+    arguments: ['@config.factory', '@keyvalue.expirable']
+  currencyapi.cron:
+    class: Drupal\currencyapi\CurrencyApiCron
+    arguments: ['@state']

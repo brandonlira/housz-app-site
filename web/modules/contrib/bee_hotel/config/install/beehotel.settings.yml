@@ -14,5 +14,8 @@ beehotel:
   units_search_submit: Search
   units_search_position: none
   chain_chart: null
+  dateandtime:
+    default_checkin_time: '15:00'
+    default_checkout_time: '10:00'
 reservation_paused_1: 1745930015
 unit_reservation_form_disabled: false

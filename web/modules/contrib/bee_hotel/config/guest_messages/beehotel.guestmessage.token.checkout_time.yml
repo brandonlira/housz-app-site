@@ -1,0 +1,8 @@
+id: "checkout_time"
+title: "check-out time"
+description: "Check out is at ..."
+settings:
+  entity: NULL
+  field: NULL
+  property: NULL
+value: '10:00am'

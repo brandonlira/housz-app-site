@@ -4,7 +4,7 @@ namespace Drupal\bee_hotel\Resolvers;
 
 use Drupal\beehotel_pricealterator\Alter;
 use Drupal\beehotel_pricealterator\PreAlter;
-use Drupal\bee_hotel\BeeHotel;
+use Drupal\beehotel_utils\BeeHotel;
 use Drupal\beehotel_utils\BeeHotelUnit;
 use Drupal\beehotel_utils\Dates;
 use Drupal\Component\Plugin\PluginManagerInterface;
@@ -39,7 +39,7 @@ class SalepriceResolver implements PriceResolverInterface {
   /**
    * The bee hotel utils.
    *
-   * @var \Drupal\bee_hotel\BeeHotel
+   * @var \Drupal\beehotel_utils\BeeHotel
    */
   private $beehotel;
 
@@ -85,7 +85,7 @@ class SalepriceResolver implements PriceResolverInterface {
    *   The request stack.
    * @param \Drupal\beehotel_utils\Dates $bee_hotel_dates
    *   The BeeHotel Dates Utility.
-   * @param \Drupal\bee_hotel\BeeHotel $bee_hotel
+   * @param \Drupal\beehotel_utils\BeeHotel $bee_hotel
    *   The BeeHotel Utilities.
    * @param \Drupal\beehotel_utils\BeeHotelUnit $bee_hotel_unit
    *   The BeeHotel Unit Utility.
@@ -116,7 +116,7 @@ class SalepriceResolver implements PriceResolverInterface {
     return new static(
       $container->get('request_stack'),
       $container->get('beehotel_utils.dates'),
-      $container->get('bee_hotel.beehotel'),
+      $container->get('beehotel_utils.beehotel'),
       $container->get('beehotel_utils.beehotelunit'),
       $container->get('beehotel_pricealterator.prealter'),
       $container->get('beehotel_pricealterator.alter'),

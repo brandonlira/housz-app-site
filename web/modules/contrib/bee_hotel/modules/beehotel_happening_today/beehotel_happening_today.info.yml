@@ -1,0 +1,20 @@
+name: 'BeeHotel Happening Today'
+type: module
+description: 'Generates daily reports and emails for hotel arrivals, departures, and daily tasks.'
+package: 'Bee Hotel'
+core_version_requirement: ^11
+dependencies:
+  - bat:bat
+  - drupal:system
+  - drupal:datetime
+textdomain: beehotel_happening_today
+
+# Information added by Drupal.org packaging script on 2026-03-01
+# version: '2.25.10'
+# project: 'bee_hotel'
+# datestamp: 1772358454
+
+# Information added by Drupal.org packaging script on 2026-03-31
+version: '2.26.0'
+project: 'bee_hotel'
+datestamp: 1774951485

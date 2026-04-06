@@ -7,3 +7,6 @@ services:
   beehotel_utils.beehotelunit:
     class: Drupal\beehotel_utils\BeeHotelUnit
     arguments: ['@current_user', '@entity_type.manager', '@messenger', '@config.factory', '@beehotel_utils.dates', '@request_stack', '@renderer']
+  beehotel_utils.beehotel:
+    class: Drupal\beehotel_utils\BeeHotel
+    arguments: ['@commerce_product.attribute_field_manager',  '@beehotel_utils.beehotelunit', '@config.factory', '@entity_type.manager', '@messenger', '@request_stack']

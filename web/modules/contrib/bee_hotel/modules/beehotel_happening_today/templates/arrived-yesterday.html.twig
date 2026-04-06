@@ -1,0 +1,107 @@
+<section class="daily-report__section daily-report__section--firstnight">
+  <h2 class="daily-report__section-title">
+    <span aria-hidden="true">🌙</span>
+    {{ 'First Night'|t }}
+    <span class="badge" aria-label="{{ 'Number of guests with first night passed'|t }}: {{ first_night_passed|length }}">
+      {{ first_night_passed|length }}
+    </span>
+  </h2>
+
+  {% if first_night_passed is not empty %}
+    <div class="daily-report__grid daily-report__first_night_passed-grid" role="list" aria-label="{{ 'Guests with first night passed'|t }}">
+      {% for guest in first_night_passed %}
+        <div class="daily-report__card" role="listitem">
+          <div class="daily-report__card-header">
+            <h3 class="daily-report__room-name">{{ guest.unit_name }}</h3>
+            <span class="daily-report__time">
+              <a href="{{ guest.booking_guest_messages }}" aria-label="{{ 'Check happiness for'|t }} {{ guest.unit_name }}">
+                <span class="icon" aria-hidden="true">💡</span> {{ "Check happiness"|t }}
+              </a>
+            </span>
+          </div>
+
+          <div class="daily-report__guest-info">
+            {% if guest.guest_name %}
+              <strong>{{ guest.guest_name }}</strong>
+            {% endif %}
+            <div class="daily-report__stay-duration">
+              <span class="visually-hidden">{{ 'Number of nights stayed'|t }}:</span>
+              {{ 'Nights'|t }}: {{ guest.nights_stayed }}
+            </div>
+
+            <div class="daily-report__stay-people">
+              <span class="visually-hidden">{{ 'Number of people'|t }}:</span>
+              {{ 'People'|t }}: {{ guest.people }}
+            </div>
+
+            {% if guest.guest_phone %}
+              <div class="daily-report__contact">
+                <span class="icon" aria-hidden="true">📞</span>
+                <span class="visually-hidden">{{ 'Phone number'|t }}:</span>
+                {{ guest.guest_phone }}
+              </div>
+            {% endif %}
+            {% if guest.guest_email %}
+              <div class="daily-report__contact">
+                <span class="icon" aria-hidden="true">📧</span>
+                <span class="visually-hidden">{{ 'Email address'|t }}:</span>
+                {{ guest.guest_email }}
+              </div>
+
+              <div class="daily-report__link">
+                {{ 'Link a Guest messages for this order'|t }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="daily-report__booking-info">
+            <ul>
+              <li>
+                <span class="visually-hidden">{{ 'Stay start date'|t }}:</span>
+                {{ 'Stay from'|t }}: {{ guest.start_date|date('d/m/Y') }}
+              </li>
+              <li>
+                <span class="visually-hidden">{{ 'Stay end date'|t }}:</span>
+                {{ 'Stay until'|t }}: {{ guest.end_date|date('d/m/Y') }}
+              </li>
+            </ul>
+
+            {# Guest follow-up action section #}
+            <div class="daily-report__followup-actions">
+              <ul>
+                <li>
+                  {{ 'Check happiness'|t }}
+                  <a href="{{ guest.booking_guest_messages }}" aria-label="{{ 'Check happiness for booking'|t }} {{ guest.booking_id }}">
+                    {{ guest.booking_id }}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="daily-report__comments">
+            <ul>
+              <li>
+                <a href="{{ guest.booking_link }}"
+                   class=""
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   data-comments="{{ guest.comment_count }}"
+                   aria-label="{{ 'View order comments'|t }} ({{ guest.comment_count }} {{ 'comments'|t }})">
+                  {{ 'Comments'|t }}
+                  {% if guest.comment_count > 0 %}
+                    <span class="visually-hidden">({{ guest.comment_count }})</span>
+                  {% endif %}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="daily-report__empty">
+      <p>{{ 'No guests requiring follow-up today'|t }}</p>
+    </div>
+  {% endif %}
+</section>

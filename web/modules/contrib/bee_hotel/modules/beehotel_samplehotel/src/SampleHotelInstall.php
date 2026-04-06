@@ -114,14 +114,40 @@ class SampleHotelInstall {
           elseif (isset($type_values['id'])) {
             $properties['id'] = $type_values['id'];
           }
-          $entities = \Drupal::entityTypeManager()->getStorage($type)
-            ->loadByProperties($properties);
-          foreach ($entities as $entity) {
-            $entity->delete();
+
+          // First check if the entity type exists.
+          $entityTypeManager = \Drupal::entityTypeManager();
+
+          try {
+              // Get the definition first.
+              $definition = $entityTypeManager->getDefinition($type, FALSE);
+
+              if (!$definition) {
+                  // Log the error.
+                  \Drupal::logger('beehotel_samplehotel')->error('@type entity type does not exist. Please enable required modules.', [
+                      '@type' => $type,
+                  ]);
+
+                  // Handle gracefully - return null or empty array.
+                  return NULL; // or return [];
+              }
+
+              // Now safely get the storage.
+              $storage = $entityTypeManager->getStorage($type);
+
+              $entities = $storage->loadByProperties($properties);
+              foreach ($entities as $entity) {
+                $entity->delete();
+              }
+
+          } catch (PluginNotFoundException $e) {
+              \Drupal::logger('beehotel_samplehotel')->error('PluginNotFoundException: @message', [
+                  '@message' => $e->getMessage(),
+              ]);
+              return NULL;
           }
         }
       }
     }
   }
-
 }

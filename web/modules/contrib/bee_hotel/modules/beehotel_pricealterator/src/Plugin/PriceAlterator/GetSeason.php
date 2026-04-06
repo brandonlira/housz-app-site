@@ -2,39 +2,15 @@
 
 namespace Drupal\beehotel_pricealterator\Plugin\PriceAlterator;
 
-use Drupal\Core\Config\ImmutableConfig;
-use Drupal\beehotel_utils\BeeHotelCommerce;
-use Drupal\beehotel_pricealterator\PriceAlteratorBase;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\beehotel_utils\BeeHotelCommerce;
+use Drupal\beehotel_pricealterator\PriceAlteratorBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Get the current price season.
- *
- * Because the plugin manager class for our plugins uses annotated class
- * discovery, Price Alterators only needs to exist within the
- * Plugin\PriceAlterator namespace, and provide a PriceAlterator
- * annotation to be declared as a plugin. This is defined in
- * \Drupal\beehotel_pricealterator\PriceAlteratorPluginManager::__construct().
- *
- * The following is the plugin annotation. This is parsed by Doctrine to make
- * the plugin definition. Any values defined here will be available in the
- * plugin definition.
- *
- * This should be used for metadata that is specifically required to instantiate
- * the plugin, or for example data that might be needed to display a list of all
- * available plugins where the user selects one. This means many plugin
- * annotations can be reduced to a plugin ID, a label and perhaps a description.
- *
- * The weight Key is the weight for this alterator
- * -9999 : heaviest, to be used as very first (reserved)
- * -9xxx : heavy, to be used as first (reserved)
- *     0 : no need to be weighted
- *  1xxx : allowed in custom modules
- *  xxxx : everything else
- *  9xxx : ligh, to be used as last (reserved)
- *  9999 : lighest, to be used as very last (reserved)
  *
  * @PriceAlterator(
  *   id = "GetSeason",
@@ -51,7 +27,7 @@ class GetSeason extends PriceAlteratorBase {
   /**
    * The value for this alterator.
    *
-   * @var float
+   * @var float|null
    */
   private $value = NULL;
 
@@ -60,7 +36,7 @@ class GetSeason extends PriceAlteratorBase {
    *
    * IE: "percentage", or "fixed".
    *
-   * @var string
+   * @var string|null
    */
   private $type = NULL;
 
@@ -72,11 +48,6 @@ class GetSeason extends PriceAlteratorBase {
   protected $beehotelCommerce;
 
   /**
-   * The devel config.
-   */
-  protected ImmutableConfig $config;
-
-  /**
    * The dates Utilities.
    *
    * @var \Drupal\beehotel_utils\Dates
@@ -84,7 +55,7 @@ class GetSeason extends PriceAlteratorBase {
   protected $datesUtil;
 
   /**
-   * Constructs a new alterator object.
+   * Constructs a new GetSeason alterator.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -92,6 +63,8 @@ class GetSeason extends PriceAlteratorBase {
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    * @param \Drupal\beehotel_utils\BeeHotelCommerce $beehotel_commerce
    *   BeeHotel Commerce Utils.
    */
@@ -99,10 +72,13 @@ class GetSeason extends PriceAlteratorBase {
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    BeeHotelCommerce $beehotel_commerce,
+    ConfigFactoryInterface $config_factory,
+    BeeHotelCommerce $beehotel_commerce
   ) {
+    // Call parent constructor to set up base class dependencies.
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $config_factory);
+
     $this->beehotelCommerce = $beehotel_commerce;
-    $this->config = \Drupal::config($this->configName());
   }
 
   /**
@@ -113,34 +89,15 @@ class GetSeason extends PriceAlteratorBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('beehotel_utils.beehotelcommerce'),
+      $container->get('config.factory'),
+      $container->get('beehotel_utils.beehotelcommerce')
     );
   }
 
   /**
-   * Reference to the Alterator (as plugin).
-   *
-   *   This value matches the ID in the @PriceAlterator annotation.
+   * {@inheritdoc}
    */
-  public function pluginId() {
-    $tmp = explode("\\", __CLASS__);
-    return end($tmp);
-  }
-
-  /**
-   * Get season.
-   *
-   * Get season applied to checkin day.
-   *
-   * @param array $data
-   *   Array of data related to this price.
-   * @param array $pricetable
-   *   Array of prices by week day.
-   *
-   * @return array
-   *   An updated $data array.
-   */
-  public function alter(array $data, array $pricetable) {
+  public function alter(array $data, array $pricetable): array {
     $data = $this->applyLogic($data);
     return $data;
   }
@@ -155,6 +112,9 @@ class GetSeason extends PriceAlteratorBase {
    *   Array of data related to this price.
    * @param array $pricetable
    *   Array of prices by week day.
+   *
+   * @return mixed
+   *   Rendered output or string.
    */
   public function currentValue(array $data, array $pricetable) {
     if ($data['caller'] == 'Drupal\beehotel_pricealterator\PriceAlteratorPluginManager::alterators') {
@@ -176,8 +136,8 @@ class GetSeason extends PriceAlteratorBase {
    * Apply the logic.
    */
   private function applyLogic($data) {
-
     $data = beehotel_pricealterator_current_seasons($data);
+
     $day = $data['norm']['dates_from_search_form']['checkin'];
     $dates = [];
     $dates['checkin']['timestamp'] = $day['timestamp'];
@@ -199,8 +159,11 @@ class GetSeason extends PriceAlteratorBase {
         }
       }
     }
+
     $data['season'] = $data['seasons']['array']['seasons']['fallback'];
-    $data['tmp']['price'] = $data['basetable'][$data['nid']][$data['season']][$data['tmp']['day_of_the_week']];
+    if (isset($data['tmp']['day_of_the_week'])) {
+      $data['tmp']['price'] = $data['basetable'][$data['nid']][$data['season']][$data['tmp']['day_of_the_week']];
+    }
 
     return $data;
   }
@@ -209,9 +172,13 @@ class GetSeason extends PriceAlteratorBase {
    * Get Season settings.
    *
    * Get Seasons settings from user input.
+   *
+   * @param int $timestamp
+   *   The timestamp to check.
+   * @param array $data
+   *   The data array to update.
    */
   public function getThisDaySeasonFromInput($timestamp, &$data) {
-
     $data = beehotel_pricealterator_get_config($data);
     $dates = [];
     $dates['checkin']['timestamp'] = $timestamp;
@@ -242,8 +209,13 @@ class GetSeason extends PriceAlteratorBase {
   /**
    * Get Season settings.
    *
-   * Get Seasons settings from user input.
+   * Get Seasons settings from user input (public wrapper).
+   *
+   * @param array $data
+   *   The data array to update.
    */
-  public function getThisDaySeasonFromInputPublic(&$data) {}
+  public function getThisDaySeasonFromInputPublic(&$data) {
+    // This method is empty. Presumably for future use.
+  }
 
 }

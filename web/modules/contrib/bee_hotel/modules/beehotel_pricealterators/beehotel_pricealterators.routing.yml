@@ -62,3 +62,11 @@ beehotel_pricealterator.pricealterator.specialnights_settings:
     _title: 'Special Nights'
   requirements:
     _permission: 'administer bee_hotel'
+
+beehotel_pricealterator.pricealterator.checkintime_settings:
+  path: '/admin/beehotel/pricealterator/alterators/checkintime'
+  defaults:
+    _form: '\Drupal\beehotel_pricealterators\Form\CheckinTime'
+    _title: 'Check-in Time'
+  requirements:
+    _permission: 'administer bee_hotel'

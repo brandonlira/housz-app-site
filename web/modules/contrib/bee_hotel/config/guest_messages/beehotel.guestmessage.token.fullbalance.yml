@@ -1,0 +1,8 @@
+id: "full_balance"
+title: "Full Balance"
+description: "Balance left to pay"
+settings:
+  entity: commerce_order
+  field: balance
+  property: number
+value: NULL

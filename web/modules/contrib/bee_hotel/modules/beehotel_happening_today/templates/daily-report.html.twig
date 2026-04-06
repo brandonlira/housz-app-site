@@ -1,0 +1,378 @@
+{#
+/**
+ * @file
+ * Template for the daily report page.
+ */
+#}
+
+<div class="daily-report" data-daily-report>
+  <header class="daily-report__header">
+    <h1 class="daily-report__title"> {{ "Happening today"|t }} </h1>
+    <div class="daily-report__subtitle">{{ day_of_the_week }}, {{ date }}</div>
+  </header>
+
+  <div class="daily-report__sections">
+
+    {# Departures Section #}
+    <section class="daily-report__section daily-report__section--departures">
+      <h2 class="daily-report__section-title">
+        <span class="icon">🚪</span>
+        {{ 'Departures'|t }}
+        <span class="badge">{{ departures|length }}</span>
+      </h2>
+
+      {% if departures %}
+        <div class="daily-report__grid">
+          {% for departure in departures %}
+            <div class="daily-report__card">
+              <div class="daily-report__card-header">
+                <h3 class="daily-report__room-name">{{ departure.unit_name }}</h3>
+                <span class="daily-report__time">{{ departure.check_out_time }}</span>
+              </div>
+
+              {% if departure.guest_name %}
+                <div class="daily-report__guest-info">
+                  <strong>{{ departure.guest_name }}</strong>
+                </div>
+              {% endif %}
+
+              <div class="daily-report__booking-info">
+
+                <ul>
+                  <li>{{ 'To'|t }}: {{ departure.end_date|date('d/m/Y') }}
+
+                  {{ dump (departure) }}
+
+                  <li>BUG: <a href="{{ departure.booking_link }}" class="" target="_blank">**{{ departure.booking_id }}**</a>
+                  <li>BUG: <a href="{{ departure.booking_link }}" class="" target="_blank">**Evento {{ departure.event_id }}**</a>
+                </ul>
+
+                <div class="daily-report__stay-duration">
+                  {{ 'Nights'|t }}: {{ departure.nights_stayed }}
+                </div>
+
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="daily-report__empty">
+          <p>{{ 'No departures today'|t }}</p>
+        </div>
+      {% endif %}
+    </section>
+
+
+    {# First night passed #}
+    <section class="daily-report__section daily-report__section--firstnight">
+      <h2 class="daily-report__section-title">🛏️{{ 'First Night'|t }}
+        <span class="badge">{{ first_night_passed|length }}</span>
+      </h2>
+
+      {% if first_night_passed is not empty %}
+      <div class="daily-report__grid daily-report__first_night_passed-grid">
+
+      {% for guest in first_night_passed %}
+
+      <div class="daily-report__card">
+        <div class="daily-report__card-header">
+          <h3 class="daily-report__room-name">{{ guest.unit_name }}</h3>
+          <span class="daily-report__time">
+            <a href='{{ guest.booking_guest_messages }}'>{{ guest.check_in_time }} {{ "Check happiness"|t }}</a>
+          </span>
+        </div>
+
+        <div class="daily-report__guest-info">
+          {% if guest.guest_name %}
+            <strong>{{ guest.guest_name }}</strong>
+          {% endif %}
+          <div class="daily-report__stay-duration">
+            {{ 'Nights'|t }}: {{ guest.nights_stayed }}
+          </div>
+
+          <div class="daily-report__stay-people">
+            {{ 'People'|t }}: {{ guest.people }}
+          </div>
+
+          {% if guest.guest_phone %}
+            <div class="daily-report__contact">
+              <span class="icon">📞</span>
+              {{ guest.guest_phone }}
+            </div>
+          {% endif %}
+          {% if guest.guest_email %}
+
+            <div class="daily-report__contact">
+              <span class="icon">📧</span>
+              {{ guest.guest_email }}
+            </div>
+
+            <div class="daily-report__link">
+              Link a Guest messages for this order
+            </div>
+          {% endif %}
+        </div>
+        <div class="daily-report__booking-info">
+        <ul>
+          <li>{{ 'Stay from'|t }}: {{ guest.start_date|date('d/m/Y') }}
+          <li>{{ 'Stay until'|t }}: {{ guest.end_date|date('d/m/Y') }}
+        </ul>
+          {# Guest follow-up action section #}
+          <div class="daily-report__followup-actions">
+            <ul>
+              <li> Check happiness
+              <a href='{{ guest.booking_guest_messages }}'>{{ guest.booking_id }}</a>
+            </ul>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="daily-report__empty">
+      <p>{{ 'No guests requiring follow-up today'|t }}</p>
+    </div>
+    {% endif %}
+  </section>
+
+
+    {# Rooms to Clean Section #}
+    <section class="daily-report__section daily-report__section--cleaning">
+      <h2 class="daily-report__section-title">
+        <span class="icon">🧹</span>
+        {{ 'Rooms to Clean'|t }}
+        <span class="badge">{{ rooms_to_clean|length }}</span>
+      </h2>
+
+      {% if rooms_to_clean %}
+        <div class="daily-report__cleaning-grid">
+          {% for room in rooms_to_clean %}
+            <div class="daily-report__cleaning-card">
+              <div class="daily-report__room-main">
+                <h3 class="daily-report__room-name">{{ room.unit_name }}</h3>
+                <span class="daily-report__room-type">{{ room.room_type }}</span>
+              </div>
+              {% if room.last_guest %}
+                <div class="daily-report__last-guest">
+                  {{ 'Previous guest'|t }}: {{ room.last_guest }}
+                </div>
+              {% endif %}
+              <div class="daily-report__cleaning-time">
+                {{ 'Check-out'|t }}: {{ room.check_out_time }}
+              </div>
+              <div class="daily-report__cleaning-status">
+                <span class="status-badge status-badge--pending">{{ 'To clean'|t }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="daily-report__empty">
+          <p>{{ 'No info available'|t }}</p>
+        </div>
+      {% endif %}
+    </section>
+
+
+
+
+
+    {# Arrivals Section #}
+    <section class="daily-report__section daily-report__section--arrivals">
+      <h2 class="daily-report__section-title">
+        <span class="icon">🎯</span>
+        {{ 'Arrivals'|t }}
+        <span class="badge">{{ arrivals|length }}</span>
+      </h2>
+
+      {% if arrivals %}
+        <div class="daily-report__grid">
+          {% for arrival in arrivals %}
+            <div class="daily-report__card">
+              <div class="daily-report__card-header">
+                <h3 class="daily-report__room-name">{{ arrival.unit_name }}</h3>
+                <span class="daily-report__time">{{ arrival.check_in_time }}</span>
+              </div>
+              <div class="daily-report__guest-info">
+                {% if arrival.guest_name %}
+                  <strong>{{ arrival.guest_name }}</strong>
+                {% endif %}
+                <div class="daily-report__stay-duration">
+                  {{ 'Nights'|t }}: {{ arrival.nights_stayed }}
+                </div>
+
+                <div class="daily-report__stay-people">
+                  {{ 'People'|t }}: {{ arrival.people }}
+                </div>
+
+                {% if arrival.guest_phone %}
+                  <div class="daily-report__contact">
+                    <span class="icon">📞</span>
+                    {{ arrival.guest_phone }}
+                  </div>
+                {% endif %}
+                {% if arrival.guest_email %}
+                  <div class="daily-report__contact">
+                    <span class="icon">📧</span>
+                    {{ arrival.guest_email }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="daily-report__booking-info">
+                • {{ 'Stay until'|t }}: {{ arrival.end_date|date('d/m/Y') }}
+                <a href="{{ arrival.booking_link }}" class="" target="_blank">
+                  {{ arrival.booking_id }}
+                </a>
+              </div>
+            </div>
+
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="daily-report__empty">
+          <p>{{ 'No arrivals today'|t }}</p>
+        </div>
+      {% endif %}
+    </section>
+
+
+    {# Leaving tomorrow #}
+    <section class="daily-report__section daily-report__section--leavingtomorrow">
+      <h2 class="daily-report__section-title">
+        <span class="icon">🎯</span>
+        {{ 'Leaving Tomorrow'|t }}
+        <span class="badge">{{ are_leaving_tomorrow|length }}</span>
+      </h2>
+
+     {% if are_leaving_tomorrow %}
+        <div class="daily-report__grid">
+          {% for is_leaving_tomorrow in are_leaving_tomorrow %}
+            <div class="daily-report__card">
+              <div class="daily-report__card-header">
+                <h3 class="daily-report__room-name">{{ is_leaving_tomorrow.unit_name }}</h3>
+                <span class="daily-report__time">{{ is_leaving_tomorrow.check_in_time }}</span>
+              </div>
+              <div class="daily-report__guest-info">
+                {% if is_leaving_tomorrow.guest_name %}
+                  <strong>{{ is_leaving_tomorrow.guest_name }}</strong>
+                {% endif %}
+                <div class="daily-report__stay-duration">
+                  {{ 'Nights'|t }}: {{ is_leaving_tomorrow.nights_stayed }}
+                </div>
+
+                <div class="daily-report__stay-people">
+                  {{ 'People'|t }}: {{ is_leaving_tomorrow.people }}
+                </div>
+
+                {% if is_leaving_tomorrow.guest_phone %}
+                  <div class="daily-report__contact">
+                    <span class="icon">📞</span>
+                    {{ is_leaving_tomorrow.guest_phone }}
+                  </div>
+                {% endif %}
+                {% if is_leaving_tomorrow.guest_email %}
+                  <div class="daily-report__contact">
+                    <span class="icon">📧</span>
+                    {{ is_leaving_tomorrow.guest_email }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="daily-report__booking-info">
+                <ul>
+                    <li> {{ 'Stay until'|t }}: {{ is_leaving_tomorrow.end_date|date('d/m/Y') }}
+                  <a href="{{ is_leaving_tomorrow.booking_link }}" class="" target="_blank">
+                    {{ is_leaving_tomorrow.booking_id }}
+                  </a>
+                </ul>
+              </div>
+
+
+              <div class="daily-report__followup-actions">
+                <ul>
+                  <li>
+                  <a href='{{ is_leaving_tomorrow.booking_guest_messages }}'>{{ 'Send directions' | t }}</a>
+                </ul>
+              </div>
+
+
+            </div>
+
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="daily-report__empty">
+          <p>{{ 'Noone is leaving tomorrow'|t }}</p>
+        </div>
+      {% endif %}
+    </section>
+
+
+
+
+
+    {# Special Notes Section #}
+    {% if special_notes %}
+      <section class="daily-report__section daily-report__section--notes">
+        <h2 class="daily-report__section-title">
+          <span class="icon">📝</span>
+          {{ 'Special Notes'|t }}
+          <span class="badge">{{ special_notes|length }}</span>
+        </h2>
+
+        <div class="daily-report__notes-grid">
+          {% for note in special_notes %}
+            <div class="daily-report__note-card">
+              <div class="daily-report__note-header">
+                <strong>{{ note.unit_name }}
+                  {% if note.guest_name %}
+                    {{ note.guest_name }}
+                  {% endif %}
+                </strong>
+                <span class="daily-report__note-type">{{ note.type }}</span>
+              </div>
+              <div class="daily-report__note-content">
+                {{ note.special_requests }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </div>
+
+  <footer class="daily-report__footer">
+    <div class="daily-report__summary">
+      <div class="daily-report__summary-item">
+        <span class="summary-number">{{ are_leaving_tomorrow|length }}</span>
+        <span class="summary-label">{{ 'Arrivals'|t }}</span>
+      </div>
+
+      <div class="daily-report__summary-item">
+        <span class="summary-number">{{ departures|length }}</span>
+        <span class="summary-label">{{ 'Departures'|t }}</span>
+      </div>
+
+      <div class="daily-report__summary-item">
+        <span class="summary-number">{{ first_night_passed|length }}</span>
+        <span class="summary-label">{{ 'First night'|t }}</span>
+      </div>
+
+      <div class="daily-report__summary-item">
+        <span class="summary-number">{{ rooms_to_clean|length }}</span>
+        <span class="summary-label">{{ 'Rooms to clean'|t }}</span>
+      </div>
+
+      <div class="daily-report__summary-item">
+        <span class="summary-number">{{ are_leaving_tomorrow|length }}</span>
+        <span class="summary-label">{{ 'Leaving tomorrow'|t }}</span>
+      </div>
+
+
+    </div>
+
+
+    <div class="daily-report__generated">
+      {{ 'Generated on'|t }}: {{ generated_time }}
+    </div>
+  </footer>
+</div>

@@ -13,38 +13,38 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Session;
-
-define('FIELD_PRODUCT', 'field_product');
-define('RESERVATION_CHECK_IN_TIME', '15:00');
-define('RESERVATION_CHECK_OUT_TIME', '10:00');
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
- * Reservation form for a unit.
+ * Defines the reservation form for a Bee Hotel unit.
  *
  * @package Drupal\bee_hotel
- *   Defines the reservation form for a unit
  */
 class BookThisUnitForm extends FormBase {
 
   /**
-   * The bee hotel unit.
+   * The product field name constant.
+   */
+  const FIELD_PRODUCT = 'field_product';
+
+  /**
+   * The Bee Hotel unit utility.
    *
    * @var \Drupal\beehotel_utils\BeeHotelUnit
    */
-  private $beehotelunit;
+  protected $beehotelunit;
 
   /**
-   * The bee hotel date utility.
+   * The Bee Hotel date utility.
    *
    * @var \Drupal\beehotel_utils\Dates
    */
-  private $beehoteldates;
+  protected $beehoteldates;
 
   /**
-   * The session.
+   * The session interface.
    *
-   * @var \Symfony\Component\HttpFoundation\Session\Session
+   * @var \Symfony\Component\HttpFoundation\Session\SessionInterface
    */
   protected $session;
 
@@ -84,26 +84,18 @@ class BookThisUnitForm extends FormBase {
   protected $requestStack;
 
   /**
-   * Constructs the object.
-   *
-   * @param \Drupal\beehotel_utils\BeeHotelUnit $bee_hotel_unit
-   *   The BeeHotel Unit Utility.
-   * @param \Drupal\beehotel_utils\Dates $bee_hotel_dates
-   *   The BeeHotel Dates Utility.
-   * @param \Symfony\Component\HttpFoundation\Session\Session $session
-   *   The session.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\commerce_cart\CartManagerInterface $cart_manager
-   *   The cart manager.
-   * @param \Drupal\commerce_cart\CartProviderInterface $cart_provider
-   *   The cart provider.
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-   *   The route match.
-   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
-   *   The request stack.
+   * Constructs the BookThisUnitForm object.
    */
-  public function __construct(BeeHotelUnit $bee_hotel_unit, Dates $bee_hotel_dates, Session $session, EntityTypeManagerInterface $entity_type_manager, CartManagerInterface $cart_manager, CartProviderInterface $cart_provider, RouteMatchInterface $route_match, RequestStack $request_stack) {
+  public function __construct(
+    BeeHotelUnit $bee_hotel_unit,
+    Dates $bee_hotel_dates,
+    SessionInterface $session,
+    EntityTypeManagerInterface $entity_type_manager,
+    CartManagerInterface $cart_manager,
+    CartProviderInterface $cart_provider,
+    RouteMatchInterface $route_match,
+    RequestStack $request_stack
+  ) {
     $this->beehotelunit = $bee_hotel_unit;
     $this->beehoteldates = $bee_hotel_dates;
     $this->session = $session;
@@ -126,7 +118,7 @@ class BookThisUnitForm extends FormBase {
       $container->get('commerce_cart.cart_manager'),
       $container->get('commerce_cart.cart_provider'),
       $container->get('current_route_match'),
-      $container->get('request_stack'),
+      $container->get('request_stack')
     );
   }
 
@@ -141,31 +133,27 @@ class BookThisUnitForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-
     $data = [];
-
     $data['beehotel_settings'] = $this->config('beehotel.settings');
-    $data['bee_settings'] = $this->config('bee.settings');
     $data['node'] = $this->routeMatch->getParameter('node');
     $data['bid'] = $this->beehotelunit->getBidFromNode($data['node']);
 
-    if ($this->beehotelunit->isThisNodeBeeHotel($data['node']) == FALSE) {
-      return $this->t("A Bee Hotel Unit is required");
+    if (!$this->beehotelunit->isThisNodeBeeHotel($data['node'])) {
+      return ['#markup' => $this->t('A Bee Hotel Unit is required')];
     }
 
-    if ($data['beehotel_settings']->get("beehotel.off_value")) {
-      $this->messenger()->addWarning($data['beehotel_settings']->get("beehotel.off_text"));
-      return;
+    if ($data['beehotel_settings']->get('beehotel.off_value')) {
+      $this->messenger()->addWarning($data['beehotel_settings']->get('beehotel.off_text'));
+      return [];
     }
 
-    if ($data['node']->hasField(FIELD_PRODUCT) != TRUE) {
-      return;
+    if (!$data['node']->hasField(self::FIELD_PRODUCT)) {
+      return [];
     }
 
     $data['default_values']['dates'] = date("j M Y", strtotime("+1 day")) . " - " . date("j M Y", strtotime("+3 day"));
     $data['request_values']['row'] = $this->requestStack->getCurrentRequest()->query->get("v");
 
-    // Pre-fill for Litepicker.
     if (!empty($data['request_values']['row'])) {
       $data['request_values']['pieces'] = explode("-", $data['request_values']['row']);
       $this->beehoteldates->fromRequestToLitepicker($data);
@@ -176,45 +164,36 @@ class BookThisUnitForm extends FormBase {
       '#value' => $data['node']->id(),
     ];
 
-    if (trim((string) $data['beehotel_settings']->get("beehotel.book_this_unit_header")) == "<ct-label>") {
-      $form['title'] = [
-        '#type' => 'html_tag',
-        '#tag' => 'h2',
-        '#value' => $this->t('Book this @t', ['@t' => $data['node']->type->entity->label()]),
-      ];
+    $header_setting = (string) $data['beehotel_settings']->get('beehotel.book_this_unit_header');
+    $title_value = $this->t('Book now');
+
+    if (trim($header_setting) === '<ct-label>') {
+      $title_value = $this->t('Book this @t', ['@t' => $data['node']->type->entity->label()]);
     }
-    elseif (trim((string) $data['beehotel_settings']->get("beehotel.book_this_unit_header")) == "<title>") {
-      $form['title'] = [
-        '#type' => 'html_tag',
-        '#tag' => 'h2',
-        '#value' => $this->t('Book @t', ['@t' => $data['node']->getTitle()]),
-      ];
+    elseif (trim($header_setting) === '<title>') {
+      $title_value = $this->t('Book @t', ['@t' => $data['node']->getTitle()]);
     }
-    else {
-      $form['title'] = [
-        '#type' => 'html_tag',
-        '#tag' => 'h2',
-        '#value' => $this->t('Book now'),
-      ];
-    }
+
+    $form['title'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'h2',
+      '#value' => $title_value,
+      '#weight' => 1,
+    ];
 
     $form['dates'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Check in > Check out'),
       '#default_value' => $data['default_values']['dates'],
       '#attributes' => [
-        'class' => [
-          'book-this-unit',
-          'edit-dates',
-          'bee_hotel_search_availability',
-        ],
+        'class' => ['book-this-unit', 'edit-dates', 'bee_hotel_search_availability'],
       ],
       '#required' => TRUE,
+      '#weight' => 2,
     ];
 
-    $product_field = $data['node']->get(FIELD_PRODUCT)->getValue();
+    $product_field = $data['node']->get(self::FIELD_PRODUCT)->getValue();
     $data['pid'] = $product_field[0]['target_id'];
-
     $data['max_occupancy'] = $this->beehotelunit->maxOccupancy($data['node']);
 
     $options = [];
@@ -226,35 +205,31 @@ class BookThisUnitForm extends FormBase {
       '#type' => 'select',
       '#title' => $this->t('Guests'),
       '#options' => $options,
+      '#weight' => 3,
     ];
 
     if (isset($data['request_values']['pieces'][6])) {
-      $form['guests']['#default_value'] = trim((int) $data['request_values']['pieces'][6]);
+      $form['guests']['#default_value'] = (int) $data['request_values']['pieces'][6];
     }
 
-    // Product ID (commerce).
-    $form['pid'] = [
-      '#type' => 'hidden',
-      '#value' => $data['pid'],
-    ];
+    $form['pid'] = ['#type' => 'hidden', '#value' => $data['pid']];
+    $form['bid'] = ['#type' => 'hidden', '#value' => $data['bid']];
 
-    // Unit ID (BAT).
-    $form['bid'] = [
-      '#type' => 'hidden',
-      '#value' => $data['bid'],
-    ];
+    // Integration with CheckinTime plugin.
+    $form['checkin_time'] = $this->buildCheckinTimeField($data);
 
+    $submit_label = $data['beehotel_settings']->get('beehotel.book_this_unit_submit');
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => $data['beehotel_settings']->get("beehotel.book_this_unit_submit"),
-      '#name' => $data['beehotel_settings']->get("beehotel.book_this_unit_submit"),
+      '#value' => $submit_label,
+      '#name' => $submit_label,
     ];
 
     $form['#attached']['library'][] = 'bee_hotel/book-this-unit';
     $form['#attached']['library'][] = 'bee_hotel/beehotel-litepicker';
     $form['#weight'] = -2000;
 
-    if ($data['beehotel_settings']->get("unit_reservation_form_disabled") == TRUE) {
+    if ($data['beehotel_settings']->get('unit_reservation_form_disabled')) {
       $form['#disabled'] = TRUE;
     }
 
@@ -265,19 +240,17 @@ class BookThisUnitForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-
     $data = [];
-
     $data['values'] = $form_state->getValues();
     $data['node'] = $this->routeMatch->getParameter('node');
 
-    if ($this->beehotelunit->isThisNodeBeeHotel($data['node']) == FALSE) {
-      return $this->t("A Bee Hotel Unit is required");
+    if (!$this->beehotelunit->isThisNodeBeeHotel($data['node'])) {
+      $form_state->setError($form, $this->t('A Bee Hotel Unit is required'));
+      return;
     }
 
     $data['node_type'] = $data['node']->type->entity;
     $bee_settings = $data['node_type']->getThirdPartySetting('bee', 'bee');
-
     $data = $this->beehotelunit->getAvailableUnits($data);
 
     if (empty($data['available_units'])) {
@@ -285,16 +258,23 @@ class BookThisUnitForm extends FormBase {
     }
 
     if (!in_array($data['values']['bid'], $data['available_units'])) {
-      $form_state->setError($form, $this->t('Sorry, this Unit not available for your request'));
+      $form_state->setError($form, $this->t('Sorry, this Unit is not available for your request'));
     }
 
-    // Payment validation.
     if ($bee_settings['payment'] != 1) {
-      $form_state->setErrorByName('checkin', $this->t('No payment available for this Content type. Please check "Enable payment for bookings"'));
+      $form_state->setErrorByName('checkin', $this->t('Payment not enabled for this content type.'));
     }
 
-    if ($data['node']->get("field_accept_reservations")->value != 1) {
-      $form_state->setErrorByName('checkin', $this->t('Sorry, no Unit available now...'));
+    if ($data['node']->get('field_accept_reservations')->value != 1) {
+      $form_state->setErrorByName('checkin', $this->t('Sorry, this unit is not accepting reservations.'));
+    }
+
+    // Save check-in time selection to session.
+    $checkinTimeKey = $form_state->getValue('checkin_time');
+    if ($checkinTimeKey) {
+      $this->session->set('beehotel_checkin_time_key', $checkinTimeKey);
+      $timeParts = explode('-', $checkinTimeKey);
+      $this->session->set('beehotel_checkin_time', $timeParts[0]);
     }
   }
 
@@ -302,15 +282,9 @@ class BookThisUnitForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-
     $data = [];
     $data['values'] = $form_state->getValues();
-
     $data['node'] = $this->routeMatch->getParameter('node');
-
-    if ($this->beehotelunit->isThisNodeBeeHotel($data['node']) == FALSE) {
-      return $this->t("A Bee Hotel Unit is required");
-    }
 
     $data['qid'] = substr($data['values']['form_build_id'], 5, 18);
     $this->session->set('beehotel_units_search_queries', [
@@ -319,99 +293,119 @@ class BookThisUnitForm extends FormBase {
 
     $data = $this->beehotelunit->getAvailableUnits($data);
 
-    $booking = bat_booking_create([
+    $booking = $this->entityTypeManager->getStorage('bat_booking')->create([
       'type' => 'bee',
       'label' => $data['node']->label(),
     ]);
     $booking->set('booking_start_date', $data['norm']['dates_from_search_form']['checkin']['Y-m-d-H-i-s']);
     $booking->set('booking_end_date', $data['norm']['dates_from_search_form']['lastnight']['Y-m-d-H-i-s']);
     $booking->set('booking_capacity', $data['values']['guests']);
-
     $booking->save();
 
-    /*Load Product*/
     $product = Product::load((int) $data['values']['pid']);
-
-    /*Load Product Variations*/
     $variations = $product->getVariationIds();
-
     $stores = $product->getStores();
     $store = reset($stores);
 
-    // This works fine for single slot units.
+    $usable_variation = [];
     foreach ($variations as $v) {
-      $product_variation = $this->entityTypeManager->getStorage('commerce_product_variation')->load((int) $v);
-      // We set max accupancy per varaition in the custom field_max_occupancy.
-      // See  /admin/commerce/config/product-variation-types/bee/edit/fields/commerce_product_variation.bee.field_max_occupancy.
-      $variation_max_occupancy = $product_variation->get("field_max_occupancy")->value;
-
-      $usable_variation = [];
-
-      if ($variation_max_occupancy >= (int) $data['values']['guests']) {
-        $usable_variation['price'] = $product_variation->getPrice();
-        $usable_variation['title'] = $product_variation->get('title')->get(0)->value;
-        $usable_variation['variant_id'] = $product_variation->get('variation_id')->get(0)->value;
+      $variation = $this->entityTypeManager->getStorage('commerce_product_variation')->load((int) $v);
+      if ($variation->get('field_max_occupancy')->value >= (int) $data['values']['guests']) {
+        $usable_variation['price'] = $variation->getPrice();
+        $usable_variation['variant_id'] = $variation->id();
         break;
       }
     }
 
-    // @todo check "default" cart exists.
-    $cart = $this->cartProvider->getCart('default', $store);
-
-    if (!$cart) {
-      $cart = $this->cartProvider->createCart('default', $store);
-    }
-    else {
-      // @todo allow more units per order.
-      $this->cartManager->emptyCart($cart);
-    }
+    $cart = $this->cartProvider->getCart('default', $store) ?: $this->cartProvider->createCart('default', $store);
+    $this->cartManager->emptyCart($cart);
 
     $order_item = $this->entityTypeManager->getStorage('commerce_order_item')->create([
-      'title'            => $data['node']->label(),
-      'type'             => 'bee',
+      'title' => $data['node']->label(),
+      'type' => 'bee',
       'purchased_entity' => $usable_variation['variant_id'],
-      'quantity'         => $data['norm']['dates_from_search_form']['days'],
-      'unit_price'       => $usable_variation['price'],
+      'quantity' => $data['norm']['dates_from_search_form']['days'],
+      'unit_price' => $usable_variation['price'],
     ]);
 
     $order_item->set('field_booking', $booking);
     $order_item->set('field_node', $data['node']);
-    $order_item->set('field_checkin', [
-      $data['norm']['dates_from_search_form']['checkin']['Y-m-d-H-i-s'],
-    ]);
-    $order_item->set('field_checkout', [
-      $data['norm']['dates_from_search_form']['checkout']['Y-m-d-H-i-s'],
-    ]);
-
-    $order_item->set('field_order_item_nights', [$data['norm']['dates_from_search_form']['days']]);
+    $order_item->set('field_checkin', $data['norm']['dates_from_search_form']['checkin']['Y-m-d-H-i-s']);
+    $order_item->set('field_checkout', $data['norm']['dates_from_search_form']['checkout']['Y-m-d-H-i-s']);
+    $order_item->set('field_order_item_nights', $data['norm']['dates_from_search_form']['days']);
     $order_item->save();
+
     $this->cartManager->addOrderItem($cart, $order_item);
     $this->session->set('beehotel_data', ['from' => $this->getFormId()]);
     $form_state->setRedirect('commerce_cart.page', ['commerce_order' => $cart->id()]);
   }
 
   /**
-   * Load entity form display configuration.
-   *
-   * @param string $entity_type
-   *   Entity type.
-   * @param string $bundle
-   *   Bundle of the entity.
-   * @param string $mode
-   *   Form mode.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface|null
-   *   EntityFormDisplay or null
+   * Build check-in time field with times and price variations.
    */
-  public function getEntityFormConfiguration($entity_type, $bundle, $mode = 'default') {
-    $config_keys = [$entity_type, $bundle, $mode];
-    $config_id = implode('.', $config_keys);
-    try {
-      return $this->entityTypeManager->getStorage('entity_form_display')->load($config_id);
+  private function buildCheckinTimeField(array $data) {
+    $config = $this->config('beehotel_pricealterator.pricealterator.CheckinTime.settings');
+
+    if (!$config->get('enabled')) {
+      return [];
     }
-    catch (PluginException $e) {
-      return NULL;
+
+    $timeSlots = $config->get('time_slots') ?: [];
+    if (empty($timeSlots)) {
+      return [];
     }
+
+    $currency_service = \Drupal::service('beehotel_utils.beehotelcommerce');
+    $currency_symbol = $currency_service->currentStoreCurrency()->get('symbol');
+
+    $form_title = $config->get('display_label') ?: $this->t('Check-in Time');
+    $pattern = $config->get('options_pattern') ?: '[label] ([start] - [end]) [[adjustment]]';
+
+    $options = [];
+    $defaultOption = '';
+
+    foreach ($timeSlots as $index => $slot) {
+      $key = $slot['start'] . '-' . $slot['end'];
+      $adjustment = (float) ($slot['adjustment'] ?? 0);
+      $adj_text = '';
+
+      if ($adjustment > 0) {
+        $adj_text = "+" . number_format($adjustment, 2) . " " . $currency_symbol;
+      }
+      elseif ($adjustment < 0) {
+        $adj_text = number_format($adjustment, 2) . " " . $currency_symbol;
+      }
+      elseif ($adjustment == 0) {
+        $adj_text = '0';
+      }
+
+      $replacements = [
+        '[label]' => !empty($slot['label']) ? $this->t($slot['label']) : '',
+        '[start]' => $slot['start'],
+        '[end]' => $slot['end'],
+        '[adjustment]' => $adj_text,
+      ];
+
+      $fullLabel = str_replace(array_keys($replacements), array_values($replacements), $pattern);
+      // Cleanup empty brackets.
+      $fullLabel = str_replace([' ()', ' []', ' []'], '', $fullLabel);
+      $options[$key] = trim($fullLabel);
+
+      if ($index === 0 && empty($defaultOption)) {
+        $defaultOption = $key;
+      }
+    }
+
+    $defaultValue = $this->session->get('beehotel_checkin_time_key', $defaultOption);
+
+    return [
+      '#type' => 'select',
+      '#title' => $form_title,
+      '#options' => $options,
+      '#default_value' => $defaultValue,
+      '#description' => $this->t('Select your preferred check-in time.'),
+      '#weight' => 10,
+    ];
   }
 
 }

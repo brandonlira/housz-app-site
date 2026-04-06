@@ -1,12 +1,8 @@
-<div class="vertical-order-item">
-
-  {# extra info as today events? #}
-  {{ extra }}
-
-  {% if hidden_text == TRUE %}
+<div{{ attributes.addClass(classes) }}>
+  {% if show_text == TRUE %}
     <div>
       <a href='/admin/commerce/orders/{{ order_id }}'>{{ mail }} </a>
-      <a href='/admin/commerce/orders/{{ order_id }}' class='small'>{{order_number}}</a>
+      <a href='/admin/commerce/orders/{{ order_id }}' class='small'>{{ order_number }}</a>
       <span>{{ name }}</span><span>{{ surname }}</span>
 
       <div class='payments'>
@@ -14,7 +10,8 @@
           <div><span class='bee_hotel_vertical payment small' title='Paid on {{ payment.date|e  }}'><span class='amount'>{{ payment.amount|e }}€</span></span></div>
         {% endfor %}
 
-        {% if balance > 0 %}
+        {# @todo fix i18 for balance #}
+        {% if balance != '0,00' %}
           <div><span class='bee_hotel_vertical balance small' title='Balance' ><span class=''>{{ balance|e }}€</span></span></div>
         {% else %}
           <div><span class='bee_hotel_vertical balanced small' title='Balanced' >&#10004; </span></div>
@@ -24,5 +21,9 @@
     <div class='comments'>{{ comments }}</div>
     <div class='extra'>{{ extra }}</div>
   {% endif %}
+
+  {# we need space below to propertly close no-text day of checkout #}
+  &nbsp;
+
 </div>
 

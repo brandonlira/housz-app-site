@@ -1,0 +1,67 @@
+{# modules/contrib/bee_hotel/templates/beehotel-guest-messages.html.twig #}
+
+{#
+/**
+ * @file
+ * Template for guest messages form.
+ *
+ * Available variables:
+ * - form: The form render array.
+ */
+#}
+
+<div class="guest-messages-form">
+  <h2>{{ 'Send Message to Guest'|t }}</h2>
+
+  <div class="form-description">
+    {{ form.description }}
+  </div>
+
+  <div class="form-fields">
+    <div class="form-row">
+      <div class="form-item to-email">
+        {{ form.to }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-item subject">
+        {{ form.subject }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-item message">
+        {{ form.message }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-item preview">
+        {{ form.preview }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-item guest-info">
+        {{ form.guest_info }}
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-item confirmation">
+        {{ form.confirmation }}
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    {{ form.actions.preview }}
+    {{ form.actions.submit }}
+    {{ form.actions.cancel }}
+  </div>
+
+  {{ form.form_build_id }}
+  {{ form.form_token }}
+  {{ form.form_id }}
+</div>

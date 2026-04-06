@@ -462,6 +462,10 @@ class BeeHotelUnit {
   /**
    * Store usefull data in session.
    *
+   * This method is not Unit related.
+   *
+   * @todo move in a better class.
+   *
    * @param array $data
    *
    *   Return array.

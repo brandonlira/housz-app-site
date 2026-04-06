@@ -1,0 +1,213 @@
+# beehotel_happening_today.po
+msgid ""
+msgstr ""
+"Project-Id-Version: BeeHotel Happening Today\n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: beehotel_happening_today.module:15
+msgid "Generates daily reports and emails for hotel arrivals, departures, and daily tasks."
+msgstr ""
+
+#: beehotel_happening_today.module:48
+msgid "First Night"
+msgstr ""
+
+#: beehotel_happening_today.module:49
+msgid "No guests requiring follow-up today"
+msgstr ""
+
+#: beehotel_happening_today.module:55
+msgid "Arrivals"
+msgstr ""
+
+#: beehotel_happening_today.module:56
+msgid "No arrivals today"
+msgstr ""
+
+#: beehotel_happening_today.module:62
+msgid "Departures"
+msgstr ""
+
+#: beehotel_happening_today.module:63
+msgid "No departures today"
+msgstr ""
+
+#: beehotel_happening_today.module:69
+msgid "Leaving Tomorrow"
+msgstr ""
+
+#: beehotel_happening_today.module:70
+msgid "Noone is leaving tomorrow"
+msgstr ""
+
+#: templates/leaving-tomorrow.html.twig:3
+msgid "Leaving Tomorrow"
+msgstr ""
+
+#: templates/leaving-tomorrow.html.twig:21
+msgid "Nights"
+msgstr ""
+
+#: templates/leaving-tomorrow.html.twig:25
+msgid "People"
+msgstr ""
+
+#: templates/leaving-tomorrow.html.twig:41
+msgid "Stay until"
+msgstr ""
+
+#: templates/leaving-tomorrow.html.twig:50
+msgid "Send directions"
+msgstr ""
+
+#: templates/leaving-tomorrow.html.twig:56
+msgid "Noone is leaving tomorrow"
+msgstr ""
+
+#: templates/departures.html.twig:3
+msgid "Departures"
+msgstr ""
+
+#: templates/departures.html.twig:25
+msgid "From"
+msgstr ""
+
+#: templates/departures.html.twig:26
+msgid "To"
+msgstr ""
+
+#: templates/departures.html.twig:30
+msgid "Nights"
+msgstr ""
+
+#: templates/departures.html.twig:36
+msgid "No departures today"
+msgstr ""
+
+#: templates/daily-report-main.html.twig:5
+msgid "Happening today"
+msgstr ""
+
+#: templates/daily-report-main.html.twig:54
+msgid "Special Notes"
+msgstr ""
+
+#: templates/daily-report-main.html.twig:83
+msgid "Arrivals"
+msgstr ""
+
+#: templates/daily-report-main.html.twig:88
+msgid "Departures"
+msgstr ""
+
+#: templates/daily-report-main.html.twig:93
+msgid "First night"
+msgstr ""
+
+#: templates/daily-report-main.html.twig:98
+msgid "Rooms to clean"
+msgstr ""
+
+#: templates/daily-report-main.html.twig:103
+msgid "Leaving tomorrow"
+msgstr ""
+
+#: templates/daily-report-main.html.twig:108
+msgid "Generated on"
+msgstr ""
+
+#: templates/arriving.html.twig:3
+msgid "Arrivals"
+msgstr ""
+
+#: templates/arriving.html.twig:21
+msgid "Nights"
+msgstr ""
+
+#: templates/arriving.html.twig:25
+msgid "People"
+msgstr ""
+
+#: templates/arriving.html.twig:41
+msgid "Stay until"
+msgstr ""
+
+#: templates/arriving.html.twig:48
+msgid "No arrivals today"
+msgstr ""
+
+#: templates/arrived-yesterday.html.twig:3
+msgid "First Night"
+msgstr ""
+
+#: templates/arrived-yesterday.html.twig:21
+msgid "Check happiness"
+msgstr ""
+
+#: templates/arrived-yesterday.html.twig:29
+msgid "Nights"
+msgstr ""
+
+#: templates/arrived-yesterday.html.twig:33
+msgid "People"
+msgstr ""
+
+#: templates/arrived-yesterday.html.twig:54
+msgid "Stay from"
+msgstr ""
+
+#: templates/arrived-yesterday.html.twig:55
+msgid "Stay until"
+msgstr ""
+
+#: templates/arrived-yesterday.html.twig:60
+msgid "Check happiness"
+msgstr ""
+
+#: templates/arrived-yesterday.html.twig:67
+msgid "No guests requiring follow-up today"
+msgstr ""
+
+#: src/Service/DailyReportGenerator.php:221
+msgid "#@number"
+msgstr ""
+
+#: src/Service/HappeningTodayMailService.php:87
+msgid "Daily Report - @date"
+msgstr ""
+
+#: (contestuale dai log)
+msgid "Report sent @hours hours ago"
+msgstr ""
+
+#: (contestuale dai log)
+msgid "Not yet time to send daily report"
+msgstr ""
+
+#: (contestuale dai log)
+msgid "Error sending Happening Today report: @error"
+msgstr ""
+
+#: (contestuale dai log)
+msgid "Error extracting number of people: @error"
+msgstr ""
+
+#: (contestuale dai log)
+msgid "Email sent to @count/@total recipients"
+msgstr ""
+
+#: (contestuale dai log)
+msgid "Failed to send email to any of @total recipients"
+msgstr ""
+
+#: (contestuale dai log)
+msgid "Eccezione durante l'invio: @error"
+msgstr ""

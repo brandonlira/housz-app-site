@@ -85,4 +85,50 @@ class BeeHotelCommerce {
     return $currency;
   }
 
+
+  // public function getGuestInfoFromReservatation($order) {
+  //   // Get billing profile
+  //   $data = [];
+  //   $data['order'] = $order;
+  //   $data['family_name'] = $order->getBillingProfile()->get('address')->family_name;
+  //   $data['given_name'] = $order->getBillingProfile()->get('address')->given_name;
+  //   $data['field_telephone'] = $order->getBillingProfile()->field_telephone->value;
+  //   return $data;
+  // }
+
+  /**
+   * Get guest information from a Commerce order.
+   *
+   * @param \Drupal\commerce_order\Entity\OrderInterface $order
+   *   The order entity.
+   *
+   * @return array
+   *   An associative array with keys: order, family_name, given_name,
+   *   field_telephone. Returns empty strings for missing data.
+   */
+  public function getGuestInfoFromReservatation($order) {
+    $data = [
+        'order' => $order,
+        'family_name' => '',
+        'given_name' => '',
+        'field_telephone' => '',
+    ];
+
+    $billing_profile = $order->getBillingProfile();
+    if ($billing_profile && $billing_profile->hasField('address')) {
+        $address = $billing_profile->get('address')->first();
+        if ($address) {
+            $data['family_name'] = $address->family_name ?? '';
+            $data['given_name'] = $address->given_name ?? '';
+        }
+    }
+
+    if ($billing_profile && $billing_profile->hasField('field_telephone')) {
+        $data['field_telephone'] = $billing_profile->field_telephone->value ?? '';
+    }
+
+    return $data;
+  }
+
+
 }

@@ -3,7 +3,7 @@
 namespace Drupal\bee_hotel\Controller;
 
 use CommerceGuys\Intl\Formatter\CurrencyFormatterInterface;
-use Drupal\bee_hotel\BeeHotel;
+use Drupal\beehotel_utils\BeeHotel;
 use Drupal\beehotel_utils\BeeHotelUnit;
 use Drupal\commerce\Context;
 use Drupal\commerce_order\PriceCalculatorInterface;
@@ -37,7 +37,7 @@ class SearchResult extends ControllerBase {
   /**
    * The Bee Hotel utility.
    *
-   * @var \Drupal\bee_hotel\BeeHotel
+   * @var \Drupal\beehotel_utils\BeeHotel
    */
   protected $beehotel;
 
@@ -114,7 +114,7 @@ class SearchResult extends ControllerBase {
   /**
    * Constructs a new SearchResult object.
    *
-   * @param \Drupal\bee_hotel\BeeHotel $bee_hotel
+   * @param \Drupal\beehotel_utils\BeeHotel $bee_hotel
    *   The BeeHotel Utility.
    * @param \Drupal\beehotel_utils\BeeHotelUnit $bee_hotel_unit
    *   The BeeHotelUnit utility.
@@ -168,7 +168,7 @@ class SearchResult extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('bee_hotel.beehotel'),
+      $container->get('beehotel_utils.beehotel'),
       $container->get('beehotel_utils.beehotelunit'),
       $container->get('entity_type.manager'),
       $container->get('renderer'),

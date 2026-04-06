@@ -1,0 +1,214 @@
+# Italian translations for BeeHotel Happening Today
+# Traduzioni italiane per BeeHotel Happening Today
+msgid ""
+msgstr ""
+"Project-Id-Version: BeeHotel Happening Today\n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Italian\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: beehotel_happening_today.module:15
+msgid "Generates daily reports and emails for hotel arrivals, departures, and daily tasks."
+msgstr "Genera report giornalieri ed email per arrivi, partenze e attività quotidiane dell'hotel."
+
+#: beehotel_happening_today.module:48
+msgid "First Night"
+msgstr "Prima Notte"
+
+#: beehotel_happening_today.module:49
+msgid "No guests requiring follow-up today"
+msgstr "Nessun ospite che richiede follow-up oggi"
+
+#: beehotel_happening_today.module:55
+msgid "Arrivals"
+msgstr "Arrivi"
+
+#: beehotel_happening_today.module:56
+msgid "No arrivals today"
+msgstr "Nessun arrivo oggi"
+
+#: beehotel_happening_today.module:62
+msgid "Departures"
+msgstr "Partenze"
+
+#: beehotel_happening_today.module:63
+msgid "No departures today"
+msgstr "Nessuna partenza oggi"
+
+#: beehotel_happening_today.module:69
+msgid "Leaving Tomorrow"
+msgstr "Partenze Domani"
+
+#: beehotel_happening_today.module:70
+msgid "Noone is leaving tomorrow"
+msgstr "Nessuno parte domani"
+
+#: templates/leaving-tomorrow.html.twig:3
+msgid "Leaving Tomorrow"
+msgstr "Partenze Domani"
+
+#: templates/leaving-tomorrow.html.twig:21
+msgid "Nights"
+msgstr "Notti"
+
+#: templates/leaving-tomorrow.html.twig:25
+msgid "People"
+msgstr "Persone"
+
+#: templates/leaving-tomorrow.html.twig:41
+msgid "Stay until"
+msgstr "Soggiorno fino al"
+
+#: templates/leaving-tomorrow.html.twig:50
+msgid "Send directions"
+msgstr "Invia indicazioni"
+
+#: templates/leaving-tomorrow.html.twig:56
+msgid "Noone is leaving tomorrow"
+msgstr "Nessuno parte domani"
+
+#: templates/departures.html.twig:3
+msgid "Departures"
+msgstr "Partenze"
+
+#: templates/departures.html.twig:25
+msgid "From"
+msgstr "Dal"
+
+#: templates/departures.html.twig:26
+msgid "To"
+msgstr "Al"
+
+#: templates/departures.html.twig:30
+msgid "Nights"
+msgstr "Notti"
+
+#: templates/departures.html.twig:36
+msgid "No departures today"
+msgstr "Nessuna partenza oggi"
+
+#: templates/daily-report-main.html.twig:5
+msgid "Happening today"
+msgstr "In programma oggi"
+
+#: templates/daily-report-main.html.twig:54
+msgid "Special Notes"
+msgstr "Note Speciali"
+
+#: templates/daily-report-main.html.twig:83
+msgid "Arrivals"
+msgstr "Arrivi"
+
+#: templates/daily-report-main.html.twig:88
+msgid "Departures"
+msgstr "Partenze"
+
+#: templates/daily-report-main.html.twig:93
+msgid "First night"
+msgstr "Prima notte"
+
+#: templates/daily-report-main.html.twig:98
+msgid "Rooms to clean"
+msgstr "Camere da pulire"
+
+#: templates/daily-report-main.html.twig:103
+msgid "Leaving tomorrow"
+msgstr "Partenze domani"
+
+#: templates/daily-report-main.html.twig:108
+msgid "Generated on"
+msgstr "Generato il"
+
+#: templates/arriving.html.twig:3
+msgid "Arrivals"
+msgstr "Arrivi"
+
+#: templates/arriving.html.twig:21
+msgid "Nights"
+msgstr "Notti"
+
+#: templates/arriving.html.twig:25
+msgid "People"
+msgstr "Persone"
+
+#: templates/arriving.html.twig:41
+msgid "Stay until"
+msgstr "Soggiorno fino al"
+
+#: templates/arriving.html.twig:48
+msgid "No arrivals today"
+msgstr "Nessun arrivo oggi"
+
+#: templates/arrived-yesterday.html.twig:3
+msgid "First Night"
+msgstr "Prima Notte"
+
+#: templates/arrived-yesterday.html.twig:21
+msgid "Check happiness"
+msgstr "Verifica soddisfazione"
+
+#: templates/arrived-yesterday.html.twig:29
+msgid "Nights"
+msgstr "Notti"
+
+#: templates/arrived-yesterday.html.twig:33
+msgid "People"
+msgstr "Persone"
+
+#: templates/arrived-yesterday.html.twig:54
+msgid "Stay from"
+msgstr "Soggiorno dal"
+
+#: templates/arrived-yesterday.html.twig:55
+msgid "Stay until"
+msgstr "Soggiorno fino al"
+
+#: templates/arrived-yesterday.html.twig:60
+msgid "Check happiness"
+msgstr "Verifica soddisfazione"
+
+#: templates/arrived-yesterday.html.twig:67
+msgid "No guests requiring follow-up today"
+msgstr "Nessun ospite che richiede follow-up oggi"
+
+#: src/Service/DailyReportGenerator.php:221
+msgid "#@number"
+msgstr "#@number"
+
+#: src/Service/HappeningTodayMailService.php:87
+msgid "Daily Report - @date"
+msgstr "Report Giornaliero - @date"
+
+#: (contestuale dai log)
+msgid "Report sent @hours hours ago"
+msgstr "Report inviato @hours ore fa"
+
+#: (contestuale dai log)
+msgid "Not yet time to send daily report"
+msgstr "Non è ancora il momento di inviare il report giornaliero"
+
+#: (contestuale dai log)
+msgid "Error sending Happening Today report: @error"
+msgstr "Errore nell'invio del report Happening Today: @error"
+
+#: (contestuale dai log)
+msgid "Error extracting number of people: @error"
+msgstr "Errore nell'estrazione del numero di persone: @error"
+
+#: (contestuale dai log)
+msgid "Email sent to @count/@total recipients"
+msgstr "Email inviata a @count/@total destinatari"
+
+#: (contestuale dai log)
+msgid "Failed to send email to any of @total recipients"
+msgstr "Impossibile inviare l'email a nessuno dei @total destinatari"
+
+#: (contestuale dai log)
+msgid "Eccezione durante l'invio: @error"
+msgstr "Eccezione durante l'invio: @error"

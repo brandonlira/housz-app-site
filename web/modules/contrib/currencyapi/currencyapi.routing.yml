@@ -1,0 +1,37 @@
+currencyapi.settings:
+  path: '/admin/config/services/currency-api'
+  defaults:
+    _form: '\Drupal\currencyapi\Form\CurrencyApiSettingsForm'
+    _title: 'Currency API Settings'
+  requirements:
+    _permission: 'administer site configuration'
+currencyapi.rates:
+  path: '/currency-rates'
+  defaults:
+    _title: 'Currency Exchange Rates'
+    _controller: '\Drupal\currencyapi\Controller\CurrencyApiController::ratesPage'
+  requirements:
+    _permission: 'access content'
+
+currencyapi.buy_100:
+  path: '/buy-100'
+  defaults:
+    _title_callback: '\Drupal\currencyapi\Controller\CurrencyApiController::buy100Title'
+    _controller: '\Drupal\currencyapi\Controller\CurrencyApiController::buy100'
+  requirements:
+    _permission: 'access content'
+
+currencyapi.rates.json:
+  path: '/currency-rates/json/{key}'
+  defaults:
+    _controller: '\Drupal\currencyapi\Controller\CurrencyApiController::ratesJson'
+  requirements:
+    _permission: 'access content'
+    key: '[a-zA-Z]+'
+currencyapi.fetchrates:
+  path: '/fetch-rates'
+  defaults:
+    _title: 'Fetch selected Exchange Rates'
+    _controller: '\Drupal\currencyapi\Controller\CurrencyApiController::fetchRates'
+  requirements:
+    _permission: 'administer site configuration'

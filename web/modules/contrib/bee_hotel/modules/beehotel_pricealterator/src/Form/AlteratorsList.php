@@ -301,8 +301,6 @@ class AlteratorsList extends FormBase {
       ];
     }
 
-    $form['alterators'] = $form['alterators'];
-
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
       '#type' => 'submit',

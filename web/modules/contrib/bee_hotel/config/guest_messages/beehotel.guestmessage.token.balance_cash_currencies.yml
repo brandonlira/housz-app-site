@@ -1,0 +1,10 @@
+id: "balance_cash_currencies"
+title: "List of currency balances by cash"
+description: "Balance  with other currencies, buy rate included"
+settings:
+        entity: commerce_order
+        field: balance
+        property: number
+        # search for hook in code
+        hook: TRUE
+value: NULL

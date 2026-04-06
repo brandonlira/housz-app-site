@@ -101,7 +101,6 @@ class SpecialNights extends ConfigFormBase {
    *   The renderer.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, DateFormatterInterface $date_formatter, ModuleHandlerInterface $module_handler, PrivateTempStoreFactory $temp_store_factory, ConfigFactoryInterface $config_factory, BeeHotelCommerce $beehotel_commerce, RendererInterface $renderer) {
-    parent::__construct($config_factory);
     $this->entityTypeManager = $entity_type_manager;
     $this->nodeStorage = $entity_type_manager->getStorage('node');
     $this->dateFormatter = $date_formatter;

@@ -2,38 +2,14 @@
 
 namespace Drupal\beehotel_pricealterators\Plugin\PriceAlterator;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\beehotel_utils\BeeHotelCommerce;
 use Drupal\beehotel_pricealterator\PriceAlteratorBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a "Global Slider" Price Alterator for BeeHotel.
- *
- * Because the plugin manager class for our plugins uses annotated class
- * discovery, Price Alterators only needs to exist within the
- * Plugin\PriceAlterator namespace, and provide a PriceAlterator
- * annotation to be declared as a plugin. This is defined in
- * \Drupal\beehotel_pricealterator\PriceAlteratorPluginManager::__construct().
- *
- * The following is the plugin annotation. This is parsed by Doctrine to make
- * the plugin definition. Any values defined here will be available in the
- * plugin definition.
- *
- * This should be used for metadata that is specifically required to instantiate
- * the plugin, or for example data that might be needed to display a list of all
- * available plugins where the user selects one. This means many plugin
- * annotations can be reduced to a plugin ID, a label and perhaps a description.
- *
- *
- *  The weight Key is the weight for this alterator.
- * Legenda for the 'weight' key:
- * -9999 : heaviest, to be used as very first (reserved)
- * -9xxx : heavy, to be used as first (reserved)
- *     0 : no need to be weighted
- *  1xxx : allowed in custom modules (@TODO)
- *  xxxx : everything else
- *  9xxx : light, to be used as last (reserved)
- *  9999 : lightest, to be used as very last (reserved)
  *
  * @PriceAlterator(
  *   description = @Translation("Slide globally price up and down"),
@@ -54,35 +30,35 @@ class GlobalSlider extends PriceAlteratorBase {
   protected $beehotelCommerce;
 
   /**
+   * The renderer service.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * Price alterator Status.
    *
-   * @var bool
+   * @var bool|null
    */
   private $status;
 
   /**
-   * Price alterator Increase.
-   *
-   * @var float
-   */
-  private $increase;
-
-  /**
    * Price alterator Enabled.
    *
-   * @var bool
+   * @var bool|null
    */
   private $enabled;
 
   /**
-   * Price alterator global slider.
+   * Price alterator global slider value.
    *
-   * @var float
+   * @var array
    */
   private $globalslider;
 
   /**
-   * Constructs a new alterator object.
+   * Constructs a new GlobalSlider alterator.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -90,15 +66,31 @@ class GlobalSlider extends PriceAlteratorBase {
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    * @param \Drupal\beehotel_utils\BeeHotelCommerce $beehotel_commerce
    *   BeeHotel Commerce Utils.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, BeeHotelCommerce $beehotel_commerce) {
-    $config = \Drupal::config($this->configName());
-    $this->status = $config->get('status');
-    $this->globalslider = [$config->get('globalslider')];
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    ConfigFactoryInterface $config_factory,
+    BeeHotelCommerce $beehotel_commerce,
+    RendererInterface $renderer
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $config_factory);
+
     $this->beehotelCommerce = $beehotel_commerce;
+    $this->renderer = $renderer;
+
+    // Load plugin-specific configuration.
+    $config = $this->configFactory->get($this->configName());
+    $this->status = $config->get('status');
     $this->enabled = $config->get('enabled');
+    $this->globalslider = [$config->get('globalslider')];
   }
 
   /**
@@ -109,14 +101,17 @@ class GlobalSlider extends PriceAlteratorBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('config.factory'),
       $container->get('beehotel_utils.beehotelcommerce'),
+      $container->get('renderer')
     );
   }
 
   /**
    * Reference to the Alterator (as plugin).
    *
-   *   This value matches the ID in the @PriceAlterator annotation.
+   * @return string
+   *   The plugin ID.
    */
   public function pluginId() {
     $tmp = explode("\\", __CLASS__);
@@ -124,21 +119,11 @@ class GlobalSlider extends PriceAlteratorBase {
   }
 
   /**
-   * Alter a price.
-   *
-   * Every Alterator needs to have an  alter method.
-   *
-   * @param array $data
-   *   Array of data related to this price.
-   * @param array $pricetable
-   *   Array of prices by week day.
-   *
-   * @return array
-   *   An updated $data array.
+   * {@inheritdoc}
    */
-  public function alter(array $data, array $pricetable) {
-
-    $data['tmp']['price'] += $data['tmp']['price'] / 100 * reset($this->globalslider);
+  public function alter(array $data, array $pricetable): array {
+    $slider = reset($this->globalslider);
+    $data['tmp']['price'] += $data['tmp']['price'] / 100 * $slider;
     $data['alterator'][] = __CLASS__;
     return $data;
   }
@@ -146,40 +131,30 @@ class GlobalSlider extends PriceAlteratorBase {
   /**
    * Current value.
    *
-   * Get current value for this alterator. We can use this
-   * method to get info and settings for the alterator.
+   * Get current value for this alterator.
    *
    * @param array $data
    *   Array of data related to this price.
    * @param array $pricetable
    *   Array of prices by week day.
    *
-   * @return array
-   *   A render array as expected by the renderer
+   * @return string
+   *   Rendered output.
    */
-  public function currentValue(array $data, array $pricetable) {
-
-    $data = [];
-    $data['value'] = "";
-    $data['currency'] = $this->beehotelCommerce->currentStoreCurrency()->get('symbol');
-    $data['percentage'] = "%";
-    $data['type'] = "";
-    $data['class'] = "";
+  public function currentValue(array $data, array $pricetable): string {
     $slider = reset($this->globalslider);
-
-    if (isset($slider)) {
-      $data['value'] = $slider ?: '';
-      $data['class'] = $this->polarity($slider) ?: '';
-      $data['type'] = $data['percentage'] ?: '';
-    }
+    $value = $slider ?? '';
+    $class = $this->polarity($slider) ?: '';
+    $percentage = "%";
 
     $tmp = $this->t("Price will be altered as per percentage value");
     $tmp .= "<br/>" . $this->t("price + (price / 100 * global slice) = Altered price");
     $tmp .= "<br/>" . $this->t("IE: 200 + (200 / 100 * 20) = 240");
+
     $current_value = [
-      '#default_value' => $data['value'],
+      '#default_value' => $value,
       '#type' => 'range_slider',
-      '#title' => $this->t('Current value:') . " " . $data['value'],
+      '#title' => $this->t('Current value:') . " " . $value,
       '#min' => -100,
       '#max' => 100,
       '#step' => 1,
@@ -192,7 +167,7 @@ class GlobalSlider extends PriceAlteratorBase {
       '#disabled' => TRUE,
     ];
 
-    return \Drupal::service('renderer')->renderPlain($current_value);
+    return $this->renderer->renderPlain($current_value);
   }
 
 }

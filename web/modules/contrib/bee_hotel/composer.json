@@ -16,10 +16,12 @@
         "drupal/bat_api": "^11.1",
         "drupal/bee": "^11.1",
         "drupal/commerce": "^2.0 || ^3.0",
+        "drupal/commerce_account_balance": "^1.0",
         "drupal/commerce_invoice": "^2.0",
         "drupal/beehotel_pricealterator": "*",
         "drupal/beehotel_pricealterators": "*",
-        "drupal/beehotel_vertical": "*"
+        "drupal/beehotel_vertical": "*",
+        "drupal/currencyapi": "^1.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

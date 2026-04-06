@@ -1,0 +1,7 @@
+enabled: true
+send_time: '07:00'
+email_subject: 'Happening Today - [date]'
+recipients:
+  - 'manager@example.com'
+  - 'reception@example.com'
+

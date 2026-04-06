@@ -1,0 +1,4 @@
+services:
+  commerce_account_balance.link_builder:
+    class: Drupal\commerce_account_balance\AccountBalanceLinkBuilder
+    arguments: ['@current_user', '@entity_type.manager']

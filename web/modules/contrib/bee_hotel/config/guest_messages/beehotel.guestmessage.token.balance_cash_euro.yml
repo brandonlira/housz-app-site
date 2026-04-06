@@ -1,0 +1,10 @@
+id: "balance_cash_euro"
+title: "Balance Cash Euro"
+description: "Balance in cash with Euro, may be lower than full balance"
+settings:
+        entity: commerce_order
+        field: balance
+        property: number
+        # search for hook in code
+        hook: TRUE
+value: NULL

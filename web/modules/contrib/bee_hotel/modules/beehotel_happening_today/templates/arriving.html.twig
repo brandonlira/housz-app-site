@@ -1,0 +1,94 @@
+<section class="daily-report__section daily-report__section--arrivals">
+  <h2 class="daily-report__section-title">
+    <span class="icon" aria-hidden="true">📥</span>
+    {{ "Arrivals"|t }}
+    <span class="badge" aria-label="{{ "Number of arrivals"|t }}: {{ arrivals|length }}">
+      {{ arrivals|length }}
+    </span>
+  </h2>
+
+  {% if arrivals %}
+    <div class="daily-report__grid" role="list" aria-label="{{ "Today\\'s arrivals"|t }}">
+      {% for arrival in arrivals %}
+        <div class="daily-report__card" role="listitem">
+          <div class="daily-report__card-header">
+            <h3 class="daily-report__room-name">{{ arrival.unit_name }}</h3>
+            <span class="daily-report__time">
+              <span class="icon" aria-hidden="true">⏰</span>
+              <span class="visually-hidden">{{ "Check-in time"|t }}:</span>
+              {{ arrival.check_in_time }}
+            </span>
+          </div>
+
+          <div class="daily-report__guest-info">
+            {% if arrival.guest_name %}
+              <strong>{{ arrival.guest_name }}</strong>
+            {% endif %}
+            <div class="daily-report__stay-duration">
+              <span class="visually-hidden">{{ "Number of nights"|t }}:</span>
+              {{ "Nights"|t }}: {{ arrival.nights_stayed }}
+            </div>
+
+            <div class="daily-report__stay-people">
+              <span class="visually-hidden">{{ "Number of people"|t }}:</span>
+              {{ "People"|t }}: {{ arrival.people }}
+            </div>
+
+            {% if arrival.guest_phone %}
+              <div class="daily-report__contact">
+                <span class="icon" aria-hidden="true">📞</span>
+                <span class="visually-hidden">{{ "Phone number"|t }}:</span>
+                {{ arrival.guest_phone }}
+              </div>
+            {% endif %}
+            {% if arrival.guest_email %}
+              <div class="daily-report__contact">
+                <span class="icon" aria-hidden="true">📧</span>
+                <span class="visually-hidden">{{ "Email address"|t }}:</span>
+                {{ arrival.guest_email }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="daily-report__booking-info">
+            <ul>
+              <li>
+                <span class="visually-hidden">{{ "Stay end date"|t }}:</span>
+                {{ "Stay until"|t }}: {{ arrival.end_date|date('d/m/Y') }}
+                <a href="{{ arrival.booking_link }}"
+                   class=""
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="{{ "View booking details for"|t }} {{ arrival.booking_id }}">
+                  {{ arrival.booking_id }}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="daily-report__comments">
+            <ul>
+              <li>
+                <a href="{{ arrival.booking_link }}"
+                   class=""
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   data-comments="{{ arrival.comment_count }}"
+                   aria-label="{{ "View order comments"|t }} ({{ arrival.comment_count }} {{ "comments"|t }})">
+                  {{ "Comments"|t }}
+                  {% if arrival.comment_count > 0 %}
+                    <span class="visually-hidden">({{ arrival.comment_count }})</span>
+                  {% endif %}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="daily-report__empty">
+      <p>{{ "No arrivals today"|t }}</p>
+    </div>
+  {% endif %}
+</section>

@@ -2,7 +2,7 @@
 
 namespace Drupal\beehotel_pricealterator;
 
-use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Plugin\PluginWithFormsTrait;
@@ -10,139 +10,160 @@ use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides the base class for payment gateways.
+ * Provides the base class for price alterator plugins.
  */
 class PriceAlteratorBase extends PluginBase implements PriceAlteratorInterface, ContainerFactoryPluginInterface {
 
   use PluginWithFormsTrait;
 
   /**
-   * The entity type manager.
+   * The config factory service.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $entityTypeManager;
+  protected $configFactory;
 
   /**
-   * The BeeHotel commerce Util.
+   * Constructs a new PriceAlteratorBase object.
    *
-   * @var \Drupal\beehotel_utils\BeeHotelCommerce
-   */
-  protected $beehotelCommerce;
-
-  /**
-   * The devel config.
-   */
-  protected ImmutableConfig $config;
-
-  /**
-   * Constructs a new Occupants alterator object.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The config factory service.
-   */
-  public function __construct(ConfigFactoryInterface $config_factory) {}
-
-  /**
-   * Creates an instance of the plugin.
-   *
-   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-   *   The container to pull out services used in the plugin.
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
    *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory service.
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public function configName() {
-    return BEEHOTEL_PRICEALTERATOR_ROUTE_BASE . $this->pluginId() . '.settings';
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    ConfigFactoryInterface $config_factory
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->configFactory = $config_factory;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function alter(array $data, array $pricetable) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public function description() {
-    // Retrieve the @description property from the annotation and return it.
-    return $this->pluginDefinition['description'];
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('config.factory')
+    );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function status() {
-    // Retrieve the @status property from the annotation and return it.
-    return $this->pluginDefinition['status'];
+  public function alter(array $data, array $pricetable): array {
+    return $data;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function weight() {
-    // Retrieve the @weight property from the annotation and return it.
-    return $this->pluginDefinition['weight'];
+  public function configName(): string {
+    return BEEHOTEL_PRICEALTERATOR_ROUTE_BASE . $this->getPluginId() . '.settings';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function polarity($value) {
+  public function description(): string {
+    return $this->pluginDefinition['description'] ?? '';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function status(): bool {
+    return (bool) ($this->pluginDefinition['status'] ?? FALSE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function weight(): int {
+    return (int) ($this->pluginDefinition['weight'] ?? 0);
+  }
+
+  /**
+   * Determines the polarity of a numeric value.
+   *
+   * @param int|float $value
+   *   The value to evaluate.
+   *
+   * @return string|null
+   *   'add' if positive, 'sub' if negative, NULL if zero.
+   */
+  public function polarity($value): ?string {
     if ($value > 0) {
-      $polarity = "add";
+      return "add";
     }
-    elseif ($value < 0) {
-      $polarity = "sub";
+    if ($value < 0) {
+      return "sub";
     }
-    else {
-      $polarity = NULL;
-    }
-    return $polarity;
+    return NULL;
   }
 
   /**
-   * Is this alterator enabled by user?
+   * Checks if this alterator is enabled by the user.
+   *
+   * @return bool
+   *   TRUE if enabled, FALSE otherwise.
    */
-  public function enabled($value) {
-    return \Drupal::config($this->configName())->get("enabled");
+  public function enabled(): bool {
+    $config = $this->configFactory->get($this->configName());
+    return (bool) $config->get('enabled');
   }
 
   /**
-   * Get alterator weight given by user.
+   * Gets the user-defined weight for this alterator.
+   *
+   * @return int
+   *   The weight value.
    */
-  public function getUserWeight() {
-    $tmp = [];
-    $tmp['settings'] = \Drupal::service('config.factory')->get('beehotel_pricealterator.settings');
-    $tmp['price_alterators'] = $tmp['settings']->get('price_alterators');
+  // public function getUserWeight(): int {
+  //   $globalConfig = $this->configFactory->get('beehotel_pricealterator.settings');
+  //   $weights = $globalConfig->get('price_alterators') ?: [];
+  //   return (int) ($weights[$this->getPluginId() . '_weight'] ?? 0);
+  // }
 
-    $user_weight = 0;
-    if (isset($tmp['price_alterators'])) {
-      $user_weight = $tmp['price_alterators'][$this->pluginId() . "_weight"];
-    }
 
-    return (int) $user_weight;
+  public function getUserWeight(): int {
+  if (!$this->configFactory) {
+    // Log the plugin ID and stop execution with a meaningful message.
+    $plugin_id = $this->getPluginId();
+    throw new \Exception("Plugin '$plugin_id' does not have ConfigFactory injected. Check its constructor and create() method.");
   }
+  $globalConfig = $this->configFactory->get('beehotel_pricealterator.settings');
+  $weights = $globalConfig->get('price_alterators') ?: [];
+  return (int) ($weights[$this->getPluginId() . '_weight'] ?? 0);
+}
+
 
   /**
-   * {@inheritdoc}
+   * Gets the storage timezone used for datetime fields.
+   *
+   * @return string
+   *   The timezone constant.
    */
-  protected function getTimezone() {
+  protected function getTimezone(): string {
     return DateTimeItemInterface::STORAGE_TIMEZONE;
   }
 
   /**
-   * {@inheritdoc}
+   * Gets the storage date format used for datetime fields.
+   *
+   * @return string
+   *   The date storage format constant.
    */
-  protected function getTimestorage() {
+  protected function getTimestorage(): string {
     return DateTimeItemInterface::DATE_STORAGE_FORMAT;
   }
 

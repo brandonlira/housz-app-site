@@ -4,7 +4,7 @@ beehotel.admin:
     _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
     _title: 'Bee Hotel'
   requirements:
-    _permission: 'administer bee_hotel'
+    _permission: 'configure beehotel settingsconfigure beehotel settings'
 
 bee_hotel.node.book_this_unit:
   path: '/node/{node}/book-this-unit'
@@ -23,7 +23,7 @@ bee_hotel.node.related_product:
       node:
         type: entity:node
   requirements:
-    _permission: 'administer bee_hotel'
+    _permission: 'configure beehotel settings'
 # search form with result below
 beehotel.unit_search:
   path: '/us'
@@ -46,7 +46,7 @@ beehotel.admin_settings:
     _form: '\Drupal\bee_hotel\Form\BeeHotelSettingsForm'
     _title: 'Settings'
   requirements:
-    _permission: 'administer bee_hotel'
+    _permission: 'configure beehotel settings'
 # bee_hotel.mail.welcome.send:
 #   path: '/admin/bee_hotel/mailguest/{order}/{type}'
 #   defaults:
@@ -58,7 +58,7 @@ beehotel.admin_settings:
 #       order:
 #         type: entity:commerce_order
 #   requirements:
-#     _permission: 'administer bee_hotel'
+#     _permission: 'configure beehotel settings'
 entity.commerce_order.guest_messages:
   path: '/admin/commerce/orders/{commerce_order}/guest-messages'
   defaults:
@@ -71,3 +71,25 @@ entity.commerce_order.guest_messages:
         type: 'entity:commerce_order'
   requirements:
     _invoice_order_access: 'TRUE'
+
+beehotel.guest_messages.mail.preview:
+  path: '/admin/beehotel/guestmessages/mail/preview/{node}/{commerce_order}'
+  defaults:
+    _form: '\Drupal\bee_hotel\Form\BeeHotelGuestMessagesMail'
+    _title: 'Mail preview - Guest Messages'
+  options:
+    parameters:
+      node:
+        type: entity:node
+      commerce_order:
+        type: entity:commerce_order
+  requirements:
+    _permission: 'configure beehotel settings'
+
+beehotel.yaml_reader.content:
+  path: '/admin/beehotel/guestmessages/tokens'
+  defaults:
+    _controller: '\Drupal\bee_hotel\Controller\TokensReader::content'
+    _title: 'Guest Message Tokens'
+  requirements:
+    _permission: 'configure beehotel settings' # Or a more specific permission if needed

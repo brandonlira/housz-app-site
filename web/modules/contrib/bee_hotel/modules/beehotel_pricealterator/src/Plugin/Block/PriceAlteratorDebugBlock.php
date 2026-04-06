@@ -113,7 +113,10 @@ class PriceAlteratorDebugBlock extends BlockBase implements ContainerFactoryPlug
       }
       else {
         $final = [];
-        if ($as[$i + 1] == NULL) {
+        $final['class'] = "";
+        $final['description'] = "";
+
+        if (isset($as[$i + 1])  && $as[$i + 1] == NULL) {
           $final['description'] = "<span class='description'> <<< " . $this->t("final avg price") . "</span>";
           $final['class'] = "is-final";
         }

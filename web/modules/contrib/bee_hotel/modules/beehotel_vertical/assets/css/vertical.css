@@ -1,333 +1,854 @@
+/* vertical.css - Enhanced Vertical Calendar with Card Design & Reservation Management */
+
+/* ============================================
+ *  1. CSS Variables with WCAG Compliant Colors
+ *  ============================================ */
 :root {
-  --select-border: transparent;
-  --time-range-form-font-size: 10px;
+  /* Primary colors with 4.5:1+ contrast ratio */
+  --primary-color: #1a5f7a;
+  --primary-dark: #0e3e52;
+  --primary-light: #2c7da0;
+  --primary-bg: #e6f3f8;
+
+  /* Secondary/Action colors - WCAG AA compliant */
+  --success-color: #2e7d32;
+  --success-bg: #e8f5e9;
+  --warning-color: #ed6c02;
+  --warning-bg: #fff4e5;
+  --error-color: #d32f2f;
+  --error-bg: #ffebee;
+  --info-color: #0288d1;
+  --info-bg: #e1f5fe;
+  --whatsapp-color: #075e54;
+  --whatsapp-bg: #e0f2e9;
+  --checkin-color: #2c7da0;
+  --checkout-color: #d45c1e;
+  --same-as-daybefore-color: #bdbdbd;
+
+  /* Neutral colors - high contrast */
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a4a4a;
+  --text-muted: #6b6b6b;
+  --bg-white: #ffffff;
+  --bg-light: #f5f5f5;
+  --bg-hover: #f0f0f0;
+  --border-color: #dddddd;
+  --border-light: #eeeeee;
+
+  /* Shadows and effects */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 2px 4px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 8px rgba(0,0,0,0.1);
+  --border-radius: 8px;
+  --border-radius-sm: 6px;
+  --transition: all 0.2s ease;
+
+  /* Typography */
+  --font-xs: 0.75rem;
+  --font-sm: 0.8125rem;
+  --font-base: 0.875rem;
+  --font-lg: 1rem;
+  --font-xl: 1.125rem;
+
+  /* Calendar specific */
+  --day-cell-min-width: 110px;
+  --day-cell-min-width-mobile: 90px;
 }
 
-body.vertical-table .layout-container #main .inner {
-  max-width: 100%;
+/* Dark mode overrides with proper contrast */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #e8e8e8;
+    --text-secondary: #cccccc;
+    --text-muted: #aaaaaa;
+    --bg-white: #1e1e2a;
+    --bg-light: #2a2a35;
+    --bg-hover: #353542;
+    --border-color: #3a3a48;
+    --border-light: #2f2f3a;
+    --primary-bg: #1e3a4a;
+    --success-bg: #1e3a2a;
+    --warning-bg: #3a2e1e;
+    --error-bg: #3a1e1e;
+    --info-bg: #1e3a4a;
+    --whatsapp-bg: #1e3a2e;
+  }
 }
 
-#tablemanager {
-  max-height: 500px;
-  overflow: auto;
-}
-
-table.vertical-table {
-  height: 300px;
-  position: relative;
-  table-layout: fixed;
-  text-align: left;
-}
-
-table.vertical-table caption {
-  text-align: right;
-  margin: 12px 0;
-  font-size: 0.76em;
-}
-
-table.vertical-table tr {
-  border: 0;
-  height: 120px;
-}
-
-table.vertical-table tr.even {
-  background: cyan;
-}
-
-table.vertical-table th {
-  background: white;
-  color: green;
-  position: sticky;
-  top: 0;
-}
-
-table.vertical-table th  h3 a: before {
-  font-family: "Font Awesome 5 Pro";
-  font-weight: 900;
-  font-size: 0.658em;
-}
-
-table.vertical-table th h3.settings a: before {
-  content: "\f013";
-}
-
-table.vertical-table th h3.unit a: before {
-  content: "\f0c1";
-}
-
-table.vertical-table th .unit {
-  text-align: center;
-}
-
-table.vertical-table tr td {
-  border-left: 1px dotted lightgrey;
-  border-right: 1px dotted lightgrey;
-  height: 100%;
-  max-width: 300px;
+/* ============================================
+ *  2. Base Reset
+ *  ============================================ */
+* {
+  margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
-table.vertical-table tr th:first-child ,
-table.vertical-table tr td:first-child {
-  width: 86px;
-  min-width: 86px;
-  max-width: 86px;
-  word-break: break-all;
-  font-size: 0.86em;
-  text-align: center;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--bg-light);
+  color: var(--text-primary);
+  line-height: 1.5;
+  font-size: var(--font-base);
 }
 
-table.vertical-table tr > td > div {
-  height: 100%;
-  margin: 0 auto;
-  position: relative;
-  width: 80%;
-}
-
-#beehotel-vertical-timerange  .row.form {
+/* ============================================
+ *  3. Main Container & Form Styling
+ *  ============================================ */
+.beehotel-vertical-timerange {
+  margin-bottom: 1.5rem;
+  background: var(--bg-white);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   display: flex;
-  align-items: center;
-  background-color: #ebebeb;
-  float: right;
-  text-align: right;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
 }
 
-form.beehotel-vertical-timerange .form-item,
-form.beehotel-vertical-timerange .form-actions {
-  display: inline-block;
+.beehotel-vertical-timerange .form-item {
+  flex: 1;
+  min-width: 180px;
+}
+
+.beehotel-vertical-timerange .form-item__label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.beehotel-vertical-timerange .form-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-white);
+  color: var(--text-primary);
+  font-size: var(--font-sm);
+  transition: var(--transition);
+}
+
+.beehotel-vertical-timerange .form-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(26, 95, 122, 0.2);
+}
+
+.beehotel-vertical-timerange .form-actions {
   margin: 0;
 }
 
-form.beehotel-vertical-timerange .form-item--range {
-  border: 0px solid #777;
-  display: flex;
-  align-items: center;
-}
-
-form.beehotel-vertical-timerange .form-item--range label {
-  margin: 0 1em;
-  width: 100%;
-  font-weight: normal;
-  font-size: var(--time-range-form-font-size);
-}
-
-form.beehotel-vertical-timerange .form-item--range select {
-  min-width: 15ch;
-  max-width: 30ch;
-  border: 1px solid var(--select-border);
-  border-radius: 0.25em;
-  padding: 0.25em 0.5em;
-  /*font-size: 1.25rem;*/
-  font-size: var(--time-range-form-font-size);
-  cursor: pointer;
-  line-height: 1.1;
-  background-color: #d5d5d5;
-  width: 100%;
-}
-
-form.beehotel-vertical-timerange .form-actions input {
-  align-items: center;
-  background-color: #ebebeb;
-  font-size: var(--time-range-form-font-size);
-  color: black;
-  display: flex;
-  height: 40px;
-  margin: 0 1em;
-  padding: 0;
-}
-
-table.vertical-table tr > td > .col1 {
-  border-left-style: solid;
-}
-
-table.vertical-table tr > td > .col1.low {
-  border-left-width: 8px;
-  border-left-color: grey;
-}
-
-table.vertical-table tr > td > .col1.high {
-  border-left-width: 10px;
-  border-left-color: orange;
-}
-
-table.vertical-table tr > td > .col1.peak {
-  border-left-width: 12px;
-  border-left-color: red;
-}
-
-table.vertical-table tr > td > div > .season {
-  font-size: 0.68em;
-  font-weight: bold;
-  margin-left: 4px;
-  text-align: left;
-}
-
-table.vertical-table tr > td > div > .season .detailed {
-  display: none;
-}
-
-table.vertical-table tr > td > div > .season.peak {
-  color: red;
-}
-
-table.vertical-table tr > td > div > .season.high {
-  color: orange;
-}
-
-table.vertical-table tr > td > div > .season.low {
-  color: grey;
-}
-
-table.vertical-table .day-of-the-week {
-  display: block;
-  font-weight: bold;
-  font-size: 1.28em;
-}
-
-table.vertical-table .day-number {
-  display: block;
-  font-weight: bold;
-  font-size: 2.48em;
-  clear: both;
-}
-
-table.vertical-table .year {
-  color: grey;
-  display: block;
-}
-
-table.vertical-table .elab-day {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  color: red;
-  font-size: 3em;
-}
-
-table.vertical-table tr > td > div > div {
-  /*display: inline-block;*/
-  padding: 0px;
-}
-
-table.vertical-table tr > td > div > div.b.reservation {
-  height: inherit;
-}
-
-table.vertical-table tr > td > div > .b > div.state-box {
-  background: #d8f9d8;
-  border: green;
-  border-radius: 8px;
-  color: green;
-  font-weight: bold;
-  margin: auto;
-  padding: 0 4px;
-  text-align: center;
-  text-transform: uppercase;
-  width: fit-content;
-}
-
-table.vertical-table tr > td > div > .b  > div.state-box.blocking {
-  background: antiquewhite;
-  border: red;
-  border-radius: 8px;
-  color: red;
-}
-
-table.vertical-table tr > td > div > .b  > a.price-link .price {
-  height: 48px;
-  width: 48px;
-  border-radius: 50%;
-  background: yellow;
-  margin: 24px auto;
-  outline: none !important;
-  box-shadow: none !important;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-table.vertical-table tr > td > div > .b  > a.price-link .price .smaller {
-  font-size: 0.48em;
-}
-
-table.vertical-table tr > td > div > div.spacer {
-  font-size: 0;
-}
-
-table.vertical-table tr > td > div > div.spacer.no-display {
-  display: none;
-}
-
-table.vertical-table tr > td > div > .reservation,
-table.vertical-table tr > td > div > .occupied,
-table.vertical-table tr > td > div > .extra {
-  background: #139ff7;
+.beehotel-vertical-timerange .form-submit {
+  background: var(--primary-color);
   color: white;
-  font-weight: bold;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 40px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: var(--font-sm);
 }
 
-table.vertical-table tr > td > div > div  .vertical-order-item {
-  padding-left: 8px;
-  vertical-align: unset;
+.beehotel-vertical-timerange .form-submit:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
-table.vertical-table tr > td > div > .reservation .vertical-order-item  .payments div {
-  display: inline;
-  list-style-type: none;
-  padding: 0px 4px;
+/* ============================================
+ *  4. Vertical Table - Card Grid Layout
+ *  ============================================ */
+#vertical-table-container {
+overflow-x: auto;
+margin: 0 -0.5rem;
+padding: 0 0.5rem;
 }
 
-table.vertical-table tr > td > div > .reservation .vertical-order-item  .payments .amount {
-  background: white;
-  border: green;
-  border-radius: 8px;
-  color: green;
-  padding: 0 4px;
+.vertical-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  min-width: 700px;
 }
 
-table.vertical-table tr > td > div > .reservation .vertical-order-item  .payments .balance {
-  border: white;
-  background: white;
-  color: red;
-  padding: 0 4px;
-  border-radius: 8px;
+/* Table Header - Room Cards */
+.vertical-table thead tr {
+  background: transparent;
 }
 
-table.vertical-table tr > td > div > .reservation .vertical-order-item  .payments .balanced {
-  color: darkgreen;
-  font-size: 1.42em;
+.vertical-table thead th {
+  padding: 0;
+  vertical-align: bottom;
+  border: none;
+  background: transparent;
+  width: var(--day-cell-min-width);
 }
 
-table.vertical-table tr > td > div > .reservation.same-as-daybefore .vertical-order-item ,
-table.vertical-table tr > td > div > .reservation.checkout .vertical-order-item {
-  visibility: hidden;
+.vertical-table thead th h3 {
+  margin: 0;
+  padding: 0.75rem 0.5rem;
+  background: var(--bg-white);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  border-bottom: 2px solid var(--primary-light);
+  font-size: var(--font-base);
+  font-weight: 600;
+  text-align: center;
 }
 
-table.vertical-table tr > td > div > .checkin {
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  margin-top: 4px;
+.vertical-table thead th h3 .button {
   display: block;
-  width: auto;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: var(--transition);
 }
 
-table.vertical-table tr > td > div > .checkout {
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+.vertical-table thead th h3 .button:hover {
+  color: var(--primary-color);
+  transform: translateY(-1px);
 }
 
-/* Mobile */
-@media screen and (max-width: 377px) {
-  .reservation .vertical-order-item .comments,
-  .reservation .vertical-order-item .amount,
-    .reservation .vertical-order-item .balance {
-    display:none;
+.vertical-table thead th h3 .header-field--title {
+  font-weight: 600;
+  display: block;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Table Body - Day Cards */
+.vertical-table tbody tr {
+  transition: var(--transition);
+}
+
+.vertical-table tbody tr:hover {
+  background: rgba(26, 95, 122, 0.03);
+}
+
+/* Day Column (First Column) */
+.vertical-table tbody td:first-child {
+  padding: 0;
+  vertical-align: top;
+  width: 100px;
+}
+
+.col1 {
+  background: var(--bg-white);
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  border-right: none;
+  overflow: hidden;
+}
+
+.col1 .season {
+  background: var(--primary-bg);
+  padding: 0.25rem 0.5rem;
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--primary-dark);
+  text-align: center;
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
+}
+
+.col1 .season .detailed {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 0.5rem;
+  font-size: var(--font-xs);
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+  white-space: normal;
+}
+
+.col1 .season:hover .detailed {
+  display: block;
+}
+
+.col1 .col {
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  background: var(--bg-white);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.col1 .day-of-the-week {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.col1 .day-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.col1 .month {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+.col1 .elab-day {
+  font-size: var(--font-xs);
+  color: var(--warning-color);
+  font-weight: 500;
+}
+
+/* Room/Day Cells */
+.vertical-table tbody td:not(:first-child) {
+  padding: 0;
+  vertical-align: top;
+}
+
+.vertical-tr-td {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-left: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+  position: relative;
+}
+
+.vertical-tr-td:hover {
+  box-shadow: var(--shadow-sm);
+  z-index: 1;
+  background: var(--bg-hover);
+}
+
+/* Spacer for empty states */
+.vertical-tr-td .spacer {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-xs);
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border-light);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vertical-tr-td .spacer.occupied {
+  background: var(--error-bg);
+  color: var(--error-color);
+}
+
+/* ============================================
+ *  5. Reservation Items - Card Style
+ *  ============================================ */
+.vertical-tr-td .b,
+.vertical-tr-td .a {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.vertical-tr-td .b:last-child,
+.vertical-tr-td .a:last-child {
+  border-bottom: none;
+}
+
+.vertical-order-item {
+  font-size: var(--font-xs);
+  transition: var(--transition);
+  background: var(--bg-white);
+  border-radius: var(--border-radius-sm);
+  padding: 0.5rem;
+  margin: -0.25rem;
+}
+
+.vertical-order-item:hover {
+  background: var(--bg-hover);
+  transform: translateX(2px);
+}
+
+.vertical-order-item > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+}
+
+.vertical-order-item a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.vertical-order-item a:hover {
+  text-decoration: underline;
+}
+
+.vertical-order-item .small {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
+.vertical-order-item .payments {
+  margin-top: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: var(--font-xs);
+}
+
+.vertical-order-item .balance,
+.vertical-order-item .payment {
+  background: var(--bg-light);
+  padding: 0.125rem 0.375rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.vertical-order-item .balance {
+  color: var(--warning-color);
+  background: var(--warning-bg);
+}
+
+.vertical-order-item .payment {
+  color: var(--success-color);
+  background: var(--success-bg);
+}
+
+.vertical-order-item .comments {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-light);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  font-style: italic;
+  word-break: break-word;
+}
+
+/* Reservation Type Indicators */
+.vertical-tr-td .a {
+  background: var(--info-bg);
+  border-left: 3px solid var(--checkout-color);
+}
+
+.vertical-tr-td .a.checkout {
+  border-left-color: var(--checkout-color);
+}
+
+.vertical-tr-td .a.reservation {
+  border-left-color: var(--primary-color);
+}
+
+.vertical-tr-td .b {
+  background: var(--bg-white);
+}
+
+.vertical-tr-td .b.reservation {
+  background: var(--success-bg);
+  border-left: 3px solid var(--checkin-color);
+}
+
+.vertical-tr-td .b.reservation.checkin {
+  border-left-color: var(--checkin-color);
+}
+
+.vertical-tr-td .b.reservation.same-as-daybefore {
+  background: var(--bg-light);
+  border-left-color: var(--same-as-daybefore-color);
+  opacity: 0.7;
+}
+
+/* ============================================
+ *  6. State Cards (AV/NO Toggle)
+ *  ============================================ */
+.state-card {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.card {
+  width: 48px;
+  height: 48px;
+  position: relative;
+  transition: transform 0.3s;
+  transform-style: preserve-3d;
+  margin: 0 auto;
+}
+
+.state-link:hover .card {
+  transform: rotateY(180deg);
+}
+
+.card__face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+  font-weight: 700;
+  font-size: var(--font-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.card__face--front {
+  background: var(--success-color);
+  color: white;
+  transform: rotateY(0deg);
+}
+
+.card__face--front.green {
+  background: var(--success-color);
+}
+
+.card__face--back {
+  background: var(--error-color);
+  color: white;
+  transform: rotateY(180deg);
+}
+
+.card__face--back.red {
+  background: var(--error-color);
+}
+
+/* Price Link */
+.price-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  text-decoration: none;
+  text-align: center;
+  width: 100%;
+}
+
+.price {
+  background: var(--primary-bg);
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--primary-dark);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.125rem;
+  transition: var(--transition);
+}
+
+.price-link:hover .price {
+  background: var(--primary-color);
+  color: white;
+  transform: scale(1.02);
+}
+
+.price__currency {
+  font-size: var(--font-xs);
+}
+
+.price__integer {
+  font-size: var(--font-base);
+  font-weight: 700;
+}
+
+/* ============================================
+ *  7. Action Buttons & Links
+ *  ============================================ */
+.vertical-tr-td .state-link {
+  display: block;
+  text-align: center;
+  margin: 0.25rem 0;
+}
+
+.button.gear {
+  background: var(--bg-light);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-xs);
+  text-decoration: none;
+  color: var(--text-secondary);
+  display: inline-block;
+  transition: var(--transition);
+}
+
+.button.gear:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* ============================================
+ *  8. Responsive Design
+ *  ============================================ */
+@media (max-width: 768px) {
+  .beehotel-vertical-timerange {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .beehotel-vertical-timerange .form-item {
+    width: 100%;
+  }
+
+  .beehotel-vertical-timerange .form-actions {
+    text-align: right;
+  }
+
+  .vertical-table thead th {
+    width: var(--day-cell-min-width-mobile);
+  }
+
+  .vertical-table tbody td:first-child {
+    width: 80px;
+  }
+
+  .col1 .day-number {
+    font-size: 1.25rem;
+  }
+
+  .col1 .col {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .vertical-order-item > div {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .card {
+    width: 40px;
+    height: 40px;
+  }
+
+  .card__face {
+    font-size: var(--font-xs);
   }
 }
 
-
-@media screen and (max-width: 1680px) {
-  body.vertical-table #preview  .inner {
-    max-width: 100%;
+@media (max-width: 480px) {
+  .vertical-table {
+    min-width: 600px;
   }
+
+  .col1 .day-number {
+    font-size: 1rem;
+  }
+
+  .col1 .day-of-the-week,
+  .col1 .month {
+    font-size: 0.65rem;
+  }
+
+  .vertical-order-item {
+    font-size: 0.7rem;
+  }
+
+  .price {
+    font-size: 0.7rem;
+    padding: 0.125rem 0.375rem;
+  }
+}
+
+/* ============================================
+ *  9. Animations & Feedback
+ *  ============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vertical-table tbody tr {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.vertical-tr-td {
+  transition: all 0.2s ease;
+}
+
+/* Notification Toast */
+.copy-notification {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-primary);
+  color: var(--bg-white);
+  padding: 0.5rem 1.25rem;
+  border-radius: 40px;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  z-index: 1000;
+  animation: slideUpFade 0.25s ease, fadeOut 0.3s ease 2s forwards;
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+}
+
+@keyframes slideUpFade {
+  from {
+    transform: translate(-50%, 12px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* ============================================
+ *  10. Print Styles
+ *  ============================================ */
+@media print {
+  .beehotel-vertical-timerange,
+  .state-link,
+  .actions-footer {
+    display: none;
+  }
+
+  .vertical-table {
+    border-collapse: collapse;
+  }
+
+  .vertical-table th,
+  .vertical-table td {
+    border: 1px solid #ccc;
+    padding: 4px;
+  }
+
+  .col1 .season .detailed {
+    display: none;
+  }
+
+  .card {
+    transform: none !important;
+  }
+
+  .card__face--back {
+    display: none;
+  }
+}
+
+/* ============================================
+ *  11. Focus States for Accessibility
+ *  ============================================ */
+.vertical-table a:focus-visible,
+.beehotel-vertical-timerange .form-submit:focus-visible,
+.state-link:focus-visible .card {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-sm);
+}
+
+.vertical-order-item a:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+/* ============================================
+ *  12. Empty State & Loading
+ *  ============================================ */
+.vertical-table tbody:empty::before {
+  content: "No availability data for the selected period";
+  display: block;
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+  font-size: var(--font-base);
+  grid-column: 1 / -1;
+}
+
+/* Loading spinner for AJAX */
+.ajax-progress {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-white);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 1001;
+}
+
+/* ============================================
+ *  13. Tooltips for Better UX
+ *  ============================================ */
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]:before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-primary);
+  color: var(--bg-white);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-xs);
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+[data-tooltip]:hover:before {
+  opacity: 1;
+}
+
+/* ============================================
+ *  14. Scroll Indicators for Long Tables
+ *  ============================================ */
+#vertical-table-container {
+position: relative;
+}
+
+#vertical-table-container::after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+height: 20px;
+background: linear-gradient(to bottom, transparent, var(--bg-light));
+pointer-events: none;
+opacity: 0;
+transition: opacity 0.2s;
+}
+
+#vertical-table-container:hover::after {
+opacity: 1;
 }

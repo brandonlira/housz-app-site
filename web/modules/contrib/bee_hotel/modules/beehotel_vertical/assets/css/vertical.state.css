@@ -14,11 +14,11 @@
   height: 20px;
   margin: 0;
   perspective: 100px;
+  position: relative; /* Add this */
 }
 
 .state-link .state .card {
-  width: 66px;
-  margin: 0;
+  width: 100%; /* Changed from 66px to 100% */
   height: 100%;
   transition: transform 1s;
   transform-style: preserve-3d;
@@ -31,20 +31,37 @@
 }
 
 .state-link .state .card__face {
+  position: absolute; /* This is the key fix */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   backface-visibility: hidden;
   color: white;
   font-weight: bold;
-  height: 100%;
   font-size: 10px;
   line-height: 24px;
   text-align: center;
-  position: absolute;
-  width: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   -webkit-backface-visibility: hidden;
   padding: 2px 12px;
   border-radius: 4px;
 }
 
+/* Front face (visible by default) */
+.state-link .state .card__face--front {
+  background: grey; /* Default fallback */
+}
+
+/* Back face (starts rotated 180deg, so hidden) */
+.state-link .state .card__face--back {
+  background: grey; /* Default fallback */
+  transform: rotateY(180deg);
+}
+
+/* Color classes */
 .state-link .state .card__face.green {
   background: #7ac97a;
   width: 46px;
@@ -55,11 +72,70 @@
   width: 46px;
 }
 
+
+
+/* ADD */
+
+
+.state-link .state {
+  width: 66px;
+  border: 0px solid #ccc;
+  height: 20px;
+  margin: 0;
+  perspective: 100px;
+  position: relative; /* Add this */
+}
+
+.state-link .state .card {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s; /* Faster transition */
+  transform-style: preserve-3d;
+  cursor: pointer;
+  position: relative;
+}
+
+.state-link .state .card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.state-link .state .card__face {
+  position: absolute; /* This is the KEY fix */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  color: white;
+  font-weight: bold;
+  font-size: 10px;
+  line-height: 24px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 12px;
+  border-radius: 4px;
+}
+
 .state-link .state .card__face--front {
-  background: grey;
+  /* Front is visible by default */
+  background: grey; /* Fallback */
 }
 
 .state-link .state .card__face--back {
-  background: grey;
-  transform: rotateY(180deg);
+  background: grey; /* Fallback */
+  transform: rotateY(180deg); /* Starts rotated, so hidden */
+}
+
+/* Color classes - override the grey */
+.state-link .state .card__face.green {
+  background: #7ac97a !important;
+  width: 46px;
+}
+
+.state-link .state .card__face.red {
+  background: #ff6262 !important;
+  width: 46px;
 }

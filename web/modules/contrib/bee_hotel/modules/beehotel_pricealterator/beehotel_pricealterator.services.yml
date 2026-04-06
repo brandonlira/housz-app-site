@@ -9,7 +9,8 @@ services:
   beehotel_pricealterator.alter:
     class: Drupal\beehotel_pricealterator\Alter
     arguments: ['@current_user', '@beehotel_pricealterator.prealter', '@plugin.manager.beehotel.pricealterator', '@entity_type.manager', '@beehotel_utils.beehotelcommerce', '@renderer', '@session', '@beehotel_utils.beehotelunit']
-  beehotel_pricealterator.base:
-    class: Drupal\beehotel_pricealterator\PriceAlteratorBase
+  # Being a plugin, we don't need it as service
+  # beehotel_pricealterator.base:
+  #   class: Drupal\beehotel_pricealterator\PriceAlteratorBase
   beehotel_pricealterator.util:
     class: Drupal\beehotel_pricealterator\Util
