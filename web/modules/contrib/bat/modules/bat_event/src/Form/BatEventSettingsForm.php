@@ -45,14 +45,14 @@ class BatEventSettingsForm extends ConfigFormBase {
     ];
 
     $form['settings']['old_events']['old_events_status'] = [
-      '#default_value' => isset($config->get("bat_event")['delete_old']['status']) ?: "",
+      '#default_value' => $config->get('bat_event')['delete_old']['status'],
       '#type' => 'checkbox',
       '#title' => $this->t('Enable'),
       '#description' => $this->t('<b>Important</b> This feature may break your data integrity. <b>Do not enable</b> this if unsure.'),
     ];
 
     $form['settings']['old_events']['old_events_days_back'] = [
-      '#default_value' => isset($config->get("bat_event")['delete_old']['days_back']) ?: "",
+      '#default_value' => $config->get('bat_event')['delete_old']['days_back'],
       '#min' => 1,
       '#required' => TRUE,
       '#step' => 1,
@@ -62,7 +62,8 @@ class BatEventSettingsForm extends ConfigFormBase {
     ];
 
     $form['settings']['old_events']['old_events_how_many_per_cron'] = [
-      '#default_value' => isset($config->get("bat_event")['delete_old']['how_many_per_cron']) ?: 0,
+      '#default_value' => $config->get('bat_event')['delete_old']['how_many_per_cron'],
+      // '#default_value' => isset($config->get("bat_event")['delete_old']['how_many_per_cron']) ?: 0,
       '#min' => 0,
       '#required' => TRUE,
       '#step' => 1,

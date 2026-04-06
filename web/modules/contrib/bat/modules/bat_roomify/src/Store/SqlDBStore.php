@@ -106,7 +106,8 @@ abstract class SqlDBStore extends Store {
    * @return array
    */
   public function buildQueries(\DateTime $start_date, \DateTime $end_date, $unit_ids) {
-    $queries = array();
+
+    $queries = [];
 
     $queries[Event::BAT_DAY] = 'SELECT * FROM ' . $this->day_table . ' WHERE ';
     $queries[Event::BAT_HOUR] = 'SELECT * FROM ' . $this->hour_table . ' WHERE ';
@@ -121,20 +122,26 @@ abstract class SqlDBStore extends Store {
 
     $year_count = 0;
 
-    $query_parameters = '';
+    // Add a minumum required WHERE.
+    $query_parameters = ' 1=1 ';
 
-    foreach ($itemized[Event::BAT_DAY] as $year => $months) {
-      if ($year_count > 0) {
-        // We are dealing with multiple years so add an OR
-        $query_parameters .= ' OR ';
+    if ( isset($itemized[Event::BAT_DAY]) && count($itemized[Event::BAT_DAY]) > 0) {
+
+      $query_parameters .= ' AND ';
+
+      foreach ($itemized[Event::BAT_DAY] as $year => $months) {
+        if ($year_count > 0) {
+          // We are dealing with multiple years so add an OR
+          $query_parameters .= ' OR ';
+        }
+        $query_parameters .= 'year IN (' . $year . ') ';
+        $query_parameters .= 'AND month IN (' . implode(",", array_keys($months)) . ') ';
+        if (count($unit_ids) > 0) {
+          // Unit ids are defined so add this as a filter
+          $query_parameters .= 'AND unit_id in (' . implode("," , $unit_ids) . ') ';
+        }
+        $year_count++;
       }
-      $query_parameters .= 'year IN (' . $year . ') ';
-      $query_parameters .= 'AND month IN (' . implode(",", array_keys($months)) . ') ';
-      if (count($unit_ids) > 0) {
-        // Unit ids are defined so add this as a filter
-        $query_parameters .= 'AND unit_id in (' . implode("," , $unit_ids) . ') ';
-      }
-      $year_count++;
     }
 
     // Add parameters to each query

@@ -19,6 +19,7 @@
           function produceCall() {
             var dates = handyDates();
             var e = '/bat_api/rest/calendar-events?_format=json&unit_types=' + drupalSettings.batCalendar[0].unitType + '&unit_ids=' + drupalSettings.batCalendar[0].unitIds + '&event_types=' + drupalSettings.batCalendar[0].eventType + '&background=' + drupalSettings.batCalendar[0].background + '&start=' + dates['start'] + '&end=' + dates['end'];
+
             var r = '/bat_api/rest/calendar-units?_format=json&unit_type=' + drupalSettings.batCalendar[0].unitType + '&unit_ids=' + drupalSettings.batCalendar[0].unitIds ;
             call = new Map();
             call.set("events",e);

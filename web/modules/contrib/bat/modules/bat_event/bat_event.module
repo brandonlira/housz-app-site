@@ -304,11 +304,6 @@ function bat_event_field_widget_form_alter(&$element, FormStateInterface $form_s
  *   Some comment.
  */
 function bat_event_load_state(int $state_id) {
-
-  // dump (__METHOD__);
-  // dump ($state_id);
-  // exit;
-
   return State::load($state_id);
 }
 
@@ -935,6 +930,7 @@ function bat_event_entity_bundle_delete($entity_type_id, $bundle) {
  * return all units within the set of valid states.
  */
 function bat_event_get_matching_units(DateTime $start_date, DateTime $end_date, $valid_name_states, $type_ids, $event_type, $intersect = FALSE, $drupal_units = []) {
+
   // Instantiate a BAT Calendar.
   $calendar = bat_event_get_calendar($type_ids, $event_type, $drupal_units);
   return bat_event_get_matching_units_from_calendar($calendar, $start_date, $end_date, $valid_name_states, $intersect);
@@ -997,9 +993,9 @@ function bat_event_get_matching_units_from_calendar($calendar, DateTime $start_d
     $constraints[] = $constraint['constraint'];
   }
 
-  $response = $calendar->getMatchingUnits($start_date, $end_date, $valid_states, $constraints, $intersect, $reset);
+  $d['response'] = $calendar->getMatchingUnits($start_date, $end_date, $valid_states, $constraints, $intersect, $reset);
 
-  $valid_unit_ids = array_keys($response->getIncluded());
+  $valid_unit_ids = array_keys($d['response']->getIncluded());
 
   if (count($valid_unit_ids)) {
     return $valid_unit_ids;

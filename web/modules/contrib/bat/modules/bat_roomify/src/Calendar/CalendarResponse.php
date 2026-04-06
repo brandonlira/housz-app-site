@@ -75,7 +75,7 @@ class CalendarResponse {
    * @param $unit
    * @param $reason
    */
-  public function addMiss(UnitInterface $unit, $reason = '', Constraint $constraint = NULL) {
+  public function addMiss(UnitInterface $unit, $reason = '', ?Constraint $constraint = NULL) {
     $this->excluded_set[$unit->getUnitId()] = array(
       'unit' => $unit,
       'reason' => $reason,

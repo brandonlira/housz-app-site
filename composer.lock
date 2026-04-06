@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "10ea08cb521eb0dcdea33683dc577396",
+    "content-hash": "355edf5678ff0a5d63a4ad2827282ab5",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -923,6 +923,54 @@
             "time": "2024-12-13T19:25:56+00:00"
         },
         {
+            "name": "cweagans/composer-patches",
+            "version": "1.7.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cweagans/composer-patches.git",
+                "reference": "e190d4466fe2b103a55467dfa83fc2fecfcaf2db"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/e190d4466fe2b103a55467dfa83fc2fecfcaf2db",
+                "reference": "e190d4466fe2b103a55467dfa83fc2fecfcaf2db",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.0 || ^2.0",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "composer/composer": "~1.0 || ~2.0",
+                "phpunit/phpunit": "~4.6"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "cweagans\\Composer\\Patches"
+            },
+            "autoload": {
+                "psr-4": {
+                    "cweagans\\Composer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Cameron Eagans",
+                    "email": "me@cweagans.net"
+                }
+            ],
+            "description": "Provides a way to patch Composer packages.",
+            "support": {
+                "issues": "https://github.com/cweagans/composer-patches/issues",
+                "source": "https://github.com/cweagans/composer-patches/tree/1.7.3"
+            },
+            "time": "2022-12-20T22:53:13+00:00"
+        },
+        {
             "name": "defuse/php-encryption",
             "version": "v2.4.0",
             "source": {
@@ -1588,17 +1636,17 @@
         },
         {
             "name": "drupal/bat",
-            "version": "11.1.0-rc1",
+            "version": "11.1.0-rc9",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/bat.git",
-                "reference": "11.1.0-rc1"
+                "reference": "11.1.0-rc9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/bat-11.1.0-rc1.zip",
-                "reference": "11.1.0-rc1",
-                "shasum": "4a67bb48fe5aa6b68679f362cd3432e5c4bed881"
+                "url": "https://ftp.drupal.org/files/projects/bat-11.1.0-rc9.zip",
+                "reference": "11.1.0-rc9",
+                "shasum": "ec4d3ef9ad188440384938884c95f86b821335d4"
             },
             "require": {
                 "drupal/bat_roomify": "*",
@@ -1619,8 +1667,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "11.1.0-rc1",
-                    "datestamp": "1745954974",
+                    "version": "11.1.0-rc9",
+                    "datestamp": "1773861923",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "RC releases are not covered by Drupal security advisories."
@@ -1988,7 +2036,7 @@
         },
         {
             "name": "drupal/bat_roomify",
-            "version": "11.1.0-rc1",
+            "version": "11.1.0-rc9",
             "require": {
                 "drupal/bat": "^11",
                 "drupal/core": "^10.2 || ^11"
@@ -1996,8 +2044,8 @@
             "type": "metapackage",
             "extra": {
                 "drupal": {
-                    "version": "11.1.0-rc1",
-                    "datestamp": "1745954974",
+                    "version": "11.1.0-rc9",
+                    "datestamp": "1773861923",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "RC releases are not covered by Drupal security advisories."
