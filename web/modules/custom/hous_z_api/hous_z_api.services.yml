@@ -5,4 +5,4 @@ services:
 
   hous_z_api.booking_notifier:
     class: Drupal\hous_z_api\Service\BookingNotifier
-    arguments: ['@plugin.manager.mail', '@language_manager', '@logger.factory']
+    arguments: ['@email_factory', '@logger.factory']

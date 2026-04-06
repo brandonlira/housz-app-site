@@ -2,10 +2,10 @@
 
 namespace Drupal\hous_z_api\Service;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Mail\MailManagerInterface;
+use Drupal\symfony_mailer\EmailFactoryInterface;
 
 /**
  * Service responsible for booking email notifications.
@@ -13,18 +13,11 @@ use Drupal\Core\Mail\MailManagerInterface;
 class BookingNotifier {
 
   /**
-   * The mail manager.
+   * The email factory.
    *
-   * @var \Drupal\Core\Mail\MailManagerInterface
+   * @var \Drupal\symfony_mailer\EmailFactoryInterface
    */
-  protected MailManagerInterface $mailManager;
-
-  /**
-   * The language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected LanguageManagerInterface $languageManager;
+  protected EmailFactoryInterface $emailFactory;
 
   /**
    * The logger.
@@ -37,12 +30,10 @@ class BookingNotifier {
    * Constructs the notifier.
    */
   public function __construct(
-    MailManagerInterface $mail_manager,
-    LanguageManagerInterface $language_manager,
+    EmailFactoryInterface $email_factory,
     LoggerChannelFactoryInterface $logger_factory,
   ) {
-    $this->mailManager = $mail_manager;
-    $this->languageManager = $language_manager;
+    $this->emailFactory = $email_factory;
     $this->logger = $logger_factory->get('hous_z_api');
   }
 
@@ -51,8 +42,21 @@ class BookingNotifier {
    */
   public function notifyBookingCreated(EntityInterface $booking): void {
     $context = $this->buildContext($booking);
-    $this->send('booking_created_admin', $context['managerEmail'] ?? '', $context);
-    $this->send('booking_created_guest', $context['requesterEmail'] ?? '', $context);
+    $room    = Html::escape((string) ($context['roomName'] ?? 'Room'));
+    $id      = Html::escape((string) ($context['bookingId'] ?? ''));
+
+    $this->send(
+      key: 'booking_created_admin',
+      to: $context['managerEmail'] ?? '',
+      subject: "New booking request #{$id} for {$room}",
+      context: $context,
+    );
+    $this->send(
+      key: 'booking_created_guest',
+      to: $context['requesterEmail'] ?? '',
+      subject: "Booking request received for {$room}",
+      context: $context,
+    );
   }
 
   /**
@@ -60,84 +64,98 @@ class BookingNotifier {
    */
   public function notifyBookingUpdated(EntityInterface $booking, EntityInterface $original): void {
     $context = $this->buildContext($booking, $original);
+    $room    = Html::escape((string) ($context['roomName'] ?? 'Room'));
+    $id      = Html::escape((string) ($context['bookingId'] ?? ''));
+    $status  = Html::escape((string) ($context['statusLabel'] ?? ucfirst($context['status'] ?? '')));
 
-    if (($context['status'] ?? '') === 'confirmed') {
-      $this->send('booking_confirmed', $context['requesterEmail'] ?? '', $context);
-    }
-    elseif (($context['status'] ?? '') === 'cancelled') {
-      $this->send('booking_cancelled', $context['requesterEmail'] ?? '', $context);
-    }
-    else {
-      $this->send('booking_status_changed', $context['requesterEmail'] ?? '', $context);
-    }
+    $guest_key = match($context['status'] ?? '') {
+      'confirmed' => 'booking_confirmed',
+      'cancelled' => 'booking_cancelled',
+      default     => 'booking_status_changed',
+    };
 
-    $this->send('booking_status_admin', $context['managerEmail'] ?? '', $context);
+    $guest_subject = match($context['status'] ?? '') {
+      'confirmed' => "Your booking is confirmed: {$room}",
+      'cancelled' => "Your booking has been cancelled: {$room}",
+      default     => "Your booking status was updated: {$room}",
+    };
+
+    $this->send(
+      key: $guest_key,
+      to: $context['requesterEmail'] ?? '',
+      subject: $guest_subject,
+      context: $context,
+    );
+    $this->send(
+      key: 'booking_status_admin',
+      to: $context['managerEmail'] ?? '',
+      subject: "Booking #{$id} changed to {$status}",
+      context: $context,
+    );
   }
 
   /**
-   * Builds a normalized booking context used by the mail hook.
+   * Builds a normalized booking context array.
    */
   public function buildContext(EntityInterface $booking, ?EntityInterface $original = NULL): array {
-    $event = $booking->get('booking_event_reference')->entity ?? NULL;
-    $unit = $event?->get('event_bat_unit_reference')->entity ?? NULL;
-    $state = $booking->get('field_event_state')->entity ?? NULL;
+    $event          = $booking->get('booking_event_reference')->entity ?? NULL;
+    $unit           = $event?->get('event_bat_unit_reference')->entity ?? NULL;
+    $state          = $booking->get('field_event_state')->entity ?? NULL;
     $original_state = $original?->get('field_event_state')->entity ?? NULL;
 
     return [
-      'bookingId' => (int) $booking->id(),
-      'roomName' => $unit?->label() ?? '',
-      'address' => $unit?->get('field_address')->value ?? '',
-      'managerEmail' => $unit?->get('field_manager_email')->value ?? '',
-      'requesterEmail' => $booking->get('field_requester_email')->value ?? '',
-      'checkInDate' => $this->formatDate($booking->get('booking_start_date')->value ?? ''),
-      'checkOutDate' => $this->formatDate($booking->get('booking_end_date')->value ?? ''),
-      'checkInTime' => $booking->hasField('field_check_in_time') ? (string) $booking->get('field_check_in_time')->value : '',
-      'checkOutTime' => $booking->hasField('field_check_out_time') ? (string) $booking->get('field_check_out_time')->value : '',
-      'details' => $booking->hasField('field_booking_details') ? (string) $booking->get('field_booking_details')->value : '',
-      'status' => $state?->get('machine_name')->value ?? '',
-      'statusLabel' => $state?->label() ?? '',
-      'previousStatus' => $original_state?->get('machine_name')->value ?? '',
+      'bookingId'           => (int) $booking->id(),
+      'roomName'            => $unit?->label() ?? '',
+      'address'             => $unit?->get('field_address')->value ?? '',
+      'managerEmail'        => $unit?->get('field_manager_email')->value ?? '',
+      'requesterEmail'      => $booking->get('field_requester_email')->value ?? '',
+      'checkInDate'         => $this->formatDate($booking->get('booking_start_date')->value ?? ''),
+      'checkOutDate'        => $this->formatDate($booking->get('booking_end_date')->value ?? ''),
+      'checkInTime'         => $booking->hasField('field_check_in_time') ? (string) $booking->get('field_check_in_time')->value : '',
+      'checkOutTime'        => $booking->hasField('field_check_out_time') ? (string) $booking->get('field_check_out_time')->value : '',
+      'details'             => $booking->hasField('field_booking_details') ? (string) $booking->get('field_booking_details')->value : '',
+      'status'              => $state?->get('machine_name')->value ?? '',
+      'statusLabel'         => $state?->label() ?? '',
+      'previousStatus'      => $original_state?->get('machine_name')->value ?? '',
       'previousStatusLabel' => $original_state?->label() ?? '',
-      'bedType' => $event?->get('field_bed_type')->value ?? '',
+      'bedType'             => $event?->get('field_bed_type')->value ?? '',
     ];
   }
 
   /**
-   * Sends one email.
+   * Sends one branded HTML email via Symfony Mailer EmailFactory.
    */
-  protected function send(string $key, string $to, array $context): void {
+  protected function send(string $key, string $to, string $subject, array $context): void {
     $to = trim(strtolower($to));
     if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+      $this->logger->warning('Skipping email "@key" — invalid or empty address "@to".', [
+        '@key' => $key,
+        '@to'  => $to,
+      ]);
       return;
     }
 
-    $result = $this->mailManager->mail(
-      'hous_z_api',
-      $key,
-      $to,
-      $this->languageManager->getDefaultLanguage()->getId(),
-      ['context' => $context],
-      NULL,
-      TRUE,
-    );
-
-    if (empty($result['result'])) {
-      $this->logger->error('Failed sending "@key" email to @to for booking @booking_id.', [
-        '@key' => $key,
-        '@to' => $to,
-        '@booking_id' => $context['bookingId'] ?? 'unknown',
+    try {
+      $html = hous_z_api_build_email_html($key, $context);
+      $this->emailFactory->sendTypedEmail('hous_z_api', $key, $to, $subject, $html);
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Failed sending "@key" to @to for booking @id: @message', [
+        '@key'     => $key,
+        '@to'      => $to,
+        '@id'      => $context['bookingId'] ?? 'unknown',
+        '@message' => $e->getMessage(),
       ]);
     }
   }
 
   /**
-   * Formats storage values to API-friendly dates.
+   * Formats storage date values to Y-m-d.
    */
   protected function formatDate(string $value): string {
     if ($value === '') {
       return '';
     }
-
     try {
       return (new \DateTime($value))->format('Y-m-d');
     }

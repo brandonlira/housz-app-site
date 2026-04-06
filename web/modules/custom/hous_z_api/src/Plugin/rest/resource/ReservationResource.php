@@ -110,7 +110,11 @@ class ReservationResource extends ResourceBase implements ContainerFactoryPlugin
       ], 200);
     }
 
-    $status_code = $result['error'] === 'Booking not found.' ? 404 : 400;
+    $status_code = match($result['error']) {
+      'Booking not found.' => 404,
+      'Access denied.'     => 403,
+      default              => 400,
+    };
     return new JsonResponse(['error' => $result['error']], $status_code);
   }
 

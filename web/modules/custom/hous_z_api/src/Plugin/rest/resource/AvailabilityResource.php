@@ -140,7 +140,7 @@ class AvailabilityResource extends ResourceBase implements \Drupal\Core\Plugin\C
     }
 
     // Build payload.
-    $payload = ['calendar'=>['years'=>[]]];
+    $payload = ['calendar' => ['years' => (object) []]];
     foreach ($period as $dt) {
       $Y = $dt->format('Y');
       $M = (int)$dt->format('n');
