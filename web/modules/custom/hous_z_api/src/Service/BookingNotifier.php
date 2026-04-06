@@ -157,7 +157,7 @@ class BookingNotifier {
       return '';
     }
     try {
-      return (new \DateTime($value))->format('Y-m-d');
+      return (new \DateTime($value))->format('d/m/Y');
     }
     catch (\Exception) {
       return $value;
