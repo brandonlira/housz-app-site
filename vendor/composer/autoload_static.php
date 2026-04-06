@@ -45,6 +45,7 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
         'T' =>
         array (
             'Twig\\' => 5,
+            'TijsVerkoyen\\CssToInlineStyles\\' => 31,
         ),
         'S' =>
         array (
@@ -78,6 +79,7 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
             'Symfony\\Component\\EventDispatcher\\' => 34,
             'Symfony\\Component\\ErrorHandler\\' => 31,
             'Symfony\\Component\\DependencyInjection\\' => 38,
+            'Symfony\\Component\\CssSelector\\' => 30,
             'Symfony\\Component\\Console\\' => 26,
             'Symfony\\Bridge\\PsrHttpMessage\\' => 30,
             'Svg\\' => 4,
@@ -127,6 +129,10 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
         'J' =>
         array (
             'JsonSchema\\' => 11,
+        ),
+        'H' =>
+        array (
+            'Html2Text\\' => 10,
         ),
         'G' =>
         array (
@@ -200,6 +206,10 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
         'Twig\\' =>
         array (
             0 => __DIR__ . '/..' . '/twig/twig/src',
+        ),
+        'TijsVerkoyen\\CssToInlineStyles\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/tijsverkoyen/css-to-inline-styles/src',
         ),
         'Symfony\\Polyfill\\Php85\\' =>
         array (
@@ -320,6 +330,10 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
         'Symfony\\Component\\DependencyInjection\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/dependency-injection',
+        ),
+        'Symfony\\Component\\CssSelector\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/css-selector',
         ),
         'Symfony\\Component\\Console\\' =>
         array (
@@ -447,6 +461,10 @@ class ComposerStaticInite4968d7ceb4379bbaed25473a0594aa5
         'JsonSchema\\' =>
         array (
             0 => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema',
+        ),
+        'Html2Text\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/html2text/html2text/src',
         ),
         'GuzzleHttp\\Psr7\\' =>
         array (
