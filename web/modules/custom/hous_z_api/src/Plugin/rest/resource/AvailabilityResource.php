@@ -84,22 +84,27 @@ class AvailabilityResource extends ResourceBase implements \Drupal\Core\Plugin\C
     catch (\Exception $e) {
       return new JsonResponse(['error' => 'Invalid date format.'], 400);
     }
-    $endDt->modify('+1 day');
+
+    // Period covers only booked nights: check-in inclusive, check-out
+    // exclusive. DatePeriod end is already exclusive — no +1 day needed.
     $interval = new \DateInterval('P1D');
     $period = new \DatePeriod($startDt->getPhpDateTime(), $interval, $endDt->getPhpDateTime());
 
-    // Query events.
+    // Strict inequality so events that merely touch the boundary (i.e. an
+    // existing checkout on $start or a new checkin on $end) are excluded,
+    // allowing back-to-back bookings.
     $storage = \Drupal::entityTypeManager()->getStorage('bat_event');
     $query = $storage->getQuery()
       ->accessCheck(FALSE)
-      ->condition('type','availability_daily')
-      ->condition('event_bat_unit_reference',(int)$unitId)
-      ->condition('field_bed_type',$bedType)
-      ->condition('event_dates.value',$end,'<=')
-      ->condition('event_dates.end_value',$start,'>=');
+      ->condition('type', 'availability_daily')
+      ->condition('event_bat_unit_reference', (int) $unitId)
+      ->condition('field_bed_type', $bedType)
+      ->condition('event_dates.value',     $end,   '<')
+      ->condition('event_dates.end_value', $start, '>');
     $ids = $query->execute();
 
-    // Count occupied per day.
+    // Count occupied beds per day. end_value is the checkout date and is not
+    // an occupied night, so keep DatePeriod exclusive (no +1 day on end).
     $occupied = [];
     if (!empty($ids)) {
       $events = $storage->loadMultiple($ids);
@@ -111,7 +116,6 @@ class AvailabilityResource extends ResourceBase implements \Drupal\Core\Plugin\C
         catch (\Exception $ignore) {
           continue;
         }
-        $e->modify('+1 day');
         $inner = new \DatePeriod($s->getPhpDateTime(), $interval, $e->getPhpDateTime());
         foreach ($inner as $d) {
           $key = $d->format('Y-m-d');
