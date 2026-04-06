@@ -532,10 +532,6 @@ display:
             multiple: false
             remember_roles:
               authenticated: authenticated
-              anonymous: '0'
-              content_editor: '0'
-              administrator: '0'
-              housz_admin: '0'
             min_placeholder: ''
             max_placeholder: ''
             placeholder: ''
@@ -602,6 +598,7 @@ display:
           empty_table: false
           caption: ''
           description: ''
+          class: ''
       row:
         type: 'entity:bat_booking'
       query:

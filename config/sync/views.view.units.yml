@@ -118,6 +118,7 @@ display:
               responsive: ''
           default: id
           empty_table: false
+          class: ''
       row:
         type: fields
       fields:
