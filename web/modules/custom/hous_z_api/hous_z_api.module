@@ -1,100 +1,161 @@
 <?php
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Language\LanguageInterface;
+
+/**
+ * Implements hook_entity_insert().
+ */
+function hous_z_api_entity_insert(EntityInterface $entity): void {
+  if ($entity->getEntityTypeId() !== 'bat_booking' || $entity->bundle() !== 'standard') {
+    return;
+  }
+
+  \Drupal::service('hous_z_api.booking_notifier')->notifyBookingCreated($entity);
+}
 
 /**
  * Implements hook_entity_update().
  */
-function hous_z_api_entity_update(EntityInterface $entity) {
-  // Only act on bat_booking bundles of type “standard”.
-  if ($entity->getEntityTypeId() === 'bat_booking'
-    && $entity->bundle() === 'standard') {
-
-    // The original entity (before save).
-    /** @var \Drupal\bat_booking\Entity\Booking $original */
-    $original = $entity->original;
-
-    // Pull out the 'event state' field target IDs.
-    $old_state = $original->get('field_event_state')->target_id;
-    $new_state = $entity->get('field_event_state')->target_id;
-
-    // If the state has actually changed, send notifications.
-    if ($old_state !== $new_state) {
-      // Build a little summary array — just like you did in ReservationResource.
-      $unit = $entity->get('booking_event_reference')->entity->get('event_bat_unit_reference')->entity;
-      $summary = [
-        'room' => [
-          'roomName'     => $unit->label(),
-          'address'      => $unit->get('field_address')->value,
-          'managerEmail' => $unit->get('field_manager_email')->value,
-        ],
-        'bookingInfo' => [
-          'checkIn'  => [
-            'date' => $entity->get('booking_start_date')->value,
-          ],
-          'checkOut' => [
-            'date' => $entity->get('booking_end_date')->value,
-          ],
-        ],
-        'stateChangedTo' => $entity->get('field_event_state')->entity->label(),
-        'requesterEmail' => $entity->get('field_requester_email')->value,
-      ];
-
-      // Send to the manager.
-      \Drupal::service('plugin.manager.mail')->mail(
-        'hous_z_api',
-        'booking_state_notification',
-        $summary['room']['managerEmail'],
-        LanguageInterface::LANGCODE_DEFAULT,
-        ['summary' => $summary]
-      );
-      // Send a copy to the requester.
-      \Drupal::service('plugin.manager.mail')->mail(
-        'hous_z_api',
-        'booking_state_notification',
-        $summary['requesterEmail'],
-        LanguageInterface::LANGCODE_DEFAULT,
-        ['summary' => $summary]
-      );
-    }
+function hous_z_api_entity_update(EntityInterface $entity): void {
+  if ($entity->getEntityTypeId() !== 'bat_booking' || $entity->bundle() !== 'standard') {
+    return;
   }
+
+  $original = $entity->original ?? NULL;
+  if (!$original) {
+    return;
+  }
+
+  $old_state = (int) $original->get('field_event_state')->target_id;
+  $new_state = (int) $entity->get('field_event_state')->target_id;
+  if ($old_state === $new_state) {
+    return;
+  }
+
+  \Drupal::service('hous_z_api.booking_notifier')->notifyBookingUpdated($entity, $original);
 }
 
 /**
  * Implements hook_mail().
  */
-function hous_z_api_mail($key, &$message, $params) {
+function hous_z_api_mail(string $key, array &$message, array $params): void {
+  $context = $params['context'] ?? [];
+  $room_name = Html::escape((string) ($context['roomName'] ?? 'Room'));
+  $booking_id = Html::escape((string) ($context['bookingId'] ?? ''));
+  $status_label = Html::escape((string) ($context['statusLabel'] ?? ucfirst((string) ($context['status'] ?? ''))));
+  $previous_status = Html::escape((string) ($context['previousStatusLabel'] ?? ucfirst((string) ($context['previousStatus'] ?? ''))));
+  $address = Html::escape((string) ($context['address'] ?? ''));
+  $check_in = Html::escape(trim((string) (($context['checkInDate'] ?? '') . ' ' . ($context['checkInTime'] ?? ''))));
+  $check_out = Html::escape(trim((string) (($context['checkOutDate'] ?? '') . ' ' . ($context['checkOutTime'] ?? ''))));
+  $guest_email = Html::escape((string) ($context['requesterEmail'] ?? ''));
+  $manager_email = Html::escape((string) ($context['managerEmail'] ?? ''));
+  $details = nl2br(Html::escape(trim((string) ($context['details'] ?? ''))));
+
+  $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed; delsp=yes';
+
   switch ($key) {
-    case 'booking_state_notification':
-      $summary = $params['summary'];
+    case 'booking_created_admin':
+      $message['subject'] = t('New booking request #@id for @room', [
+        '@id' => $booking_id,
+        '@room' => $room_name,
+      ]);
+      $message['body'][] = hous_z_api_build_email_markup([
+        '<p>A new booking request was created and is pending review.</p>',
+        "<p><strong>Booking ID:</strong> {$booking_id}</p>",
+        "<p><strong>Guest email:</strong> {$guest_email}</p>",
+        "<p><strong>Room:</strong> {$room_name}</p>",
+        "<p><strong>Check-in:</strong> {$check_in}</p>",
+        "<p><strong>Check-out:</strong> {$check_out}</p>",
+        $address !== '' ? "<p><strong>Address:</strong> {$address}</p>" : '',
+        $details !== '' ? "<p><strong>Details:</strong><br>{$details}</p>" : '',
+      ]);
+      break;
 
-      // subject
-      $message['subject'] = t('Your reservation is now @state: @room', [
-        '@state' => $summary['stateChangedTo'],
-        '@room'  => $summary['room']['roomName'],
+    case 'booking_created_guest':
+      $message['subject'] = t('Booking request received for @room', [
+        '@room' => $room_name,
       ]);
+      $message['body'][] = hous_z_api_build_email_markup([
+        '<p>Your booking request was received successfully.</p>',
+        "<p><strong>Booking ID:</strong> {$booking_id}</p>",
+        "<p><strong>Room:</strong> {$room_name}</p>",
+        "<p><strong>Check-in:</strong> {$check_in}</p>",
+        "<p><strong>Check-out:</strong> {$check_out}</p>",
+        $address !== '' ? "<p><strong>Address:</strong> {$address}</p>" : '',
+        '<p>Status: Pending</p>',
+      ]);
+      break;
 
-      // body
-      $body = [];
-      $body[] = t('Hi,');
-      $body[] = t('The reservation for @room has changed to @state.', [
-        '@room'  => $summary['room']['roomName'],
-        '@state' => $summary['stateChangedTo'],
+    case 'booking_confirmed':
+      $message['subject'] = t('Booking confirmed: @room', [
+        '@room' => $room_name,
       ]);
-      $body[] = '';
-      $body[] = t('Check‑in date: @date', [
-        '@date' => $summary['bookingInfo']['checkIn']['date'],
+      $message['body'][] = hous_z_api_build_email_markup([
+        '<p>Your booking has been confirmed.</p>',
+        "<p><strong>Booking ID:</strong> {$booking_id}</p>",
+        "<p><strong>Room:</strong> {$room_name}</p>",
+        "<p><strong>Check-in:</strong> {$check_in}</p>",
+        "<p><strong>Check-out:</strong> {$check_out}</p>",
+        $address !== '' ? "<p><strong>Address:</strong> {$address}</p>" : '',
+        $manager_email !== '' ? "<p>If needed, contact the manager at {$manager_email}.</p>" : '',
       ]);
-      $body[] = t('Check‑out date: @date', [
-        '@date' => $summary['bookingInfo']['checkOut']['date'],
+      break;
+
+    case 'booking_cancelled':
+      $message['subject'] = t('Booking cancelled: @room', [
+        '@room' => $room_name,
       ]);
-      $body[] = '';
-      $body[] = t('If you have questions, contact the manager at @email.', [
-        '@email' => $summary['room']['managerEmail'],
+      $message['body'][] = hous_z_api_build_email_markup([
+        '<p>Your booking has been cancelled.</p>',
+        "<p><strong>Booking ID:</strong> {$booking_id}</p>",
+        "<p><strong>Room:</strong> {$room_name}</p>",
+        "<p><strong>Original check-in:</strong> {$check_in}</p>",
+        "<p><strong>Original check-out:</strong> {$check_out}</p>",
+        $details !== '' ? "<p><strong>Details:</strong><br>{$details}</p>" : '',
+        $manager_email !== '' ? "<p>If needed, contact the manager at {$manager_email}.</p>" : '',
       ]);
-      $message['body'] = $body;
+      break;
+
+    case 'booking_status_admin':
+      $message['subject'] = t('Booking #@id changed to @status', [
+        '@id' => $booking_id,
+        '@status' => $status_label,
+      ]);
+      $message['body'][] = hous_z_api_build_email_markup([
+        '<p>A booking status changed.</p>',
+        "<p><strong>Booking ID:</strong> {$booking_id}</p>",
+        "<p><strong>Room:</strong> {$room_name}</p>",
+        $guest_email !== '' ? "<p><strong>Guest email:</strong> {$guest_email}</p>" : '',
+        $previous_status !== '' ? "<p><strong>Previous status:</strong> {$previous_status}</p>" : '',
+        "<p><strong>Current status:</strong> {$status_label}</p>",
+        "<p><strong>Check-in:</strong> {$check_in}</p>",
+        "<p><strong>Check-out:</strong> {$check_out}</p>",
+        $details !== '' ? "<p><strong>Details:</strong><br>{$details}</p>" : '',
+      ]);
+      break;
+
+    case 'booking_status_changed':
+      $message['subject'] = t('Booking updated: @room', [
+        '@room' => $room_name,
+      ]);
+      $message['body'][] = hous_z_api_build_email_markup([
+        '<p>Your booking status has been updated.</p>',
+        "<p><strong>Booking ID:</strong> {$booking_id}</p>",
+        $previous_status !== '' ? "<p><strong>Previous status:</strong> {$previous_status}</p>" : '',
+        "<p><strong>Current status:</strong> {$status_label}</p>",
+        "<p><strong>Room:</strong> {$room_name}</p>",
+        "<p><strong>Check-in:</strong> {$check_in}</p>",
+        "<p><strong>Check-out:</strong> {$check_out}</p>",
+      ]);
       break;
   }
 }
 
+/**
+ * Builds HTML markup for booking emails.
+ */
+function hous_z_api_build_email_markup(array $parts): string {
+  $filtered = array_filter($parts, static fn(string $part): bool => $part !== '');
+  return implode('', $filtered);
+}
