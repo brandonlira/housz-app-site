@@ -7,6 +7,9 @@ dependencies:
     - field.field.bat_booking.standard.booking_end_date
     - field.field.bat_booking.standard.booking_event_reference
     - field.field.bat_booking.standard.booking_start_date
+    - field.field.bat_booking.standard.field_booking_details
+    - field.field.bat_booking.standard.field_check_in_time
+    - field.field.bat_booking.standard.field_check_out_time
     - field.field.bat_booking.standard.field_event_state
     - field.field.bat_booking.standard.field_requester_email
   module:
@@ -23,6 +26,29 @@ content:
       link: true
     third_party_settings: {  }
     weight: 2
+    region: content
+  field_booking_details:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 4
+    region: content
+  field_check_in_time:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 5
+    region: content
+  field_check_out_time:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 6
     region: content
   field_requester_email:
     type: string
