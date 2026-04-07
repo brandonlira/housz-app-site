@@ -433,6 +433,36 @@ curl --location --request PATCH 'https://hous-z-app-site.ddev.site/api/reservati
 - Message template config from earlier email experiments still exists in `config/sync`, but the active email flow runs through `hook_mail()` in `hous_z_api.module`. The old config can be removed.
 - End-to-end email delivery depends on environment mail transport. Validate with a real SMTP provider before going live.
 
+## Management Portal
+
+The web portal at `/housz` is for **managers only** (role `housz_admin`). Staff book via the mobile app.
+
+| Page | URL | Access |
+|---|---|---|
+| Dashboard | `/housz` | `housz_admin` |
+| Bookings list | `/housz/bookings` | `housz_admin` |
+| Rooms list | `/housz/units` | `housz_admin` |
+| Settings | `/housz/settings` | `housz_admin` |
+| Login | `/user/login` | public |
+
+### Notification settings
+
+At `/housz/settings` a manager can configure:
+
+- **Notify role** — all active users with `housz_admin` receive booking emails automatically
+- **Additional emails** — extra recipients with no Drupal account required
+
+Both are cumulative. The fallback is `field_manager_email` on the room if nothing is configured.
+
+### Roles
+
+| Role | Purpose |
+|---|---|
+| `administrator` | Full Drupal access |
+| `housz_admin` | Manager portal only — bookings, rooms, settings, email notifications |
+
+---
+
 ## Changelog
 
 ### 2026-04
@@ -442,6 +472,12 @@ curl --location --request PATCH 'https://hous-z-app-site.ddev.site/api/reservati
 - Added ownership check to `DELETE /api/reservation/{id}`: only the booking owner or an admin can delete.
 - Moved `minStay` from hardcoded value to `hous_z_api.settings` config (`min_stay` key).
 - Added `hous_z_api` as declared dependency of `hous_z_management` to prevent container errors.
+- Created custom `hous_z_theme` (Starterkit-based) with Zoocha branding (`#3a11c8` purple, `#F04E37` coral).
+- Built management portal at `/housz` with dashboard, bookings list, rooms list, and settings pages.
+- Role `housz_admin` created with scoped permissions (no Drupal admin access).
+- Booking email notifications now driven by role or manually listed emails via `/housz/settings`.
+- Email templates migrated to Drupal Twig (`templates/email/hous-z-api-email.html.twig`).
+- Login page redesigned with split-screen layout (form left, brand panel right).
 
 ## Recommended Next Steps
 
