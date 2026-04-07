@@ -1,0 +1,300 @@
+/**
+ * @file
+ * Hous-Z landing page styles for anonymous users.
+ */
+
+/* ── Landing wrapper ── */
+.hz-landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--hz-color-dark, #1a1a2e);
+}
+
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
+
+.hz-landing__hero {
+  flex: 1;
+  background: var(--hz-color-primary, #4B20D4);
+  background-image:
+    radial-gradient(ellipse at 15% 85%, rgba(240, 78, 55, 0.2) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 15%, rgba(124, 92, 232, 0.25) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 120%, rgba(26, 26, 46, 0.5) 0%, transparent 60%);
+  display: flex;
+  align-items: center;
+  padding: 6rem 8vw;
+  gap: 4rem;
+  position: relative;
+  overflow: hidden;
+  min-height: 75vh;
+}
+
+/* Decorative circles */
+.hz-landing__circle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hz-landing__circle--1 {
+  width: 600px; height: 600px;
+  bottom: -200px; right: -150px;
+  background: rgba(255, 255, 255, 0.025);
+}
+.hz-landing__circle--2 {
+  width: 300px; height: 300px;
+  top: -80px; left: -80px;
+  background: rgba(240, 78, 55, 0.08);
+}
+.hz-landing__circle--3 {
+  width: 150px; height: 150px;
+  top: 40%; right: 35%;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ── Hero content (left) ── */
+.hz-landing__hero-content {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+}
+
+.hz-landing__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 2.5rem;
+}
+
+.hz-landing__brand-name {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.hz-landing__headline {
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.15;
+  margin: 0 0 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.hz-landing__headline em {
+  font-style: normal;
+  color: var(--hz-color-accent, #F04E37);
+}
+
+.hz-landing__sub {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin: 0 0 2.5rem;
+  max-width: 440px;
+}
+
+.hz-landing__actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hz-landing__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: var(--hz-color-accent, #F04E37);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 16px rgba(240, 78, 55, 0.4);
+}
+
+.hz-landing__cta:hover {
+  background: #d93e29;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(240, 78, 55, 0.5);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ── Hero visual (right) — booking mockup ── */
+.hz-landing__hero-visual {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.hz-landing__mockup {
+  background: #fff;
+  border-radius: 16px;
+  width: 320px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+  transform: rotate(2deg);
+  transition: transform 0.3s ease;
+}
+
+.hz-landing__mockup:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+.hz-landing__mockup-header {
+  background: #f3f4f6;
+  padding: 0.75rem 1rem;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.hz-landing__mockup-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d1d5db;
+}
+
+.hz-landing__mockup-dot:nth-child(1) { background: #ef4444; }
+.hz-landing__mockup-dot:nth-child(2) { background: #f59e0b; }
+.hz-landing__mockup-dot:nth-child(3) { background: #10b981; }
+
+.hz-landing__mockup-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hz-landing__mockup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+}
+
+.hz-landing__mockup-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.hz-landing__mockup-row span:first-child {
+  color: #9ca3af;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+}
+
+.hz-landing__mockup-badge {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 0.5rem;
+}
+
+.hz-landing__mockup-badge--confirm {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+/* ═══════════════════════════════════════
+   FEATURES SECTION
+═══════════════════════════════════════ */
+
+.hz-landing__features {
+  background: var(--hz-color-dark, #1a1a2e);
+  padding: 5rem 8vw;
+}
+
+.hz-landing__features-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.hz-landing__feature {
+  text-align: center;
+}
+
+.hz-landing__feature-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(75, 32, 212, 0.2);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  color: var(--hz-color-primary-light, #7c5ce8);
+}
+
+.hz-landing__feature-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.hz-landing__feature h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.625rem;
+}
+
+.hz-landing__feature p {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+
+.hz-landing__footer {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2rem 8vw;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.hz-landing__footer p {
+  margin: 0 0 0.25rem;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .hz-landing__hero {
+    flex-direction: column;
+    padding: 4rem 6vw;
+    text-align: center;
+  }
+  .hz-landing__sub { max-width: 100%; }
+  .hz-landing__actions { justify-content: center; }
+  .hz-landing__hero-visual { display: none; }
+  .hz-landing__features-inner { grid-template-columns: 1fr; gap: 2rem; }
+}

@@ -1,0 +1,35 @@
+name: 'Hous-Z Theme'
+type: theme
+description: 'Zoocha-branded theme for the Hous-Z Room Booking System.'
+'base theme': stable9
+version: 1.0.0
+libraries:
+  - core/normalize
+  - hous_z_theme/global
+  - hous_z_theme/base
+  - hous_z_theme/messages
+libraries-override:
+  bee_hotel/beehotel-promo:
+    js:
+      assets/js/promo.js: false
+    css:
+      layout:
+        assets/css/promo.css: false
+
+libraries-extend:
+  user/drupal.user:
+    - hous_z_theme/user
+  core/drupal.dropbutton:
+    - hous_z_theme/dropbutton
+  core/drupal.dialog:
+    - hous_z_theme/dialog
+  file/drupal.file:
+    - hous_z_theme/file
+  core/drupal.item-list:
+    - hous_z_theme/item-list
+  core/drupal.progress:
+    - hous_z_theme/progress
+  core/drupal.tablesort:
+    - hous_z_theme/drupal.tablesort
+core_version_requirement: ^11
+generator: 'starterkit_theme:11.3.5'

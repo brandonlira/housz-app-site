@@ -1,0 +1,25 @@
+uuid: 7f0b1462-5732-4133-a989-69f92f53c6f0
+langcode: en
+status: false
+dependencies:
+  config:
+    - system.menu.main
+  module:
+    - system
+  theme:
+    - hous_z_theme
+id: hous_z_theme_sidebar_menu
+theme: hous_z_theme
+region: sidebar_first
+weight: -10
+provider: null
+plugin: 'system_menu_block:main'
+settings:
+  id: 'system_menu_block:main'
+  label: Navigation
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility: {  }

@@ -2,7 +2,6 @@
 
 namespace Drupal\hous_z_api\Service;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\symfony_mailer\EmailFactoryInterface;
@@ -12,23 +11,9 @@ use Drupal\symfony_mailer\EmailFactoryInterface;
  */
 class BookingNotifier {
 
-  /**
-   * The email factory.
-   *
-   * @var \Drupal\symfony_mailer\EmailFactoryInterface
-   */
   protected EmailFactoryInterface $emailFactory;
-
-  /**
-   * The logger.
-   *
-   * @var \Psr\Log\LoggerInterface
-   */
   protected $logger;
 
-  /**
-   * Constructs the notifier.
-   */
   public function __construct(
     EmailFactoryInterface $email_factory,
     LoggerChannelFactoryInterface $logger_factory,
@@ -42,21 +27,13 @@ class BookingNotifier {
    */
   public function notifyBookingCreated(EntityInterface $booking): void {
     $context = $this->buildContext($booking);
-    $room    = Html::escape((string) ($context['roomName'] ?? 'Room'));
-    $id      = Html::escape((string) ($context['bookingId'] ?? ''));
+    $room    = (string) ($context['roomName'] ?? 'Room');
+    $id      = (string) ($context['bookingId'] ?? '');
 
-    $this->send(
-      key: 'booking_created_admin',
-      to: $context['managerEmail'] ?? '',
-      subject: "New booking request #{$id} for {$room}",
-      context: $context,
-    );
-    $this->send(
-      key: 'booking_created_guest',
-      to: $context['requesterEmail'] ?? '',
-      subject: "Booking request received for {$room}",
-      context: $context,
-    );
+    $this->send('booking_created_admin', $context['managerEmail'] ?? '',
+      "New booking request #{$id} for {$room}", $context);
+    $this->send('booking_created_guest', $context['requesterEmail'] ?? '',
+      "Booking request received for {$room}", $context);
   }
 
   /**
@@ -64,38 +41,29 @@ class BookingNotifier {
    */
   public function notifyBookingUpdated(EntityInterface $booking, EntityInterface $original): void {
     $context = $this->buildContext($booking, $original);
-    $room    = Html::escape((string) ($context['roomName'] ?? 'Room'));
-    $id      = Html::escape((string) ($context['bookingId'] ?? ''));
-    $status  = Html::escape((string) ($context['statusLabel'] ?? ucfirst($context['status'] ?? '')));
+    $room    = (string) ($context['roomName'] ?? 'Room');
+    $id      = (string) ($context['bookingId'] ?? '');
+    $status  = (string) ($context['statusLabel'] ?? ucfirst($context['status'] ?? ''));
 
-    $guest_key = match($context['status'] ?? '') {
+    $guest_key = match ($context['status'] ?? '') {
       'confirmed' => 'booking_confirmed',
       'cancelled' => 'booking_cancelled',
       default     => 'booking_status_changed',
     };
 
-    $guest_subject = match($context['status'] ?? '') {
+    $guest_subject = match ($context['status'] ?? '') {
       'confirmed' => "Your booking is confirmed: {$room}",
       'cancelled' => "Your booking has been cancelled: {$room}",
       default     => "Your booking status was updated: {$room}",
     };
 
-    $this->send(
-      key: $guest_key,
-      to: $context['requesterEmail'] ?? '',
-      subject: $guest_subject,
-      context: $context,
-    );
-    $this->send(
-      key: 'booking_status_admin',
-      to: $context['managerEmail'] ?? '',
-      subject: "Booking #{$id} changed to {$status}",
-      context: $context,
-    );
+    $this->send($guest_key, $context['requesterEmail'] ?? '', $guest_subject, $context);
+    $this->send('booking_status_admin', $context['managerEmail'] ?? '',
+      "Booking #{$id} changed to {$status}", $context);
   }
 
   /**
-   * Builds a normalized booking context array.
+   * Builds a normalised booking context array from entity fields.
    */
   public function buildContext(EntityInterface $booking, ?EntityInterface $original = NULL): array {
     $event          = $booking->get('booking_event_reference')->entity ?? NULL;
@@ -136,8 +104,8 @@ class BookingNotifier {
     }
 
     try {
-      $html = hous_z_api_build_email_html($key, $context);
-      $this->emailFactory->sendTypedEmail('hous_z_api', $key, $to, $subject, $html);
+      $vars = $this->buildTemplateVars($key, $context);
+      $this->emailFactory->sendTypedEmail('hous_z_api', $key, $to, $subject, $vars);
     }
     catch (\Exception $e) {
       $this->logger->error('Failed sending "@key" to @to for booking @id: @message', [
@@ -150,7 +118,138 @@ class BookingNotifier {
   }
 
   /**
-   * Formats storage date values to Y-m-d.
+   * Builds per-key template variables for the hous_z_api_email theme hook.
+   */
+  protected function buildTemplateVars(string $key, array $context): array {
+    $id           = (string) ($context['bookingId'] ?? '');
+    $room         = (string) ($context['roomName'] ?? 'Room');
+    $status       = (string) ($context['status'] ?? 'pending');
+    $status_label = (string) ($context['statusLabel'] ?? ucfirst($status));
+    $prev_label   = (string) ($context['previousStatusLabel'] ?? ucfirst((string) ($context['previousStatus'] ?? '')));
+    $check_in     = trim(($context['checkInDate'] ?? '') . ' ' . ($context['checkInTime'] ?? ''));
+    $check_out    = trim(($context['checkOutDate'] ?? '') . ' ' . ($context['checkOutTime'] ?? ''));
+    $address      = (string) ($context['address'] ?? '');
+    $guest        = (string) ($context['requesterEmail'] ?? '');
+    $manager      = (string) ($context['managerEmail'] ?? '');
+    $details      = (string) ($context['details'] ?? '');
+    $logo_url     = $this->getLogoUrl();
+
+    $base = [
+      'status'       => $status,
+      'status_label' => $status_label,
+      'details'      => $details,
+      'logo_url'     => $logo_url,
+    ];
+
+    // Helper closure — builds a row array with named keys for Twig.
+    $row = fn(string $label, string $value, bool $is_status = FALSE) => [
+      'label'     => $label,
+      'value'     => $value,
+      'is_status' => $is_status,
+    ];
+
+    return match ($key) {
+      'booking_created_admin' => $base + [
+        'heading'   => 'New booking request',
+        'intro'     => 'A new booking is pending your review.',
+        'cta_email' => '',
+        'rows'      => array_values(array_filter([
+          $row('Booking ID', "#{$id}"),
+          $row('Guest',      $guest),
+          $row('Room',       $room),
+          $row('Check-in',   $check_in),
+          $row('Check-out',  $check_out),
+          $address !== '' ? $row('Address', $address) : NULL,
+        ])),
+      ],
+      'booking_created_guest' => $base + [
+        'heading'   => 'Booking request received',
+        'intro'     => 'Your booking request was received. You will be notified once it is reviewed.',
+        'cta_email' => $manager,
+        'rows'      => array_values(array_filter([
+          $row('Booking ID', "#{$id}"),
+          $row('Room',       $room),
+          $row('Check-in',   $check_in),
+          $row('Check-out',  $check_out),
+          $row('Status',     'Pending review', TRUE),
+          $address !== '' ? $row('Address', $address) : NULL,
+        ])),
+      ],
+      'booking_confirmed' => $base + [
+        'heading'   => 'Your booking is confirmed',
+        'intro'     => 'Great news — your booking has been approved.',
+        'cta_email' => $manager,
+        'rows'      => array_values(array_filter([
+          $row('Booking ID', "#{$id}"),
+          $row('Room',       $room),
+          $row('Check-in',   $check_in),
+          $row('Check-out',  $check_out),
+          $row('Status',     'Confirmed', TRUE),
+          $address !== '' ? $row('Address', $address) : NULL,
+        ])),
+      ],
+      'booking_cancelled' => $base + [
+        'heading'   => 'Your booking has been cancelled',
+        'intro'     => 'Unfortunately your booking has been cancelled.',
+        'cta_email' => $manager,
+        'rows'      => array_values(array_filter([
+          $row('Booking ID', "#{$id}"),
+          $row('Room',       $room),
+          $row('Check-in',   $check_in),
+          $row('Check-out',  $check_out),
+          $row('Status',     'Cancelled', TRUE),
+        ])),
+      ],
+      'booking_status_admin' => $base + [
+        'heading'   => "Booking #{$id} status updated",
+        'intro'     => 'A booking status has changed.',
+        'cta_email' => '',
+        'rows'      => array_values(array_filter([
+          $row('Booking ID', "#{$id}"),
+          $row('Room',       $room),
+          $row('Guest',      $guest),
+          $row('Check-in',   $check_in),
+          $row('Check-out',  $check_out),
+          $row('New status', $status_label, TRUE),
+          $prev_label !== '' ? $row('Previous', $prev_label) : NULL,
+        ])),
+      ],
+      'booking_status_changed' => $base + [
+        'heading'   => 'Your booking was updated',
+        'intro'     => 'Your booking status has changed.',
+        'cta_email' => $manager,
+        'rows'      => array_values(array_filter([
+          $row('Booking ID', "#{$id}"),
+          $row('Room',       $room),
+          $row('Check-in',   $check_in),
+          $row('Check-out',  $check_out),
+          $row('New status', $status_label, TRUE),
+          $prev_label !== '' ? $row('Previous', $prev_label) : NULL,
+        ])),
+      ],
+      default => $base + [
+        'heading'   => 'Booking notification',
+        'intro'     => '',
+        'cta_email' => '',
+        'rows'      => [],
+      ],
+    };
+  }
+
+  /**
+   * Returns the absolute URL to the module logo, or empty string if not found.
+   */
+  protected function getLogoUrl(): string {
+    $module_path = \Drupal::service('extension.list.module')->getPath('hous_z_api');
+    $logo_file   = DRUPAL_ROOT . '/' . $module_path . '/images/logo.png';
+    if (file_exists($logo_file)) {
+      return \Drupal::request()->getSchemeAndHttpHost() . '/' . $module_path . '/images/logo.png';
+    }
+    return '';
+  }
+
+  /**
+   * Formats a storage date value to British format (dd/mm/yyyy).
    */
   protected function formatDate(string $value): string {
     if ($value === '') {

@@ -1,0 +1,104 @@
+{#
+/**
+ * @file
+ * Hous-Z bookings management page.
+ *
+ * Available variables:
+ * - rows:         Array of booking rows.
+ * - total:        Total number of bookings (after filter).
+ * - state_filter: Active state filter ('' | 'pending' | 'confirmed' | 'cancelled').
+ * - pager:        Array with keys: page, pages, per_page.
+ */
+#}
+
+<div class="hz-dash">
+
+  {# ── Page header ── #}
+  <div class="hz-dash__welcome">
+    <div>
+      <h1 class="hz-dash__title">Bookings</h1>
+      <p class="hz-dash__subtitle">{{ total }} booking{{ total != 1 ? 's' }} total</p>
+    </div>
+    <div class="hz-dash__welcome-actions">
+      <a href="/housz" class="button button--secondary">← Dashboard</a>
+    </div>
+  </div>
+
+  {# ── State filter tabs ── #}
+  <div class="hz-filter-tabs">
+    <a href="/housz/bookings" class="hz-filter-tab{% if state_filter == '' %} is-active{% endif %}">
+      All
+    </a>
+    <a href="/housz/bookings?state=pending" class="hz-filter-tab hz-filter-tab--pending{% if state_filter == 'pending' %} is-active{% endif %}">
+      Pending
+    </a>
+    <a href="/housz/bookings?state=confirmed" class="hz-filter-tab hz-filter-tab--confirmed{% if state_filter == 'confirmed' %} is-active{% endif %}">
+      Confirmed
+    </a>
+    <a href="/housz/bookings?state=cancelled" class="hz-filter-tab hz-filter-tab--cancelled{% if state_filter == 'cancelled' %} is-active{% endif %}">
+      Cancelled
+    </a>
+  </div>
+
+  {# ── Table ── #}
+  <div class="hz-panel">
+    {% if rows is empty %}
+      <div class="hz-empty">
+        <p>No bookings found{% if state_filter %} with status <strong>{{ state_filter }}</strong>{% endif %}.</p>
+      </div>
+    {% else %}
+      <div class="hz-table-wrap">
+        <table class="hz-table hz-table--bookings">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Room</th>
+              <th>Guest</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td class="hz-table__id">#{{ row.id }}</td>
+                <td><strong>{{ row.room }}</strong></td>
+                <td class="hz-table__email">{{ row.guest }}</td>
+                <td>{{ row.check_in }}</td>
+                <td>{{ row.check_out }}</td>
+                <td>
+                  <span class="hz-badge hz-badge--{{ row.status }}">{{ row.status_label }}</span>
+                </td>
+                <td class="hz-table__actions">
+                  {% if row.status != 'confirmed' %}
+                    <a href="{{ row.confirm_url }}" class="hz-action-btn hz-action-btn--confirm" title="Confirm">✓</a>
+                  {% endif %}
+                  {% if row.status != 'cancelled' %}
+                    <a href="{{ row.cancel_url }}" class="hz-action-btn hz-action-btn--cancel" title="Cancel">✕</a>
+                  {% endif %}
+                  <a href="{{ row.edit_url }}" class="hz-action-btn hz-action-btn--edit" title="Edit">✎</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {# ── Pager ── #}
+      {% if pager.pages > 1 %}
+        <div class="hz-pager">
+          {% if pager.page > 0 %}
+            <a href="/housz/bookings?page={{ pager.page - 1 }}{% if state_filter %}&state={{ state_filter }}{% endif %}" class="hz-pager__btn">← Previous</a>
+          {% endif %}
+          <span class="hz-pager__info">Page {{ pager.page + 1 }} of {{ pager.pages }}</span>
+          {% if pager.page < pager.pages - 1 %}
+            <a href="/housz/bookings?page={{ pager.page + 1 }}{% if state_filter %}&state={{ state_filter }}{% endif %}" class="hz-pager__btn">Next →</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+
+</div>

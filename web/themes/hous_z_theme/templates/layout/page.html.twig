@@ -1,0 +1,101 @@
+{#
+/**
+ * @file
+ * Hous-Z Theme page template — Zoocha-branded app shell.
+ *
+ * Regions used:
+ * - page.header:         Branding block (logo + site name).
+ * - page.primary_menu:   Main navigation (renders in the header bar).
+ * - page.secondary_menu: User account / logout (right side of header).
+ * - page.sidebar_first:  Left sidebar navigation.
+ * - page.breadcrumb:     Breadcrumb trail.
+ * - page.highlighted:    Highlighted content (site-wide notices).
+ * - page.help:           Contextual help text.
+ * - page.content:        Main page content.
+ * - page.footer:         Footer region.
+ */
+#}
+
+<div class="hz-layout{% if not page.sidebar_first %} hz-layout--no-sidebar{% endif %}">
+
+  {# ══════════════════════════════════════════════
+     HEADER
+  ══════════════════════════════════════════════ #}
+  <header class="hz-header" role="banner">
+
+    {# Brand #}
+    <a href="{{ front_page }}" class="hz-header__brand" rel="home">
+      {{ page.header }}
+      <div class="hz-header__titles">
+        <span class="hz-header__app">Hous-Z</span>
+        <span class="hz-header__tagline">Room Booking System</span>
+      </div>
+    </a>
+
+    {# Primary nav (inline in header) #}
+    {% if page.primary_menu %}
+      <nav class="hz-header__nav" role="navigation" aria-label="{{ 'Main navigation'|t }}">
+        {{ page.primary_menu }}
+      </nav>
+    {% endif %}
+
+    {# User / secondary menu (right) #}
+    {% if page.secondary_menu %}
+      <div class="hz-header__user">
+        {{ page.secondary_menu }}
+      </div>
+    {% endif %}
+
+  </header>
+
+  {# ══════════════════════════════════════════════
+     BODY (sidebar + main)
+  ══════════════════════════════════════════════ #}
+  <div class="hz-body">
+
+    {# ── Sidebar ── #}
+    {% if page.sidebar_first %}
+      <aside class="hz-sidebar" role="complementary" aria-label="{{ 'Sidebar navigation'|t }}">
+        {{ page.sidebar_first }}
+      </aside>
+    {% endif %}
+
+    {# ── Main ── #}
+    <main class="hz-main" role="main">
+      <a id="main-content" tabindex="-1"></a>
+
+      {% if page.breadcrumb %}
+        <div class="hz-breadcrumb">
+          {{ page.breadcrumb }}
+        </div>
+      {% endif %}
+
+      {% if page.highlighted %}
+        <div class="hz-highlighted">
+          {{ page.highlighted }}
+        </div>
+      {% endif %}
+
+      {% if page.help %}
+        <div class="hz-help">
+          {{ page.help }}
+        </div>
+      {% endif %}
+
+      <div class="hz-content">
+        {{ page.content }}
+      </div>
+
+    </main>
+  </div>
+
+  {# ══════════════════════════════════════════════
+     FOOTER
+  ══════════════════════════════════════════════ #}
+  {% if page.footer %}
+    <footer class="hz-footer" role="contentinfo">
+      {{ page.footer }}
+    </footer>
+  {% endif %}
+
+</div>{# /.hz-layout #}

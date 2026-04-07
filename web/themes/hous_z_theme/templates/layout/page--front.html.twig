@@ -1,0 +1,18 @@
+{#
+/**
+ * @file
+ * Front page template.
+ * - Anonymous users see the full-screen landing page (no header/sidebar).
+ * - Authenticated users are redirected by the controller — this template
+ *   is never rendered for them.
+ */
+#}
+
+{% if not logged_in %}
+  {# Full-screen landing — no app shell overhead #}
+  <a id="main-content" tabindex="-1"></a>
+  {{ page.content }}
+{% else %}
+  {# Fallback: render the normal app shell (controller redirects first) #}
+  {% include active_theme_path() ~ '/templates/layout/page.html.twig' %}
+{% endif %}

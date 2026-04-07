@@ -6,3 +6,10 @@ dashboard:
     js/dashboard.js: {}
   dependencies:
     - core/drupal
+
+landing:
+  css:
+    theme:
+      css/landing.css: {}
+  dependencies:
+    - core/drupal

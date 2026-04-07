@@ -1,0 +1,118 @@
+{#
+/**
+ * @file
+ * Hous-Z units (rooms) management page.
+ *
+ * Available variables:
+ * - rows:    Array of unit rows.
+ * - add_url: URL to add a new unit.
+ */
+#}
+
+<div class="hz-dash">
+
+  {# ── Page header ── #}
+  <div class="hz-dash__welcome">
+    <div>
+      <h1 class="hz-dash__title">Rooms</h1>
+      <p class="hz-dash__subtitle">{{ rows|length }} room{{ rows|length != 1 ? 's' }} configured</p>
+    </div>
+    <div class="hz-dash__welcome-actions">
+      <a href="/housz" class="button button--secondary">← Dashboard</a>
+      <a href="{{ add_url }}" class="button button--primary">+ Add Room</a>
+    </div>
+  </div>
+
+  {# ── Units grid ── #}
+  {% if rows is empty %}
+    <div class="hz-panel">
+      <div class="hz-empty">
+        <p>No rooms configured yet. <a href="{{ add_url }}">Add your first room →</a></p>
+      </div>
+    </div>
+  {% else %}
+
+    {# Summary cards #}
+    <div class="hz-stats" style="margin-bottom: 2rem;">
+      <div class="hz-stat hz-stat--purple">
+        <div class="hz-stat__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-9 3h8v2h-8V5zm-4 0h2v2H6V5zm13 14H5v-2h14v2zm0-4H5v-6h14v6z"/>
+          </svg>
+        </div>
+        <div class="hz-stat__body">
+          <span class="hz-stat__value">{{ rows|length }}</span>
+          <span class="hz-stat__label">Total Rooms</span>
+        </div>
+      </div>
+      <div class="hz-stat hz-stat--success">
+        <div class="hz-stat__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+        </div>
+        <div class="hz-stat__body">
+          <span class="hz-stat__value">{{ rows|filter(r => r.status == 'active')|length }}</span>
+          <span class="hz-stat__label">Active</span>
+        </div>
+      </div>
+      <div class="hz-stat hz-stat--dark">
+        <div class="hz-stat__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+          </svg>
+        </div>
+        <div class="hz-stat__body">
+          <span class="hz-stat__value">{{ rows|map(r => r.bookings)|reduce((carry, v) => carry + v, 0) }}</span>
+          <span class="hz-stat__label">Total Bookings</span>
+        </div>
+      </div>
+    </div>
+
+    {# Rooms table #}
+    <div class="hz-panel">
+      <div class="hz-table-wrap">
+        <table class="hz-table hz-table--units">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Room Name</th>
+              <th>Beds</th>
+              <th>Manager Email</th>
+              <th>Address</th>
+              <th>Bookings</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td class="hz-table__id">#{{ row.id }}</td>
+                <td><strong>{{ row.name }}</strong></td>
+                <td>{{ row.beds }}</td>
+                <td class="hz-table__email">{{ row.email }}</td>
+                <td>{{ row.address }}</td>
+                <td>
+                  <span class="hz-unit-bookings">{{ row.bookings }}</span>
+                </td>
+                <td>
+                  {% if row.status == 'active' %}
+                    <span class="hz-badge hz-badge--confirmed">Active</span>
+                  {% else %}
+                    <span class="hz-badge hz-badge--cancelled">Inactive</span>
+                  {% endif %}
+                </td>
+                <td class="hz-table__actions">
+                  <a href="{{ row.edit_url }}" class="hz-action-btn hz-action-btn--edit" title="Edit">✎</a>
+                  <a href="{{ row.delete_url }}" class="hz-action-btn hz-action-btn--cancel" title="Delete" onclick="return confirm('Delete this room?')">✕</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+
+</div>

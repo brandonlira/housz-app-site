@@ -1,0 +1,22 @@
+uuid: e2cab8fb-fb09-4dac-b1ca-15c1c8fc5f19
+langcode: en
+status: true
+dependencies:
+  module:
+    - help
+  theme:
+    - hous_z_theme
+_core:
+  default_config_hash: VfPFqqxfkomud5CO8DUijw85QIl9GIxh_nIxLOYESxg
+id: hous_z_theme_help
+theme: hous_z_theme
+region: help
+weight: 0
+provider: null
+plugin: help_block
+settings:
+  id: help_block
+  label: Help
+  label_display: '0'
+  provider: help
+visibility: {  }

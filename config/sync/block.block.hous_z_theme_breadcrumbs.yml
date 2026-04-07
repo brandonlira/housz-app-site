@@ -1,0 +1,22 @@
+uuid: 73c41b11-b1bf-404e-81e5-c2d55ee229b8
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - hous_z_theme
+_core:
+  default_config_hash: VhBzWb7lMRtIOg9G7VSw_0uopi-7zXeHq4vXqqV1HFE
+id: hous_z_theme_breadcrumbs
+theme: hous_z_theme
+region: breadcrumb
+weight: 0
+provider: null
+plugin: system_breadcrumb_block
+settings:
+  id: system_breadcrumb_block
+  label: Breadcrumbs
+  label_display: '0'
+  provider: system
+visibility: {  }
