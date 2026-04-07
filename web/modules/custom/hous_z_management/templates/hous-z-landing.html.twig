@@ -10,7 +10,6 @@
   {# ── Hero ── #}
   <section class="hz-landing__hero">
 
-    {# Background decorative shapes #}
     <div class="hz-landing__hero-bg" aria-hidden="true">
       <div class="hz-landing__circle hz-landing__circle--1"></div>
       <div class="hz-landing__circle hz-landing__circle--2"></div>
@@ -21,34 +20,32 @@
 
       {# Logo / brand #}
       <div class="hz-landing__brand">
-        <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100" height="100" rx="20" fill="rgba(255,255,255,0.12)"/>
-          <polygon points="18,22 82,22 82,38 42,62 82,62 82,78 18,78 18,62 58,38 18,38" fill="#F04E37"/>
-        </svg>
-        <span class="hz-landing__brand-name">ZOOCHA</span>
+        <img src="/themes/hous_z_theme/images/zoocha-logotype.svg" alt="Zoocha" class="hz-landing__logotype" />
       </div>
 
+      <div class="hz-landing__eyebrow">Manager Portal</div>
+
       <h1 class="hz-landing__headline">
-        Book your<br>
-        <em>perfect room</em><br>
-        at Zoocha HQ.
+        Manage room<br>
+        <em>bookings</em><br>
+        at Zoocha.
       </h1>
 
       <p class="hz-landing__sub">
-        The internal room booking platform for the Zoocha team —
-        check availability, reserve your bed, and get instant confirmation.
+        Review, approve, and track accommodation requests from the Zoocha team.
+        Employees book via the mobile app — you keep everything running smoothly from here.
       </p>
 
       <div class="hz-landing__actions">
         <a href="/user/login" class="hz-landing__cta">
-          Sign in to book
+          Sign in to manage
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
         </a>
       </div>
 
     </div>
 
-    {# Hero visual (room card mockup) #}
+    {# Hero visual — booking mockup #}
     <div class="hz-landing__hero-visual" aria-hidden="true">
       <div class="hz-landing__mockup">
         <div class="hz-landing__mockup-header">
@@ -78,21 +75,21 @@
       <div class="hz-landing__feature">
         <div class="hz-landing__feature-icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/>
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
           </svg>
         </div>
-        <h3>Real-time availability</h3>
-        <p>See which rooms are free for your dates instantly — no email chains needed.</p>
+        <h3>One-click approvals</h3>
+        <p>Confirm or cancel booking requests instantly from the dashboard — no back-and-forth needed.</p>
       </div>
 
       <div class="hz-landing__feature">
         <div class="hz-landing__feature-icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            <path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/>
           </svg>
         </div>
-        <h3>Instant confirmation</h3>
-        <p>Book a single or double room in seconds and receive confirmation by email.</p>
+        <h3>Full booking visibility</h3>
+        <p>See all upcoming check-ins, recent requests, and occupancy at a glance from a single dashboard.</p>
       </div>
 
       <div class="hz-landing__feature">
@@ -101,8 +98,8 @@
             <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
           </svg>
         </div>
-        <h3>Email notifications</h3>
-        <p>You and your manager are notified at every step — booking, confirmation, cancellation.</p>
+        <h3>Automatic notifications</h3>
+        <p>Employees are notified by email the moment you approve or cancel their request — no manual follow-up.</p>
       </div>
 
     </div>
@@ -110,8 +107,16 @@
 
   {# ── Footer ── #}
   <footer class="hz-landing__footer">
-    <p>Hous-Z &bull; Zoocha Room Booking System</p>
-    <p><small>&copy; {{ "now"|date("Y") }} Zoocha. We champion curiosity.</small></p>
+    <div class="hz-landing__footer-inner">
+      <div class="hz-landing__footer-brand">
+        <img src="/themes/hous_z_theme/images/zoocha-logotype.svg" alt="Zoocha" class="hz-landing__footer-logotype" />
+      </div>
+      <div class="hz-landing__footer-info">
+        <p>Hous-Z &bull; Internal Room Booking Platform</p>
+        <p>3 Queen Square, Bristol, BS1 4JQ, UK &bull; <a href="https://zoocha.com">zoocha.com</a></p>
+      </div>
+      <p class="hz-landing__footer-copy">&copy; {{ "now"|date("Y") }} Zoocha Ltd. All rights reserved.</p>
+    </div>
   </footer>
 
 </div>

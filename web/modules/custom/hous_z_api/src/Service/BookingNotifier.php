@@ -30,8 +30,10 @@ class BookingNotifier {
     $room    = (string) ($context['roomName'] ?? 'Room');
     $id      = (string) ($context['bookingId'] ?? '');
 
-    $this->send('booking_created_admin', $context['managerEmail'] ?? '',
-      "New booking request #{$id} for {$room}", $context);
+    foreach ($this->getManagerRecipients($context['managerEmail'] ?? '') as $recipient) {
+      $this->send('booking_created_admin', $recipient,
+        "New booking request #{$id} for {$room}", $context);
+    }
     $this->send('booking_created_guest', $context['requesterEmail'] ?? '',
       "Booking request received for {$room}", $context);
   }
@@ -58,8 +60,10 @@ class BookingNotifier {
     };
 
     $this->send($guest_key, $context['requesterEmail'] ?? '', $guest_subject, $context);
-    $this->send('booking_status_admin', $context['managerEmail'] ?? '',
-      "Booking #{$id} changed to {$status}", $context);
+    foreach ($this->getManagerRecipients($context['managerEmail'] ?? '') as $recipient) {
+      $this->send('booking_status_admin', $recipient,
+        "Booking #{$id} changed to {$status}", $context);
+    }
   }
 
   /**
@@ -246,6 +250,48 @@ class BookingNotifier {
       return \Drupal::request()->getSchemeAndHttpHost() . '/' . $module_path . '/images/logo.png';
     }
     return '';
+  }
+
+  /**
+   * Returns the list of manager email recipients.
+   *
+   * Priority:
+   *  1. All active users with the configured notify_role.
+   *  2. Additional emails from notify_emails config.
+   *  3. Fallback: the room's field_manager_email.
+   */
+  protected function getManagerRecipients(string $fallback_email): array {
+    $config    = \Drupal::config('hous_z_management.settings');
+    $recipients = [];
+
+    // Role-based recipients.
+    $notify_role = $config->get('notify_role');
+    if ($notify_role) {
+      $users = \Drupal::entityTypeManager()->getStorage('user')->loadByProperties([
+        'status' => 1,
+        'roles'  => $notify_role,
+      ]);
+      foreach ($users as $user) {
+        $email = $user->getEmail();
+        if ($email) {
+          $recipients[] = $email;
+        }
+      }
+    }
+
+    // Additional configured emails.
+    foreach ($config->get('notify_emails') ?? [] as $email) {
+      if ($email && !\Drupal::service('email.validator')->isValid($email) === FALSE) {
+        $recipients[] = $email;
+      }
+    }
+
+    // Fallback to room manager email if nothing configured.
+    if (empty($recipients) && $fallback_email) {
+      $recipients[] = $fallback_email;
+    }
+
+    return array_unique(array_filter($recipients));
   }
 
   /**

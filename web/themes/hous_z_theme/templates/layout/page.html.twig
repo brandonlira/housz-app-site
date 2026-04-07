@@ -64,6 +64,10 @@
     <main class="hz-main" role="main">
       <a id="main-content" tabindex="-1"></a>
 
+      {% if hz_back_link %}
+        {{ hz_back_link }}
+      {% endif %}
+
       {% if page.breadcrumb %}
         <div class="hz-breadcrumb">
           {{ page.breadcrumb }}

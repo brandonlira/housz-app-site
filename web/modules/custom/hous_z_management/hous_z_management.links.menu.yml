@@ -18,3 +18,10 @@ hous_z_management.units_menu:
   route_name: hous_z_management.units
   parent: hous_z_management.admin_menu
   weight: 10
+
+hous_z_management.settings_menu:
+  title: 'Settings'
+  description: 'Hous-Z system settings'
+  route_name: hous_z_management.settings
+  parent: hous_z_management.admin_menu
+  weight: 20

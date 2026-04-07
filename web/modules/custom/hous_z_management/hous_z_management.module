@@ -65,10 +65,27 @@ function hous_z_management_entity_type_alter(array &$entity_types) {
  * Redirects users to the dashboard after login.
  */
 function hous_z_management_user_login($account) {
-  // Only redirect if there's no existing destination parameter.
   $request = \Drupal::request();
   if (!$request->query->has('destination')) {
-    // Set the destination to the Houz dashboard.
     $request->query->set('destination', '/housz');
   }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * After password reset, redirect to /user/login so the status message
+ * is visible instead of being swallowed by the anonymous landing page.
+ */
+function hous_z_management_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  if ($form_id === 'user_pass') {
+    $form['#submit'][] = 'hous_z_management_user_pass_submit';
+  }
+}
+
+/**
+ * Custom submit handler for the password reset form.
+ */
+function hous_z_management_user_pass_submit($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $form_state->setRedirect('user.login');
 }
