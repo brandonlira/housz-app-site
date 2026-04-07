@@ -4,16 +4,9 @@ status: true
 dependencies:
   config:
     - filter.format.restricted_html
-    - rest.resource.availability_resource
-    - rest.resource.bat_api_events_resource
-    - rest.resource.bat_api_units_resource
-    - rest.resource.full_occupancy_resource
     - rest.resource.hous_z_api_my_reservations
     - rest.resource.houz_bookings
-    - rest.resource.reservation_resource
-    - rest.resource.reservation_status_resource
     - rest.resource.rooms_resource
-    - rest.resource.user_reservations_resource
   module:
     - bee
     - comment
@@ -33,19 +26,9 @@ permissions:
   - 'access comments'
   - 'access content'
   - 'access site-wide contact form'
-  - 'administer rest resources'
-  - 'restful delete reservation_resource'
-  - 'restful get availability_resource'
-  - 'restful get bat_api_events_resource'
-  - 'restful get bat_api_units_resource'
-  - 'restful get full_occupancy_resource'
   - 'restful get hous_z_api_my_reservations'
   - 'restful get houz_bookings'
   - 'restful get rooms_resource'
-  - 'restful patch reservation_resource'
-  - 'restful patch reservation_status_resource'
-  - 'restful post reservation_resource'
-  - 'restful post user_reservations_resource'
   - 'search content'
   - 'use text format restricted_html'
   - 'view calendar data for any availability_daily event'

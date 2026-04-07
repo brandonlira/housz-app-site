@@ -39,4 +39,7 @@ php.local.ini
 
 xdebug.log
 
+# OAuth RSA keys — never commit private keys
+/oauth-keys/
+
 scripts/jenkins/config.sh
