@@ -323,6 +323,85 @@
   font-size: 0.875rem;
 }
 
+/* ═══════════════════════════════════════
+   SETTINGS PAGE
+═══════════════════════════════════════ */
+
+.hz-settings__body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hz-settings__field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.hz-settings__field input[type="text"],
+.hz-settings__field select,
+.hz-settings__field textarea {
+  width: 100%;
+  max-width: 520px;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #1a1a2e;
+  background: #f9fafb;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.hz-settings__field input[type="text"]:focus,
+.hz-settings__field select:focus,
+.hz-settings__field textarea:focus {
+  outline: none;
+  border-color: #4B20D4;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(75, 32, 212, 0.1);
+}
+
+.hz-settings__field .description,
+.hz-settings__field .form-item__description {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* Save button */
+.hz-dash .form-actions {
+  margin-top: 0.5rem;
+}
+
+.hz-dash .form-actions .button--primary,
+.hz-dash .form-submit {
+  background: #4B20D4;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 4px 12px rgba(75, 32, 212, 0.25);
+}
+
+.hz-dash .form-actions .button--primary:hover,
+.hz-dash .form-submit:hover {
+  background: #3a11c8;
+  transform: translateY(-1px);
+}
+
 /* ── Actions bar ── */
 .hz-actions-bar {
   display: flex;
