@@ -1,0 +1,123 @@
+/**
+ * @file
+ * Status badges for booking states.
+ */
+
+.hz-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hz-space-1);
+  padding: 3px var(--hz-space-3);
+  border-radius: var(--hz-radius-full);
+  font-size: var(--hz-text-xs);
+  font-weight: var(--hz-font-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.hz-badge--pending {
+  background: var(--hz-color-warning-bg);
+  color: #92400e;
+}
+
+.hz-badge--confirmed {
+  background: var(--hz-color-success-bg);
+  color: #065f46;
+}
+
+.hz-badge--cancelled {
+  background: var(--hz-color-error-bg);
+  color: #991b1b;
+}
+
+.hz-badge--primary {
+  background: var(--hz-color-primary-bg);
+  color: var(--hz-color-primary);
+}
+
+.hz-badge--accent {
+  background: #fff1f0;
+  color: var(--hz-color-accent-dark);
+}
+
+/* Dot indicator */
+.hz-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--hz-radius-full);
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ── Booking card / panel ── */
+.hz-card {
+  background: var(--hz-color-white);
+  border-radius: var(--hz-radius-lg);
+  box-shadow: var(--hz-shadow-sm);
+  border: 1px solid var(--hz-color-gray-200);
+  overflow: hidden;
+  transition: box-shadow var(--hz-transition-fast);
+}
+
+.hz-card:hover {
+  box-shadow: var(--hz-shadow);
+}
+
+.hz-card__header {
+  padding: var(--hz-space-5) var(--hz-space-6);
+  border-bottom: 1px solid var(--hz-color-gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hz-space-4);
+}
+
+.hz-card__title {
+  font-size: var(--hz-text-base);
+  font-weight: var(--hz-font-semibold);
+  color: var(--hz-color-dark);
+  margin: 0;
+}
+
+.hz-card__body {
+  padding: var(--hz-space-5) var(--hz-space-6);
+}
+
+.hz-card__footer {
+  padding: var(--hz-space-4) var(--hz-space-6);
+  border-top: 1px solid var(--hz-color-gray-200);
+  background: var(--hz-color-gray-50);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--hz-space-3);
+}
+
+/* ── Info grid ── */
+.hz-info-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--hz-space-1) 0;
+}
+
+.hz-info-grid__label {
+  font-size: var(--hz-text-xs);
+  font-weight: var(--hz-font-semibold);
+  color: var(--hz-color-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: var(--hz-space-2) 0;
+  border-bottom: 1px solid var(--hz-color-primary-border);
+  align-self: start;
+}
+
+.hz-info-grid__value {
+  font-size: var(--hz-text-sm);
+  color: var(--hz-color-dark);
+  font-weight: var(--hz-font-medium);
+  padding: var(--hz-space-2) 0;
+  border-bottom: 1px solid var(--hz-color-primary-border);
+}

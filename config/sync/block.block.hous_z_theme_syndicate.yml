@@ -1,0 +1,23 @@
+uuid: 19fc6215-5a46-4478-9048-a4eeb60aaf13
+langcode: en
+status: false
+dependencies:
+  module:
+    - node
+  theme:
+    - hous_z_theme
+_core:
+  default_config_hash: 0gq3VPg-_UM69FCCWurLFIrrnIjC2HLKhwo9iQNtcUo
+id: hous_z_theme_syndicate
+theme: hous_z_theme
+region: page_top
+weight: 0
+provider: null
+plugin: node_syndicate_block
+settings:
+  id: node_syndicate_block
+  label: 'RSS feed'
+  label_display: '0'
+  provider: node
+  block_count: 10
+visibility: {  }

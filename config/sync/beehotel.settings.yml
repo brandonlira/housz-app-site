@@ -1,3 +1,12 @@
+beehotel:
+  off_value: false
+  off_text: ''
+  setup_mode: false
+  calendar_from: 0
+  dateandtime:
+    default_checkin_time: '14:00'
+  cancellation_policy_days: '0'
+  bybeehotel_promo_enabled: true
 dateandtime:
   default_checkin_time: '15:00'
   default_checkout_time: '10:00'

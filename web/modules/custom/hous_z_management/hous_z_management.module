@@ -6,6 +6,48 @@
  */
 
 /**
+ * Implements hook_theme().
+ */
+function hous_z_management_theme(): array {
+  return [
+    'hous_z_dashboard' => [
+      'variables' => [
+        'stats'       => [],
+        'upcoming'    => [],
+        'recent'      => [],
+        'username'    => '',
+        'greeting'    => '',
+        'today_label' => '',
+      ],
+    ],
+    'hous_z_landing' => [
+      'variables' => [],
+    ],
+    'hous_z_bookings' => [
+      'variables' => [
+        'rows'         => [],
+        'total'        => 0,
+        'state_filter' => '',
+        'pager'        => [],
+      ],
+    ],
+    'hous_z_units' => [
+      'variables' => [
+        'rows'    => [],
+        'add_url' => '',
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_hous_z_landing().
+ */
+function hous_z_management_preprocess_hous_z_landing(array &$variables): void {
+  $variables['#attached']['library'][] = 'hous_z_management/landing';
+}
+
+/**
  * Implements hook_entity_type_alter().
  *
  * Override BAT Event entity to use custom class with label functionality.
@@ -27,6 +69,6 @@ function hous_z_management_user_login($account) {
   $request = \Drupal::request();
   if (!$request->query->has('destination')) {
     // Set the destination to the Houz dashboard.
-    $request->query->set('destination', '/admin/houz');
+    $request->query->set('destination', '/housz');
   }
 }

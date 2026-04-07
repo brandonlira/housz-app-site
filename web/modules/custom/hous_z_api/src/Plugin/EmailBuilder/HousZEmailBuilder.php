@@ -27,28 +27,40 @@ class HousZEmailBuilder extends EmailBuilderBase {
 
   /**
    * {@inheritdoc}
+   *
+   * Initialisation phase — setTo() must be called here, not in build().
+   *
+   * @param string $to      Recipient email address.
+   * @param string $subject Email subject line.
+   * @param array  $vars    Template variables for hous_z_api_email theme hook.
    */
-  public function createParams(EmailInterface $email, string $to = '', string $subject = '', string $html = ''): void {
-    // setTo must be called in the initialisation phase (createParams),
-    // not in build() — see https://www.drupal.org/node/3501754
+  public function createParams(EmailInterface $email, string $to = '', string $subject = '', array $vars = []): void {
     if ($to !== '') {
       $email->setTo($to);
     }
     $email
       ->setParam('subject', $subject)
-      ->setParam('html', $html);
+      ->setParam('vars', $vars);
   }
 
   /**
    * {@inheritdoc}
    */
   public function build(EmailInterface $email): void {
+    $vars = $email->getParam('vars') ?? [];
+
     $email->setSubject($email->getParam('subject'));
 
     $email->setBody([
-      '#type'     => 'inline_template',
-      '#template' => '{{ html|raw }}',
-      '#context'  => ['html' => $email->getParam('html')],
+      '#theme'        => 'hous_z_api_email',
+      '#heading'      => $vars['heading']      ?? '',
+      '#intro'        => $vars['intro']        ?? '',
+      '#rows'         => $vars['rows']         ?? [],
+      '#details'      => $vars['details']      ?? '',
+      '#status'       => $vars['status']       ?? 'pending',
+      '#status_label' => $vars['status_label'] ?? '',
+      '#cta_email'    => $vars['cta_email']    ?? '',
+      '#logo_url'     => $vars['logo_url']     ?? '',
     ]);
   }
 

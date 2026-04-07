@@ -1,0 +1,74 @@
+/**
+ * @file
+ * Zoocha-branded status messages.
+ */
+
+.messages {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hz-space-3);
+  padding: var(--hz-space-4) var(--hz-space-5);
+  border-radius: var(--hz-radius);
+  border-left: 4px solid;
+  font-size: var(--hz-text-sm);
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* keep icon support */
+  background-repeat: no-repeat;
+  background-position: var(--hz-space-4) center;
+}
+
+.messages + .messages {
+  margin-top: var(--hz-space-3);
+}
+
+.messages__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1;
+}
+
+.messages__item + .messages__item {
+  margin-top: var(--hz-space-1);
+}
+
+/* Status — green */
+.messages--status {
+  background-color: var(--hz-color-success-bg);
+  border-color: var(--hz-color-success);
+  color: #065f46;
+  background-image: url(../../images/icons/check.svg);
+  box-shadow: -4px 0 0 var(--hz-color-success); /* LTR */
+}
+[dir="rtl"] .messages--status { box-shadow: 4px 0 0 var(--hz-color-success); }
+
+/* Warning — amber */
+.messages--warning {
+  background-color: var(--hz-color-warning-bg);
+  border-color: var(--hz-color-warning);
+  color: #78350f;
+  background-image: url(../../images/icons/warning.svg);
+  box-shadow: -4px 0 0 var(--hz-color-warning); /* LTR */
+}
+[dir="rtl"] .messages--warning { box-shadow: 4px 0 0 var(--hz-color-warning); }
+
+/* Error — red */
+.messages--error {
+  background-color: var(--hz-color-error-bg);
+  border-color: var(--hz-color-error);
+  color: #991b1b;
+  background-image: url(../../images/icons/error.svg);
+  box-shadow: -4px 0 0 var(--hz-color-error); /* LTR */
+}
+[dir="rtl"] .messages--error { box-shadow: 4px 0 0 var(--hz-color-error); }
+
+.messages--error p.error {
+  color: #991b1b;
+}
+
+.messages a {
+  font-weight: var(--hz-font-semibold);
+  text-decoration: underline;
+}

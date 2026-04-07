@@ -1,53 +1,465 @@
-.houz-dashboard {
-  margin: 20px 0;
+/**
+ * @file
+ * Hous-Z management dashboard styles.
+ */
+
+/* Hide the Drupal-generated page title on the dashboard
+   (we render our own welcome heading inside the template) */
+.path-housz h1.page-title,
+.path-housz .page-title,
+[data-drupal-selector="hz-dash"] ~ h1 {
+  display: none;
 }
 
-.houz-stats,
-.houz-actions {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 20px;
-  margin-bottom: 20px;
+/* ═══════════════════════════════════════
+   DASHBOARD WRAPPER
+═══════════════════════════════════════ */
+
+.hz-dash {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.houz-stats h2,
-.houz-actions h2 {
-  margin-top: 0;
-  color: #495057;
-  border-bottom: 2px solid #007bff;
-  padding-bottom: 10px;
+/* ── Welcome bar ── */
+.hz-dash__welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
 
-.houz-stats p {
-  font-size: 16px;
-  margin: 10px 0;
-  color: #6c757d;
+.hz-dash__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--hz-color-dark, #1a1a2e);
+  margin: 0 0 0.25rem;
 }
 
-.houz-actions .button {
-  margin-right: 10px;
-  margin-bottom: 10px;
-  display: inline-block;
-  padding: 10px 20px;
-  text-decoration: none;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+.hz-dash__subtitle {
+  font-size: 0.875rem;
+  color: var(--hz-color-gray-500, #6b7280);
+  margin: 0;
+}
+
+.hz-dash__welcome-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════ */
+
+.hz-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.hz-stat {
   background: #fff;
-  color: #333;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: 1px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-.houz-actions .button--primary {
-  background: #007bff;
-  border-color: #007bff;
+.hz-stat:hover {
+  box-shadow: 0 4px 16px rgba(75, 32, 212, 0.12);
+  transform: translateY(-2px);
+}
+
+.hz-stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.hz-stat--purple::before  { background: #4B20D4; }
+.hz-stat--dark::before    { background: #1a1a2e; }
+.hz-stat--warning::before { background: #f59e0b; }
+.hz-stat--success::before { background: #10b981; }
+.hz-stat--accent::before  { background: #F04E37; }
+
+.hz-stat__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hz-stat__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.hz-stat--purple  .hz-stat__icon { background: #f0ebff; color: #4B20D4; }
+.hz-stat--dark    .hz-stat__icon { background: #f0f0f5; color: #1a1a2e; }
+.hz-stat--warning .hz-stat__icon { background: #fff8e1; color: #d97706; }
+.hz-stat--success .hz-stat__icon { background: #ecfdf5; color: #059669; }
+.hz-stat--accent  .hz-stat__icon { background: #fff1f0; color: #F04E37; }
+
+.hz-stat__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.hz-stat__value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--hz-color-dark, #1a1a2e);
+  line-height: 1;
+}
+
+.hz-stat__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--hz-color-gray-500, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hz-stat__cta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #F04E37;
+  text-decoration: none;
+  margin-top: auto;
+}
+
+.hz-stat__cta:hover {
+  text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════
+   CONTENT GRID
+═══════════════════════════════════════ */
+
+.hz-dash__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Panels ── */
+.hz-panel {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.hz-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 1rem;
+}
+
+.hz-panel__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--hz-color-dark, #1a1a2e);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hz-panel__title svg {
+  color: var(--hz-color-primary, #4B20D4);
+  flex-shrink: 0;
+}
+
+.hz-panel__badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: #f0ebff;
+  color: #4B20D4;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.hz-panel__link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--hz-color-primary, #4B20D4);
+  text-decoration: none;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.hz-panel__link:hover {
+  text-decoration: underline;
+}
+
+/* ── Tables ── */
+.hz-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure the table never forces its panel wider */
+.hz-panel .hz-table-wrap {
+  max-width: 100%;
+}
+
+.hz-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.hz-table thead tr {
+  background: #f9fafb;
+}
+
+.hz-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.hz-table td {
+  padding: 0.875rem 1rem;
+  color: #374151;
+  border-bottom: 1px solid #f9fafb;
+  vertical-align: middle;
+}
+
+.hz-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.hz-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.hz-table__id {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hz-table__email {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hz-table__dates small {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+/* ── Badges ── */
+.hz-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Give the status column enough room for the badge */
+.hz-table td:last-child,
+.hz-table th:last-child {
+  min-width: 110px;
+}
+
+.hz-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.hz-badge--pending   { background: #fff8e1; color: #92400e; }
+.hz-badge--confirmed { background: #ecfdf5; color: #065f46; }
+.hz-badge--cancelled { background: #fef2f2; color: #991b1b; }
+
+/* ── Empty state ── */
+.hz-empty {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* ── Actions bar ── */
+.hz-actions-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════
+   BOOKINGS PAGE
+═══════════════════════════════════════ */
+
+/* ── Filter tabs ── */
+.hz-filter-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hz-filter-tab {
+  padding: 0.5rem 1.25rem;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  color: #6b7280;
+  transition: all 0.15s ease;
+}
+
+.hz-filter-tab:hover {
+  border-color: #4B20D4;
+  color: #4B20D4;
+  text-decoration: none;
+}
+
+.hz-filter-tab.is-active {
+  background: #4B20D4;
+  border-color: #4B20D4;
   color: #fff;
 }
 
-.houz-actions .button:hover {
-  background: #e9ecef;
+.hz-filter-tab--pending.is-active   { background: #92400e; border-color: #92400e; }
+.hz-filter-tab--confirmed.is-active { background: #065f46; border-color: #065f46; }
+.hz-filter-tab--cancelled.is-active { background: #991b1b; border-color: #991b1b; }
+
+/* ── Bookings table extras ── */
+.hz-table--bookings .hz-table__guest-name {
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 0.85rem;
 }
 
-.houz-actions .button--primary:hover {
-  background: #0056b3;
-  border-color: #0056b3;
+.hz-table--bookings .hz-table__email {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+/* ── Row action buttons ── */
+.hz-table__actions {
+  white-space: nowrap;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.hz-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.hz-action-btn--confirm { background: #ecfdf5; color: #065f46; }
+.hz-action-btn--confirm:hover { background: #065f46; color: #fff; text-decoration: none; }
+
+.hz-action-btn--cancel { background: #fef2f2; color: #991b1b; }
+.hz-action-btn--cancel:hover { background: #991b1b; color: #fff; text-decoration: none; }
+
+.hz-action-btn--edit { background: #f0ebff; color: #4B20D4; }
+.hz-action-btn--edit:hover { background: #4B20D4; color: #fff; text-decoration: none; }
+
+/* ── Units table ── */
+.hz-unit-bookings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  background: #f0ebff;
+  color: #4B20D4;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0 8px;
+}
+
+/* ── Pager ── */
+.hz-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.hz-pager__btn {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  transition: all 0.15s ease;
+}
+
+.hz-pager__btn:hover {
+  background: #4B20D4;
+  color: #fff;
+  border-color: #4B20D4;
+  text-decoration: none;
+}
+
+.hz-pager__info {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-weight: 500;
 }

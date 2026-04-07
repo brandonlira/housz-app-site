@@ -1,0 +1,105 @@
+/**
+ * @file
+ * Zoocha-branded button styles.
+ */
+
+.button,
+.image-button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hz-space-2);
+  padding: var(--hz-space-2) var(--hz-space-5);
+  border-radius: var(--hz-radius);
+  font-family: var(--hz-font-sans);
+  font-size: var(--hz-text-sm);
+  font-weight: var(--hz-font-semibold);
+  line-height: 1.5;
+  cursor: pointer;
+  border: 2px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all var(--hz-transition-fast);
+  background: var(--hz-color-primary);
+  color: var(--hz-color-white);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.button:hover,
+.image-button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+  background: var(--hz-color-primary-dark);
+  color: var(--hz-color-white);
+  text-decoration: none;
+  box-shadow: var(--hz-shadow);
+  transform: translateY(-1px);
+}
+
+.button:active,
+input[type="submit"]:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Primary */
+.button--primary {
+  background: var(--hz-color-primary);
+  border-color: var(--hz-color-primary);
+  color: var(--hz-color-white);
+}
+
+.button--primary:hover {
+  background: var(--hz-color-primary-dark);
+  border-color: var(--hz-color-primary-dark);
+  color: var(--hz-color-white);
+}
+
+/* Secondary / ghost */
+.button--secondary {
+  background: transparent;
+  border-color: var(--hz-color-primary);
+  color: var(--hz-color-primary);
+}
+
+.button--secondary:hover {
+  background: var(--hz-color-primary-bg);
+  color: var(--hz-color-primary-dark);
+  text-decoration: none;
+}
+
+/* Danger / accent */
+.button--danger,
+input[type="reset"] {
+  background: var(--hz-color-accent);
+  border-color: var(--hz-color-accent);
+  color: var(--hz-color-white);
+}
+
+.button--danger:hover,
+input[type="reset"]:hover {
+  background: var(--hz-color-accent-dark);
+  border-color: var(--hz-color-accent-dark);
+  color: var(--hz-color-white);
+}
+
+/* Small */
+.button--small {
+  padding: var(--hz-space-1) var(--hz-space-3);
+  font-size: var(--hz-text-xs);
+}
+
+/* Extra small */
+.button--extrasmall {
+  padding: 2px var(--hz-space-2);
+  font-size: var(--hz-text-xs);
+}
+
+/* Spacing when multiple buttons side by side */
+.button + .button {
+  margin-left: var(--hz-space-2);
+}

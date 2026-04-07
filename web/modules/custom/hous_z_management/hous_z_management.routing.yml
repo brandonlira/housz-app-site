@@ -1,23 +1,41 @@
+hous_z_management.home:
+  path: '/housz-home'
+  defaults:
+    _controller: '\Drupal\hous_z_management\Controller\HouzDashboardController::home'
+    _title: 'Hous-Z · Room Booking System'
+  requirements:
+    _access: 'TRUE'
+
 hous_z_management.dashboard:
-  path: '/admin/houz'
+  path: '/housz'
   defaults:
     _controller: '\Drupal\hous_z_management\Controller\HouzDashboardController::dashboard'
-    _title: 'Houz Management Dashboard'
+    _title: ''
   requirements:
     _permission: 'access houz dashboard'
 
 hous_z_management.bookings:
-  path: '/admin/houz/bookings'
+  path: '/housz/bookings'
   defaults:
     _controller: '\Drupal\hous_z_management\Controller\HouzDashboardController::bookings'
-    _title: 'Manage Bookings'
+    _title: 'Bookings'
   requirements:
     _permission: 'manage houz bookings'
 
+hous_z_management.booking_action:
+  path: '/housz/bookings/{booking_id}/{action}'
+  defaults:
+    _controller: '\Drupal\hous_z_management\Controller\HouzDashboardController::bookingAction'
+    _title: ''
+  requirements:
+    _permission: 'manage houz bookings'
+    action: 'confirm|cancel'
+    booking_id: '\d+'
+
 hous_z_management.units:
-  path: '/admin/houz/units'
+  path: '/housz/units'
   defaults:
     _controller: '\Drupal\hous_z_management\Controller\HouzDashboardController::units'
-    _title: 'Manage Units'
+    _title: 'Rooms'
   requirements:
     _permission: 'manage houz units'

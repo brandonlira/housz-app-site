@@ -1,0 +1,269 @@
+/**
+ * @file
+ * Full-page login layout — Zoocha split screen.
+ */
+
+/* ── Override the default app shell on login pages ── */
+.hz-login-page .hz-header,
+.hz-login-page .hz-sidebar {
+  display: none;
+}
+
+.hz-login-page .hz-body {
+  margin-top: 0;
+}
+
+.hz-login-page body,
+body.path-user-login,
+body.path-user-password {
+  background: var(--hz-color-dark);
+}
+
+/* ── Full viewport split layout ── */
+.hz-login-wrap {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Left panel — brand ── */
+.hz-login__brand {
+  flex: 1;
+  background: var(--hz-color-primary);
+  background-image:
+    radial-gradient(ellipse at 20% 80%, rgba(240, 78, 55, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(124, 92, 232, 0.3) 0%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--hz-space-16) var(--hz-space-16);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative circles */
+.hz-login__brand::before {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.hz-login__brand::after {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: rgba(240, 78, 55, 0.12);
+}
+
+.hz-login__logo {
+  margin-bottom: var(--hz-space-10);
+  position: relative;
+  z-index: 1;
+}
+
+.hz-login__logo img {
+  height: 52px;
+  width: auto;
+}
+
+.hz-login__logo-fallback {
+  display: flex;
+  align-items: center;
+  gap: var(--hz-space-3);
+}
+
+.hz-login__logo-fallback span {
+  color: var(--hz-color-white);
+  font-size: var(--hz-text-2xl);
+  font-weight: var(--hz-font-extrabold);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.hz-login__headline {
+  color: var(--hz-color-white);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: var(--hz-font-extrabold);
+  line-height: 1.2;
+  margin: 0 0 var(--hz-space-5) 0;
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+}
+
+.hz-login__headline em {
+  font-style: normal;
+  color: var(--hz-color-accent);
+}
+
+.hz-login__tagline {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: var(--hz-text-base);
+  line-height: 1.7;
+  margin: 0 0 var(--hz-space-10) 0;
+  position: relative;
+  z-index: 1;
+  max-width: 380px;
+}
+
+/* Feature list */
+.hz-login__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hz-space-3);
+  position: relative;
+  z-index: 1;
+}
+
+.hz-login__features li {
+  display: flex;
+  align-items: center;
+  gap: var(--hz-space-3);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--hz-text-sm);
+  font-weight: var(--hz-font-medium);
+}
+
+.hz-login__features li::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hz-color-accent);
+  flex-shrink: 0;
+}
+
+/* ── Right panel — form ── */
+.hz-login__form-panel {
+  width: 480px;
+  flex-shrink: 0;
+  background: var(--hz-color-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--hz-space-16) var(--hz-space-12);
+}
+
+.hz-login__form-header {
+  margin-bottom: var(--hz-space-8);
+}
+
+.hz-login__form-header h1,
+.hz-login__form-header .page-title {
+  font-size: var(--hz-text-2xl);
+  font-weight: var(--hz-font-extrabold);
+  color: var(--hz-color-dark);
+  margin: 0 0 var(--hz-space-2) 0;
+}
+
+.hz-login__form-header p {
+  color: var(--hz-color-gray-500);
+  font-size: var(--hz-text-sm);
+  margin: 0;
+}
+
+/* Form fields */
+.hz-login__form-panel .form-item {
+  margin-bottom: var(--hz-space-5);
+}
+
+.hz-login__form-panel label {
+  display: block;
+  font-size: var(--hz-text-sm);
+  font-weight: var(--hz-font-semibold);
+  color: var(--hz-color-gray-700);
+  margin-bottom: var(--hz-space-2);
+}
+
+.hz-login__form-panel input[type="text"],
+.hz-login__form-panel input[type="password"],
+.hz-login__form-panel input[type="email"] {
+  width: 100%;
+  padding: var(--hz-space-3) var(--hz-space-4);
+  border: 2px solid var(--hz-color-gray-200);
+  border-radius: var(--hz-radius);
+  font-family: var(--hz-font-sans);
+  font-size: var(--hz-text-base);
+  color: var(--hz-color-dark);
+  background: var(--hz-color-white);
+  transition: border-color var(--hz-transition-fast), box-shadow var(--hz-transition-fast);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.hz-login__form-panel input[type="text"]:focus,
+.hz-login__form-panel input[type="password"]:focus,
+.hz-login__form-panel input[type="email"]:focus {
+  outline: none;
+  border-color: var(--hz-color-primary);
+  box-shadow: 0 0 0 3px rgba(75, 32, 212, 0.12);
+}
+
+.hz-login__form-panel input[type="submit"] {
+  width: 100%;
+  padding: var(--hz-space-3) var(--hz-space-5);
+  margin-top: var(--hz-space-2);
+  font-size: var(--hz-text-base);
+  font-weight: var(--hz-font-bold);
+  letter-spacing: 0.3px;
+}
+
+/* Local tasks (Log in / Reset password tabs) */
+.hz-login__form-panel div.tabs {
+  border-bottom: 2px solid var(--hz-color-gray-200);
+  margin-bottom: var(--hz-space-6);
+}
+
+/* Messages on login */
+.hz-login__form-panel .messages {
+  margin-bottom: var(--hz-space-5);
+  font-size: var(--hz-text-sm);
+}
+
+/* Footer note */
+.hz-login__footer-note {
+  margin-top: var(--hz-space-8);
+  padding-top: var(--hz-space-6);
+  border-top: 1px solid var(--hz-color-gray-200);
+  font-size: var(--hz-text-xs);
+  color: var(--hz-color-gray-400);
+  text-align: center;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .hz-login-wrap {
+    flex-direction: column;
+  }
+
+  .hz-login__brand {
+    padding: var(--hz-space-10) var(--hz-space-6);
+    min-height: 220px;
+  }
+
+  .hz-login__headline {
+    font-size: var(--hz-text-xl);
+  }
+
+  .hz-login__features {
+    display: none;
+  }
+
+  .hz-login__form-panel {
+    width: 100%;
+    padding: var(--hz-space-8) var(--hz-space-6);
+  }
+}

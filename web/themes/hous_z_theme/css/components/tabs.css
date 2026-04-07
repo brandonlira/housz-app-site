@@ -1,0 +1,48 @@
+/**
+ * @file
+ * Zoocha-branded local task tabs.
+ */
+
+div.tabs {
+  margin-bottom: var(--hz-space-6);
+  border-bottom: 2px solid var(--hz-color-gray-200);
+}
+
+ul.tabs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: var(--hz-space-1);
+  flex-wrap: wrap;
+}
+
+.tabs > li {
+  display: flex;
+  margin-bottom: -2px;
+}
+
+.tabs a {
+  display: block;
+  padding: var(--hz-space-2) var(--hz-space-4);
+  text-decoration: none;
+  color: var(--hz-color-gray-500);
+  font-size: var(--hz-text-sm);
+  font-weight: var(--hz-font-medium);
+  border-bottom: 2px solid transparent;
+  transition: all var(--hz-transition-fast);
+  border-radius: var(--hz-radius) var(--hz-radius) 0 0;
+}
+
+.tabs a:hover {
+  color: var(--hz-color-primary);
+  background: var(--hz-color-primary-bg);
+  text-decoration: none;
+}
+
+.tabs a.is-active {
+  color: var(--hz-color-primary);
+  font-weight: var(--hz-font-semibold);
+  border-bottom-color: var(--hz-color-primary);
+  background: transparent;
+}

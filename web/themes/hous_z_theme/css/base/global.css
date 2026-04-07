@@ -1,0 +1,123 @@
+/**
+ * @file
+ * Base reset and global typography for Hous-Z Theme.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--hz-font-sans);
+  font-size: var(--hz-text-base);
+  font-weight: var(--hz-font-normal);
+  color: var(--hz-color-gray-700);
+  background-color: var(--hz-color-gray-100);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Headings ── */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 var(--hz-space-4) 0;
+  font-weight: var(--hz-font-bold);
+  line-height: 1.3;
+  color: var(--hz-color-dark);
+}
+
+h1 { font-size: var(--hz-text-3xl); }
+h2 { font-size: var(--hz-text-2xl); }
+h3 { font-size: var(--hz-text-xl); }
+h4 { font-size: var(--hz-text-lg); }
+h5 { font-size: var(--hz-text-base); font-weight: var(--hz-font-semibold); }
+h6 { font-size: var(--hz-text-sm);   font-weight: var(--hz-font-semibold); }
+
+/* ── Links ── */
+a {
+  color: var(--hz-color-primary);
+  text-decoration: none;
+  transition: color var(--hz-transition-fast);
+}
+
+a:hover,
+a:focus {
+  color: var(--hz-color-primary-dark);
+  text-decoration: underline;
+}
+
+/* ── Paragraphs & lists ── */
+p {
+  margin: 0 0 var(--hz-space-4) 0;
+}
+
+ul,
+ol {
+  margin: 0 0 var(--hz-space-4) 0;
+  padding-left: var(--hz-space-6);
+}
+
+/* ── Images ── */
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Code ── */
+code,
+pre {
+  font-family: var(--hz-font-mono);
+  font-size: 0.9em;
+}
+
+pre {
+  background: var(--hz-color-gray-50);
+  border: 1px solid var(--hz-color-gray-200);
+  border-radius: var(--hz-radius);
+  padding: var(--hz-space-4);
+  overflow-x: auto;
+}
+
+/* ── HR ── */
+hr {
+  border: none;
+  border-top: 1px solid var(--hz-color-gray-200);
+  margin: var(--hz-space-6) 0;
+}
+
+/* ── Focus visible ── */
+:focus-visible {
+  outline: 2px solid var(--hz-color-primary);
+  outline-offset: 2px;
+  border-radius: var(--hz-radius-sm);
+}
+
+/* ── Skip link ── */
+.visually-hidden,
+.element-invisible {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}
+
+.visually-hidden.focusable:active,
+.visually-hidden.focusable:focus {
+  position: static !important;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
