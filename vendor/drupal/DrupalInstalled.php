@@ -16,6 +16,6 @@ class DrupalInstalled {
   /**
    * A hash of all the installed packages and their versions.
    */
-  public const string VERSIONS_HASH = '9e7831ce3bf875cd';
+  public const string VERSIONS_HASH = '8c809ae781b12fce';
 
 }

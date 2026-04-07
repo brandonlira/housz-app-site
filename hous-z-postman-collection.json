@@ -1,0 +1,225 @@
+{
+  "info": {
+    "name": "Hous-Z API",
+    "description": "Hous-Z Room Booking API — Zoocha internal platform.\n\nAuthentication: OAuth 2.0 Client Credentials.\nRun the 'Get Token' request first — the token is saved automatically to {{access_token}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://hous-z-app-site.ddev.site", "type": "string" },
+    { "key": "client_id", "value": "housz-flutter-app", "type": "string" },
+    { "key": "client_secret", "value": "448b2529cc66be60faaba3d42556fea2f028e43d356fab171b0bbb05dc409bce", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "check_in", "value": "2026-05-01", "type": "string" },
+    { "key": "check_out", "value": "2026-05-05", "type": "string" },
+    { "key": "unit_id", "value": "1", "type": "string" },
+    { "key": "bed_type", "value": "single_bed", "type": "string" },
+    { "key": "booking_id", "value": "", "type": "string" },
+    { "key": "requester_email", "value": "employee@zoocha.com", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get Token (Client Credentials)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.access_token) {",
+                  "    pm.collectionVariables.set('access_token', json.access_token);",
+                  "    console.log('Token saved. Expires in ' + json.expires_in + 's');",
+                  "    pm.test('Token obtained', function() { pm.expect(json.token_type).to.eql('Bearer'); });",
+                  "} else {",
+                  "    pm.test('Token request failed', function() { pm.expect.fail(JSON.stringify(json)); });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type", "value": "client_credentials" },
+                { "key": "client_id", "value": "{{client_id}}" },
+                { "key": "client_secret", "value": "{{client_secret}}" },
+                { "key": "scope", "value": "api" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/oauth/token", "host": ["{{base_url}}"], "path": ["oauth", "token"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rooms",
+      "item": [
+        {
+          "name": "List Available Rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/rooms?checkInDate={{check_in}}&checkOutDate={{check_out}}&_format=json",
+              "host": ["{{base_url}}"],
+              "path": ["api", "rooms"],
+              "query": [
+                { "key": "checkInDate", "value": "{{check_in}}" },
+                { "key": "checkOutDate", "value": "{{check_out}}" },
+                { "key": "_format", "value": "json" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Check Bed Availability",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/availability/{{unit_id}}/{{bed_type}}/{{check_in}}/{{check_out}}?_format=json",
+              "host": ["{{base_url}}"],
+              "path": ["api", "availability", "{{unit_id}}", "{{bed_type}}", "{{check_in}}", "{{check_out}}"],
+              "query": [{ "key": "_format", "value": "json" }]
+            }
+          }
+        },
+        {
+          "name": "Full Occupancy Dates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/full-occupancy?_format=json",
+              "host": ["{{base_url}}"],
+              "path": ["api", "full-occupancy"],
+              "query": [{ "key": "_format", "value": "json" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "Create Reservation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.booking_id) {",
+                  "    pm.collectionVariables.set('booking_id', json.booking_id);",
+                  "    console.log('booking_id saved: ' + json.booking_id);",
+                  "    pm.test('Reservation created', function() { pm.response.to.have.status(201); });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unit_id\": \"{{unit_id}}\",\n  \"bed_type\": \"{{bed_type}}\",\n  \"check_in\": \"{{check_in}}\",\n  \"check_out\": \"{{check_out}}\",\n  \"requester_email\": \"{{requester_email}}\",\n  \"notes\": \"Postman test booking\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reservation?_format=json",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reservation"],
+              "query": [{ "key": "_format", "value": "json" }]
+            }
+          }
+        },
+        {
+          "name": "My Reservations (by email)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{requester_email}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/user/reservations?_format=json",
+              "host": ["{{base_url}}"],
+              "path": ["api", "user", "reservations"],
+              "query": [{ "key": "_format", "value": "json" }]
+            }
+          }
+        },
+        {
+          "name": "Update Reservation Status (Manager only)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": \"{{booking_id}}\",\n  \"status\": \"confirmed\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reservation/status?_format=json",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reservation", "status"],
+              "query": [{ "key": "_format", "value": "json" }]
+            }
+          }
+        },
+        {
+          "name": "Cancel Reservation Status (Manager only)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": \"{{booking_id}}\",\n  \"status\": \"cancelled\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reservation/status?_format=json",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reservation", "status"],
+              "query": [{ "key": "_format", "value": "json" }]
+            }
+          }
+        },
+        {
+          "name": "Delete Reservation (Manager only)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_id\": \"{{booking_id}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reservation?_format=json",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reservation"],
+              "query": [{ "key": "_format", "value": "json" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

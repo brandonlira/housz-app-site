@@ -29,7 +29,7 @@
         "drupal/message_notify": "^1.5",
         "drupal/paragraphs": "^1.19",
         "drupal/search_api": "^1.38",
-        "drupal/simple_oauth": "^6.0",
+        "drupal/simple_oauth": "^6.1",
         "drupal/symfony_mailer": "^1.6",
         "drush/drush": "^13.6"
     },
