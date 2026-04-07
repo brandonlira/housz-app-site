@@ -8,7 +8,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--hz-color-dark, #1a1a2e);
+  background: #0f0c24;
 }
 
 /* ═══════════════════════════════════════
@@ -17,18 +17,18 @@
 
 .hz-landing__hero {
   flex: 1;
-  background: var(--hz-color-primary, #4B20D4);
+  background: #3a11c8;
   background-image:
-    radial-gradient(ellipse at 15% 85%, rgba(240, 78, 55, 0.2) 0%, transparent 55%),
-    radial-gradient(ellipse at 85% 15%, rgba(124, 92, 232, 0.25) 0%, transparent 55%),
-    radial-gradient(ellipse at 50% 120%, rgba(26, 26, 46, 0.5) 0%, transparent 60%);
+    radial-gradient(ellipse at 10% 90%, rgba(240, 78, 55, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 10%, rgba(90, 50, 220, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 110%, rgba(15, 12, 36, 0.6) 0%, transparent 60%);
   display: flex;
   align-items: center;
   padding: 6rem 8vw;
-  gap: 4rem;
+  gap: 5rem;
   position: relative;
   overflow: hidden;
-  min-height: 75vh;
+  min-height: 78vh;
 }
 
 /* Decorative circles */
@@ -38,19 +38,20 @@
   pointer-events: none;
 }
 .hz-landing__circle--1 {
-  width: 600px; height: 600px;
-  bottom: -200px; right: -150px;
-  background: rgba(255, 255, 255, 0.025);
+  width: 700px; height: 700px;
+  bottom: -280px; right: -180px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 .hz-landing__circle--2 {
-  width: 300px; height: 300px;
-  top: -80px; left: -80px;
-  background: rgba(240, 78, 55, 0.08);
+  width: 320px; height: 320px;
+  top: -100px; left: -80px;
+  background: rgba(240, 78, 55, 0.07);
 }
 .hz-landing__circle--3 {
-  width: 150px; height: 150px;
-  top: 40%; right: 35%;
-  background: rgba(255, 255, 255, 0.04);
+  width: 160px; height: 160px;
+  top: 38%; right: 36%;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* ── Hero content (left) ── */
@@ -58,24 +59,38 @@
   flex: 1;
   position: relative;
   z-index: 1;
-  max-width: 560px;
+  max-width: 580px;
 }
 
+/* Brand row */
 .hz-landing__brand {
-  display: flex;
+  margin-bottom: 2.75rem;
+}
+
+.hz-landing__logotype {
+  height: 36px;
+  width: auto;
+  display: block;
+}
+
+/* Eyebrow label */
+.hz-landing__eyebrow {
+  display: inline-flex;
   align-items: center;
-  gap: 0.875rem;
-  margin-bottom: 2.5rem;
-}
-
-.hz-landing__brand-name {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.125rem;
-  font-weight: 800;
-  letter-spacing: 3px;
+  gap: 0.5rem;
+  background: rgba(240, 78, 55, 0.15);
+  color: #F04E37;
+  border: 1px solid rgba(240, 78, 55, 0.3);
+  border-radius: 100px;
+  padding: 0.3rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
+  margin-bottom: 1.5rem;
 }
 
+/* Headline */
 .hz-landing__headline {
   font-size: clamp(2.25rem, 5vw, 3.5rem);
   font-weight: 800;
@@ -87,15 +102,15 @@
 
 .hz-landing__headline em {
   font-style: normal;
-  color: var(--hz-color-accent, #F04E37);
+  color: #F04E37;
 }
 
 .hz-landing__sub {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 1.1rem;
-  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 1.05rem;
+  line-height: 1.75;
   margin: 0 0 2.5rem;
-  max-width: 440px;
+  max-width: 460px;
 }
 
 .hz-landing__actions {
@@ -109,20 +124,20 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 2rem;
-  background: var(--hz-color-accent, #F04E37);
+  background: #F04E37;
   color: #fff;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.15s ease;
-  box-shadow: 0 4px 16px rgba(240, 78, 55, 0.4);
+  box-shadow: 0 4px 20px rgba(240, 78, 55, 0.35);
 }
 
 .hz-landing__cta:hover {
   background: #d93e29;
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(240, 78, 55, 0.5);
+  box-shadow: 0 8px 28px rgba(240, 78, 55, 0.45);
   color: #fff;
   text-decoration: none;
 }
@@ -137,11 +152,11 @@
 .hz-landing__mockup {
   background: #fff;
   border-radius: 16px;
-  width: 320px;
+  width: 330px;
   overflow: hidden;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 32px 72px rgba(0, 0, 0, 0.35);
   transform: rotate(2deg);
-  transition: transform 0.3s ease;
+  transition: transform 0.35s ease;
 }
 
 .hz-landing__mockup:hover {
@@ -219,7 +234,7 @@
 ═══════════════════════════════════════ */
 
 .hz-landing__features {
-  background: var(--hz-color-dark, #1a1a2e);
+  background: #0f0c24;
   padding: 5rem 8vw;
 }
 
@@ -238,13 +253,13 @@
 .hz-landing__feature-icon {
   width: 56px;
   height: 56px;
-  background: rgba(75, 32, 212, 0.2);
+  background: rgba(58, 17, 200, 0.25);
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.25rem;
-  color: var(--hz-color-primary-light, #7c5ce8);
+  color: #8b6ef5;
 }
 
 .hz-landing__feature-icon svg {
@@ -261,8 +276,8 @@
 
 .hz-landing__feature p {
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.75;
   margin: 0;
 }
 
@@ -271,16 +286,56 @@
 ═══════════════════════════════════════ */
 
 .hz-landing__footer {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 2rem 8vw;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 0.8rem;
+  background: #080617;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 2.5rem 8vw;
 }
 
-.hz-landing__footer p {
-  margin: 0 0 0.25rem;
+.hz-landing__footer-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.hz-landing__footer-brand {
+  display: flex;
+  align-items: center;
+}
+
+.hz-landing__footer-logotype {
+  height: 22px;
+  width: auto;
+  display: block;
+  opacity: 0.7;
+}
+
+.hz-landing__footer-info {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+
+.hz-landing__footer-info p {
+  margin: 0;
+}
+
+.hz-landing__footer-info a {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+}
+
+.hz-landing__footer-info a:hover {
+  color: #fff;
+}
+
+.hz-landing__footer-copy {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.75rem;
+  margin: 0;
 }
 
 /* ═══════════════════════════════════════
@@ -292,6 +347,7 @@
     flex-direction: column;
     padding: 4rem 6vw;
     text-align: center;
+    gap: 3rem;
   }
   .hz-landing__sub { max-width: 100%; }
   .hz-landing__actions { justify-content: center; }

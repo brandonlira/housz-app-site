@@ -1,0 +1,3 @@
+notify_role: housz_admin
+notify_emails: {  }
+login_redirect: /housz

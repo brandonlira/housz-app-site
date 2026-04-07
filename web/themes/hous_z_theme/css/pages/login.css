@@ -1,269 +1,278 @@
 /**
  * @file
- * Full-page login layout — Zoocha split screen.
+ * Login page — full-screen split layout using body class override.
  */
 
-/* ── Override the default app shell on login pages ── */
-.hz-login-page .hz-header,
-.hz-login-page .hz-sidebar {
-  display: none;
+/* ── Hide the app shell on auth pages ── */
+.hz-auth-page .hz-header,
+.hz-auth-page .hz-sidebar,
+.hz-auth-page .hz-footer,
+.hz-auth-page .hz-breadcrumb,
+.hz-auth-page .hz-tabs,
+.hz-auth-page .hz-help {
+  display: none !important;
 }
 
-.hz-login-page .hz-body {
+.hz-auth-page .hz-body {
   margin-top: 0;
-}
-
-.hz-login-page body,
-body.path-user-login,
-body.path-user-password {
-  background: var(--hz-color-dark);
-}
-
-/* ── Full viewport split layout ── */
-.hz-login-wrap {
-  display: flex;
   min-height: 100vh;
 }
 
-/* ── Left panel — brand ── */
-.hz-login__brand {
-  flex: 1;
-  background: var(--hz-color-primary);
-  background-image:
-    radial-gradient(ellipse at 20% 80%, rgba(240, 78, 55, 0.25) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(124, 92, 232, 0.3) 0%, transparent 60%);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  padding: var(--hz-space-16) var(--hz-space-16);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Decorative circles */
-.hz-login__brand::before {
-  content: '';
-  position: absolute;
-  bottom: -80px;
-  left: -80px;
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.hz-login__brand::after {
-  content: '';
-  position: absolute;
-  top: -60px;
-  right: -60px;
-  width: 240px;
-  height: 240px;
-  border-radius: 50%;
-  background: rgba(240, 78, 55, 0.12);
-}
-
-.hz-login__logo {
-  margin-bottom: var(--hz-space-10);
-  position: relative;
-  z-index: 1;
-}
-
-.hz-login__logo img {
-  height: 52px;
-  width: auto;
-}
-
-.hz-login__logo-fallback {
-  display: flex;
-  align-items: center;
-  gap: var(--hz-space-3);
-}
-
-.hz-login__logo-fallback span {
-  color: var(--hz-color-white);
-  font-size: var(--hz-text-2xl);
-  font-weight: var(--hz-font-extrabold);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-}
-
-.hz-login__headline {
-  color: var(--hz-color-white);
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-  font-weight: var(--hz-font-extrabold);
-  line-height: 1.2;
-  margin: 0 0 var(--hz-space-5) 0;
-  position: relative;
-  z-index: 1;
-  max-width: 420px;
-}
-
-.hz-login__headline em {
-  font-style: normal;
-  color: var(--hz-color-accent);
-}
-
-.hz-login__tagline {
-  color: rgba(255, 255, 255, 0.65);
-  font-size: var(--hz-text-base);
-  line-height: 1.7;
-  margin: 0 0 var(--hz-space-10) 0;
-  position: relative;
-  z-index: 1;
-  max-width: 380px;
-}
-
-/* Feature list */
-.hz-login__features {
-  list-style: none;
-  margin: 0;
+.hz-auth-page .hz-main {
+  margin-left: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--hz-space-3);
-  position: relative;
-  z-index: 1;
 }
 
-.hz-login__features li {
-  display: flex;
-  align-items: center;
-  gap: var(--hz-space-3);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: var(--hz-text-sm);
-  font-weight: var(--hz-font-medium);
-}
-
-.hz-login__features li::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--hz-color-accent);
-  flex-shrink: 0;
-}
-
-/* ── Right panel — form ── */
-.hz-login__form-panel {
-  width: 480px;
-  flex-shrink: 0;
-  background: var(--hz-color-white);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: var(--hz-space-16) var(--hz-space-12);
-}
-
-.hz-login__form-header {
-  margin-bottom: var(--hz-space-8);
-}
-
-.hz-login__form-header h1,
-.hz-login__form-header .page-title {
-  font-size: var(--hz-text-2xl);
-  font-weight: var(--hz-font-extrabold);
-  color: var(--hz-color-dark);
-  margin: 0 0 var(--hz-space-2) 0;
-}
-
-.hz-login__form-header p {
-  color: var(--hz-color-gray-500);
-  font-size: var(--hz-text-sm);
+.hz-auth-page .hz-content {
+  max-width: none;
   margin: 0;
 }
 
-/* Form fields */
-.hz-login__form-panel .form-item {
-  margin-bottom: var(--hz-space-5);
+/* ── Split layout wrapper ── */
+.hz-auth-page .hz-layout {
+  flex-direction: row;
+  min-height: 100vh;
 }
 
-.hz-login__form-panel label {
+/* ══════════════════════════════════════
+   LEFT BRAND PANEL
+══════════════════════════════════════ */
+
+.hz-auth-page .hz-body::before {
+  content: '';
+  display: none; /* handled via actual DOM */
+}
+
+/* We inject the brand panel via CSS on the layout */
+.hz-auth-page .hz-body {
+  display: grid;
+  grid-template-columns: 480px 1fr;
+}
+
+.hz-auth-page .hz-main {
+  grid-column: 1;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 3.5rem;
+  min-height: 100vh;
+}
+
+/* ── Right brand panel ── */
+.hz-auth-page .hz-layout::before {
+  content: '';
+  position: fixed;
+  top: 0; right: 0;
+  width: calc(100vw - 480px);
+  height: 100vh;
+  background: #3a11c8;
+  background-image:
+    radial-gradient(ellipse at 15% 85%, rgba(240, 78, 55, 0.2) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 15%, rgba(90, 50, 220, 0.3) 0%, transparent 50%);
+  z-index: 0;
+}
+
+.hz-auth-page .hz-layout::after {
+  content: '';
+  position: fixed;
+  top: 0; right: 0;
+  width: calc(100vw - 480px);
+  height: 100vh;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(240,78,55,0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 40%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════
+   FORM PANEL (right)
+══════════════════════════════════════ */
+
+/* Header above form */
+.hz-auth-page .hz-main::before {
+  content: 'Welcome back';
   display: block;
-  font-size: var(--hz-text-sm);
-  font-weight: var(--hz-font-semibold);
-  color: var(--hz-color-gray-700);
-  margin-bottom: var(--hz-space-2);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 0.375rem;
+  font-family: inherit;
 }
 
-.hz-login__form-panel input[type="text"],
-.hz-login__form-panel input[type="password"],
-.hz-login__form-panel input[type="email"] {
+.hz-auth-page .hz-main::after {
+  content: 'Sign in to access the management portal';
+  display: block;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+  font-family: inherit;
+}
+
+/* Zoocha logotype at top of form */
+.hz-auth-page .hz-content::before {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 36px;
+  background: url('/themes/hous_z_theme/images/zoocha-logotype-dark.svg') no-repeat left center;
+  background-size: contain;
+  margin-bottom: 2.5rem;
+}
+
+/* ── Form fields ── */
+.hz-auth-page .form-item {
+  margin-bottom: 1.25rem;
+}
+
+.hz-auth-page label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hz-auth-page input[type="text"],
+.hz-auth-page input[type="password"],
+.hz-auth-page input[type="email"] {
   width: 100%;
-  padding: var(--hz-space-3) var(--hz-space-4);
-  border: 2px solid var(--hz-color-gray-200);
-  border-radius: var(--hz-radius);
-  font-family: var(--hz-font-sans);
-  font-size: var(--hz-text-base);
-  color: var(--hz-color-dark);
-  background: var(--hz-color-white);
-  transition: border-color var(--hz-transition-fast), box-shadow var(--hz-transition-fast);
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #1a1a2e;
+  background: #f9fafb;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   -webkit-appearance: none;
   appearance: none;
+  box-sizing: border-box;
 }
 
-.hz-login__form-panel input[type="text"]:focus,
-.hz-login__form-panel input[type="password"]:focus,
-.hz-login__form-panel input[type="email"]:focus {
+.hz-auth-page input[type="text"]:focus,
+.hz-auth-page input[type="password"]:focus,
+.hz-auth-page input[type="email"]:focus {
   outline: none;
-  border-color: var(--hz-color-primary);
-  box-shadow: 0 0 0 3px rgba(75, 32, 212, 0.12);
+  border-color: #3a11c8;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(58, 17, 200, 0.1);
 }
 
-.hz-login__form-panel input[type="submit"] {
+/* ── Submit button ── */
+.hz-auth-page input[type="submit"],
+.hz-auth-page .form-actions .button--primary {
   width: 100%;
-  padding: var(--hz-space-3) var(--hz-space-5);
-  margin-top: var(--hz-space-2);
-  font-size: var(--hz-text-base);
-  font-weight: var(--hz-font-bold);
+  padding: 0.9rem 1.5rem;
+  background: #3a11c8;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 16px rgba(58, 17, 200, 0.3);
+  margin-top: 0.5rem;
   letter-spacing: 0.3px;
 }
 
-/* Local tasks (Log in / Reset password tabs) */
-.hz-login__form-panel div.tabs {
-  border-bottom: 2px solid var(--hz-color-gray-200);
-  margin-bottom: var(--hz-space-6);
+.hz-auth-page input[type="submit"]:hover,
+.hz-auth-page .form-actions .button--primary:hover {
+  background: #2d0da0;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(58, 17, 200, 0.4);
 }
 
-/* Messages on login */
-.hz-login__form-panel .messages {
-  margin-bottom: var(--hz-space-5);
-  font-size: var(--hz-text-sm);
+/* ── Tabs (Log in / Reset password) ── */
+.hz-auth-page .tabs--primary,
+.hz-auth-page ul.tabs {
+  display: flex;
+  gap: 0;
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  border-bottom: 2px solid #e5e7eb;
 }
 
-/* Footer note */
-.hz-login__footer-note {
-  margin-top: var(--hz-space-8);
-  padding-top: var(--hz-space-6);
-  border-top: 1px solid var(--hz-color-gray-200);
-  font-size: var(--hz-text-xs);
-  color: var(--hz-color-gray-400);
+.hz-auth-page .tabs--primary li a,
+.hz-auth-page ul.tabs li a {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.hz-auth-page .tabs--primary li.is-active a,
+.hz-auth-page ul.tabs li.active a,
+.hz-auth-page .tabs--primary li a.is-active {
+  color: #3a11c8;
+  border-bottom-color: #3a11c8;
+}
+
+.hz-auth-page .tabs--primary li a:hover,
+.hz-auth-page ul.tabs li a:hover {
+  color: #3a11c8;
+  text-decoration: none;
+}
+
+/* ── Messages ── */
+.hz-auth-page .messages {
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+}
+
+/* ── Footer note ── */
+.hz-auth-page .hz-login__footer-note {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f3f4f6;
+  font-size: 0.72rem;
+  color: #9ca3af;
   text-align: center;
 }
 
+/* ── Back to home link ── */
+.hz-auth-page .hz-login__back,
+.hz-auth-page a.hz-login__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: #9ca3af;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 2rem;
+  transition: color 0.15s ease;
+}
+
+.hz-auth-page .hz-login__back:hover {
+  color: #3a11c8;
+  text-decoration: none;
+}
+
 /* ── Responsive ── */
-@media (max-width: 768px) {
-  .hz-login-wrap {
-    flex-direction: column;
+@media (max-width: 860px) {
+  .hz-auth-page .hz-body {
+    grid-template-columns: 1fr;
   }
 
-  .hz-login__brand {
-    padding: var(--hz-space-10) var(--hz-space-6);
-    min-height: 220px;
+  .hz-auth-page .hz-main {
+    grid-column: 1;
+    padding: 2.5rem 1.5rem;
+    min-height: 100vh;
   }
 
-  .hz-login__headline {
-    font-size: var(--hz-text-xl);
-  }
-
-  .hz-login__features {
+  .hz-auth-page .hz-layout::before,
+  .hz-auth-page .hz-layout::after {
     display: none;
-  }
-
-  .hz-login__form-panel {
-    width: 100%;
-    padding: var(--hz-space-8) var(--hz-space-6);
   }
 }

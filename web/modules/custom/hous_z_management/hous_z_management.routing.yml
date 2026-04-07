@@ -22,6 +22,14 @@ hous_z_management.bookings:
   requirements:
     _permission: 'manage houz bookings'
 
+hous_z_management.settings:
+  path: '/housz/settings'
+  defaults:
+    _form: '\Drupal\hous_z_management\Form\HouzSettingsForm'
+    _title: 'Settings'
+  requirements:
+    _permission: 'administer houz settings'
+
 hous_z_management.booking_action:
   path: '/housz/bookings/{booking_id}/{action}'
   defaults:

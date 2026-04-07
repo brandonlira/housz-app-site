@@ -6,6 +6,49 @@
  */
 
 /**
+ * Implements hook_theme_suggestions_page_alter().
+ *
+ * Add page template suggestions based on current route name.
+ */
+function hous_z_theme_theme_suggestions_page_alter(array &$suggestions, array $variables): void {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if ($route_name) {
+    $suggestion = 'page__' . str_replace('.', '__', $route_name);
+    $suggestions[] = $suggestion;
+  }
+}
+
+/**
+ * Implements hook_preprocess_html().
+ *
+ * Add route-based body classes and attach login library.
+ */
+function hous_z_theme_preprocess_html(array &$variables): void {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  $auth_routes = ['user.login', 'user.pass', 'user.register'];
+  if (in_array($route_name, $auth_routes)) {
+    $variables['attributes']['class'][] = 'hz-auth-page';
+    $variables['#attached']['library'][] = 'hous_z_theme/login';
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ *
+ * Inject a "back to home" link on auth pages.
+ */
+function hous_z_theme_preprocess_page(array &$variables): void {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  $auth_routes = ['user.login', 'user.pass', 'user.register'];
+  if (in_array($route_name, $auth_routes)) {
+    $variables['hz_back_link'] = [
+      '#type'       => 'markup',
+      '#markup'     => '<a href="/" class="hz-login__back"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Back to home</a>',
+    ];
+  }
+}
+
+/**
  * Implements hook_preprocess_image_widget().
  */
 function hous_z_theme_preprocess_image_widget(array &$variables): void {

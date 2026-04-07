@@ -57,6 +57,8 @@ module:
   inline_entity_form: 0
   jsonapi: 0
   jsonapi_extras: 0
+  layout_builder: 0
+  layout_discovery: 0
   link: 0
   mailer_transport: 0
   mailsystem: 0
