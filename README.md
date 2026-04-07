@@ -1,61 +1,46 @@
 # Hous-Z App Site
 
-Drupal 11 backend for the Hous-Z internal booking app. The site manages rooms, beds, availability, reservations, and email notifications for a pub-hotel used by company staff.
+Drupal 11 backend for the Hous-Z internal room booking platform at Zoocha.
 
-The mobile app consumes JSON from Drupal. Drupal is the source of truth for:
+Employees book rooms via the Flutter mobile app. Managers review and approve bookings via the web portal at `/housz`.
 
-- room and bed inventory
-- calendar availability
-- booking creation
-- booking approval or cancellation
-- booking lookup by requester email
-- email notifications to guest and manager
+---
 
 ## Business Flow
 
-The intended app flow is:
+1. Employee opens the app and logs in via OAuth.
+2. Employee selects check-in and check-out dates.
+3. App fetches available rooms and bed types for that period.
+4. Employee selects room and bed type and submits a booking request.
+5. Booking is created with status `pending`.
+6. Manager receives an email notification and approves or cancels via `/housz/bookings`.
+7. Employee receives a confirmation email.
 
-1. User logs into the app.
-2. User selects check-in and check-out dates.
-3. App requests available rooms and bed types for that date range.
-4. App shows only available rooms/beds.
-5. User selects room and bed type.
-6. App sends booking request to Drupal.
-7. Manager reviews the booking and updates the status to `confirmed` or `cancelled`.
-8. Drupal notifies the guest and manager by email.
+---
 
 ## Project Structure
 
-- `web/modules/custom/hous_z_api`
-  Custom REST API endpoints and booking email logic.
-- `web/modules/custom/hous_z_management`
-  Admin dashboard, booking management UI, and related Drupal management features.
-- `config/sync`
-  Drupal configuration export, including REST resources, fields, views, and mail settings.
+```
+web/modules/custom/hous_z_api        REST API endpoints and email notifications
+web/modules/custom/hous_z_management Admin portal, dashboard, settings
+web/themes/hous_z_theme              Custom Starterkit theme (Zoocha branding)
+config/sync                          Drupal configuration export
+oauth-keys/                          OAuth RSA keys (not committed to git)
+```
 
-## Key Dependencies
-
-- Drupal 11
-- `drupal/bee_hotel`
-- `drupal/rest`
-- `drupal/serialization`
-- `drupal/message`
-- `drupal/message_notify`
-- `drupal/mailsystem`
-- `drupal/simple_oauth`
-- `drush/drush`
+---
 
 ## Local Environment
 
-This repository is configured for DDEV.
+Configured for DDEV.
 
-- Project name: `hous-z-app-site`
-- Base URL: `https://hous-z-app-site.ddev.site`
-- Docroot: `web`
-- PHP: `8.3`
-- Database: `MariaDB 10.11`
-
-Useful commands:
+```
+Project:  hous-z-app-site
+URL:      https://hous-z-app-site.ddev.site
+Docroot:  web
+PHP:      8.3
+Database: MariaDB 10.11
+```
 
 ```bash
 ddev start
@@ -65,74 +50,114 @@ ddev drush cim -y
 ddev drush cr
 ```
 
-## Custom Modules
+---
 
-### `hous_z_api`
+## Key Dependencies
 
-Main responsibilities:
+- Drupal 11
+- `drupal/bat` + `drupal/bee_hotel` — room and booking management
+- `drupal/rest` + `drupal/serialization` — REST API
+- `drupal/simple_oauth` — OAuth 2.0 authentication
+- `drupal/consumers` — OAuth client management
+- `drupal/basic_auth` — basic auth (dev/testing only)
+- `drupal/message` + `drupal/message_notify` — email notifications
+- `drush/drush`
 
-- create reservations
-- update reservation status
-- return reservations for a given email
-- send booking emails
+---
 
-Important files:
+## Authentication
 
-- [`web/modules/custom/hous_z_api/src/Service/ReservationService.php`](./web/modules/custom/hous_z_api/src/Service/ReservationService.php)
-- [`web/modules/custom/hous_z_api/src/Service/BookingNotifier.php`](./web/modules/custom/hous_z_api/src/Service/BookingNotifier.php)
-- [`web/modules/custom/hous_z_api/hous_z_api.module`](./web/modules/custom/hous_z_api/hous_z_api.module)
-- [`web/modules/custom/hous_z_api/src/Plugin/rest/resource/ReservationResource.php`](./web/modules/custom/hous_z_api/src/Plugin/rest/resource/ReservationResource.php)
-- [`web/modules/custom/hous_z_api/src/Plugin/rest/resource/UserReservationsResource.php`](./web/modules/custom/hous_z_api/src/Plugin/rest/resource/UserReservationsResource.php)
-- [`web/modules/custom/hous_z_api/src/Plugin/rest/resource/ReservationStatusResource.php`](./web/modules/custom/hous_z_api/src/Plugin/rest/resource/ReservationStatusResource.php)
+The API uses **OAuth 2.0** via `simple_oauth`.
 
-### `hous_z_management`
+### OAuth client (Flutter app)
 
-Main responsibilities:
-
-- admin booking management
-- dashboard and listing pages
-- state creation post-updates like `confirmed` and `cancelled`
-
-## Booking Data Model
-
-The booking flow uses BAT/Bee Hotel entities:
-
-- `bat_unit`
-  Room/unit record
-- `bat_event`
-  Availability/event instance for the requested stay
-- `bat_booking`
-  Booking record linked to the event
-
-Relevant booking fields:
-
-- `field_requester_email`
-- `field_event_state`
-- `booking_start_date`
-- `booking_end_date`
-- `field_booking_details`
-- `field_check_in_time`
-- `field_check_out_time`
-
-Relevant room fields:
-
-- `field_address`
-- `field_manager_email`
-- `field_beds`
-- `field_cover_image`
-
-## Configuration
-
-### Minimum Stay
-
-The minimum number of nights required per booking is controlled via Drupal config:
-
-```bash
-ddev drush cset hous_z_api.settings min_stay 2
-ddev drush cr
+```
+Client ID:     housz-flutter-app
+Redirect URI:  housz://oauth/callback
+Scope:         api
+Grant types:   Authorization Code + PKCE (production), Client Credentials (testing)
 ```
 
-Default is `2`. The value is read by `GET /api/rooms` and returned in each room's `calendarData.minStay` field.
+Token endpoint: `POST /oauth/token`
+Authorize endpoint: `GET /oauth/authorize`
+
+RSA keys are stored in `oauth-keys/` (excluded from git). Regenerate on each environment:
+
+```bash
+mkdir -p oauth-keys
+openssl genrsa -out oauth-keys/private.key 2048
+openssl rsa -in oauth-keys/private.key -pubout -out oauth-keys/public.key
+chmod 600 oauth-keys/private.key
+```
+
+Then update the key paths at `/admin/config/services/consumer`.
+
+### REST resource authentication
+
+All REST resources accept `cookie` and `oauth2`. Anonymous access is disabled.
+
+### Permissions
+
+| Role | Access |
+|---|---|
+| `anonymous` | None |
+| `authenticated` | GET rooms/availability, POST reservation, GET own reservations |
+| `housz_admin` | All of the above + PATCH status, DELETE reservation, GET all bookings |
+
+---
+
+## API Endpoints
+
+All requests require:
+```
+Authorization: Bearer {access_token}
+Accept: application/json
+```
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/rooms` | Available rooms for a date range |
+| GET | `/api/availability/{unitId}/{bedType}/{start}/{end}` | Daily availability calendar |
+| GET | `/api/full-occupancy` | Fully booked dates across all rooms |
+| POST | `/api/reservation` | Create a reservation |
+| POST | `/api/user/reservations` | Reservations by requester email |
+| PATCH | `/api/reservation/status` | Update status (manager only) |
+| DELETE | `/api/reservation` | Delete a reservation (manager only) |
+
+Query parameter `_format=json` required on all endpoints.
+
+bedType values: `single_bed`, `double_bed`
+
+### Create reservation — body
+
+```json
+{
+  "unitId": "1",
+  "bedType": "single_bed",
+  "checkInDate": "2026-05-01",
+  "checkOutDate": "2026-05-05",
+  "email": "employee@zoocha.com",
+  "notes": "optional"
+}
+```
+
+### Update status — body
+
+```json
+{
+  "booking_id": 42,
+  "status": "confirmed"
+}
+```
+
+Status values: `confirmed`, `cancelled`
+
+### Booking status flow
+
+```
+pending → confirmed (manager approves)
+pending → cancelled (manager cancels)
+```
 
 ---
 
@@ -140,326 +165,101 @@ Default is `2`. The value is read by `GET /api/rooms` and returned in each room'
 
 A booking occupies nights from check-in (inclusive) to check-out (exclusive).
 
-- A booking for **01/05 → 03/05** occupies the nights of **01/05 and 02/05**.
-- **03/05** is free and can be used as check-in for the next booking (back-to-back).
+- A booking for **01/05 → 03/05** occupies nights **01/05 and 02/05**.
+- **03/05** is free and can be used as check-in for the next booking (back-to-back bookings allowed).
 
-A bed type is considered unavailable on a given day when the number of overlapping bookings for that type equals or exceeds `field_bed_quantity` on the unit.
-
----
-
-## API Endpoints
-
-### List Rooms
-
-`GET /api/rooms`
-
-Optional query parameters: `checkInDate`, `checkOutDate`.
-
-Response:
-
-```json
-{
-  "rooms": [
-    {
-      "room": {
-        "roomName": "Coder Alley Room",
-        "description": "...",
-        "imageUrl": "https://...",
-        "tags": ["ensuite"],
-        "availableBeds": [
-          { "type": "single_bed", "quantity": 2 },
-          { "type": "double_bed", "quantity": 1 }
-        ]
-      },
-      "calendarData": {
-        "checkInDate": "2025-06-16",
-        "checkOutDate": "2025-06-20",
-        "minStay": 2
-      }
-    }
-  ]
-}
-```
+A bed type is unavailable on a day when the number of overlapping bookings equals `field_bed_quantity` on the unit.
 
 ---
 
-### Check Availability (per bed type)
+## Data Model
 
-`GET /api/availability/{unitId}/{bedType}/{start}/{end}`
+### BAT entities
 
-- `bedType`: `single_bed` or `double_bed`
-- `start` / `end`: `YYYY-MM-DD`
+- `bat_unit` — room record
+- `bat_event` — availability event for the stay
+- `bat_booking` — booking record linked to the event
 
-Returns a calendar tree with per-day availability for the given unit and bed type.
+### Room fields
 
----
+- `field_beds` (paragraph: `field_bed_type`, `field_bed_quantity`)
+- `field_address`
+- `field_manager_email`
+- `field_cover_image`
 
-### Full Occupancy Calendar
+### Booking fields
 
-`GET /api/full-occupancy`
-
-Returns a calendar of dates where **all** bed types across **all** units are fully booked. Used by the app to block dates on the main calendar before the user selects a room.
-
----
-
-### Create Reservation
-
-`POST /api/reservation`
-
-Request:
-
-```json
-{
-  "unitId": 1,
-  "bedType": "single_bed",
-  "checkInDate": "2025-06-16",
-  "checkOutDate": "2025-06-20",
-  "email": "usuario@exemplo.com",
-  "checkInTime": "14:00",
-  "checkOutTime": "11:00",
-  "details": "Algumas observacoes"
-}
-```
-
-Response:
-
-```json
-{
-  "room": {
-    "roomName": "Coder Alley Room",
-    "bedType": "single_bed",
-    "imageUrls": [],
-    "imageCount": 0,
-    "address": "The Seed Warehouse",
-    "managerEmail": "brandon@zoocha.com"
-  },
-  "bookingInfo": {
-    "email": "usuario@exemplo.com",
-    "checkIn": {
-      "date": "2025-06-16",
-      "time": "14:00"
-    },
-    "checkOut": {
-      "date": "2025-06-20",
-      "time": "11:00"
-    }
-  },
-  "details": "Algumas observacoes"
-}
-```
-
-### Get User Reservations
-
-`POST /api/user/reservations`
-
-Request:
-
-```json
-{
-  "email": "usuario@exemplo.com"
-}
-```
-
-Response:
-
-```json
-{
-  "user": {
-    "email": "usuario@exemplo.com",
-    "totalReservations": 1
-  },
-  "reservations": [
-    {
-      "bookingId": 15,
-      "room": {
-        "unitId": 1,
-        "roomName": "Coder Alley Room",
-        "bedType": "single_bed",
-        "address": "The Seed Warehouse",
-        "managerEmail": "brandon@zoocha.com"
-      },
-      "dates": {
-        "checkInDate": "2025-06-16",
-        "checkInTime": "14:00",
-        "checkOutDate": "2025-06-20",
-        "checkOutTime": "11:00"
-      },
-      "status": "pending",
-      "details": "Algumas observacoes",
-      "createdAt": "2025-06-15T10:30:00Z"
-    }
-  ]
-}
-```
-
-### Delete Reservation
-
-`DELETE /api/reservation/{id}`
-
-Only the booking owner or a user with the `manage housz bookings` permission can delete a booking. Returns `Access denied` otherwise.
+- `field_requester_email`
+- `field_event_state`
+- `booking_start_date` / `booking_end_date`
+- `field_booking_details`
 
 ---
-
-### Update Reservation Status
-
-`PATCH /api/reservation/status`
-
-Request:
-
-```json
-{
-  "bookingId": 15,
-  "status": "confirmed"
-}
-```
-
-Allowed status values:
-
-- `confirmed`
-- `cancelled`
-
-Response:
-
-```json
-{
-  "bookingId": 15,
-  "status": "confirmed",
-  "message": "Booking status updated successfully."
-}
-```
-
-## Email Flows
-
-The current email implementation is code-driven from `hous_z_api` and sends:
-
-- booking created to manager
-- booking created confirmation to guest
-- booking confirmed to guest
-- booking cancelled to guest
-- booking status changed to manager
-
-Emails are triggered by entity hooks on `bat_booking` insert and update.
-
-## Permissions and REST Access
-
-Drupal REST resources require explicit permissions per method and resource.
-
-Examples:
-
-- `restful post reservation_resource`
-- `restful post user_reservations_resource`
-- `restful patch reservation_status_resource`
-
-If the app consumes these endpoints without a Drupal login session, review authentication carefully. Current config uses `cookie` authentication on the exported REST resources, which is usually not ideal for a mobile app.
-
-## Email Configuration
-
-Current exported mail config points to Drupal's PHP mail/sendmail defaults.
-
-Files to review:
-
-- [`config/sync/system.mail.yml`](./config/sync/system.mail.yml)
-- [`config/sync/mailsystem.settings.yml`](./config/sync/mailsystem.settings.yml)
-
-Before relying on notifications in production, validate:
-
-- Drupal can send email in the target environment
-- each room has `field_manager_email` filled in
-- the app sends a valid requester email
-
-## Testing
-
-Apply updates:
-
-```bash
-ddev drush updb -y
-ddev drush cim -y
-ddev drush cr
-```
-
-Create reservation:
-
-```bash
-curl --location --request POST 'https://hous-z-app-site.ddev.site/api/reservation' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "unitId": 1,
-    "bedType": "single_bed",
-    "checkInDate": "2025-06-16",
-    "checkOutDate": "2025-06-20",
-    "email": "usuario@exemplo.com",
-    "checkInTime": "14:00",
-    "checkOutTime": "11:00",
-    "details": "Teste de reserva"
-  }'
-```
-
-Get user reservations:
-
-```bash
-curl --location --request POST 'https://hous-z-app-site.ddev.site/api/user/reservations' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "email": "usuario@exemplo.com"
-  }'
-```
-
-Confirm reservation:
-
-```bash
-curl --location --request PATCH 'https://hous-z-app-site.ddev.site/api/reservation/status' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "bookingId": 15,
-    "status": "confirmed"
-  }'
-```
-
-Cancel reservation:
-
-```bash
-curl --location --request PATCH 'https://hous-z-app-site.ddev.site/api/reservation/status' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "bookingId": 15,
-    "status": "cancelled"
-  }'
-```
-
-## Known Gaps and Cleanup Items
-
-- The legacy endpoint `GET /api/my-reservations/{email}` still exists alongside `POST /api/user/reservations`. Both return reservation history. Treat the legacy one as deprecated and remove once the app migrates.
-- REST authentication is still cookie-based in config export. For a mobile app, OAuth (`simple_oauth`) or token-based auth is preferable.
-- Message template config from earlier email experiments still exists in `config/sync`, but the active email flow runs through `hook_mail()` in `hous_z_api.module`. The old config can be removed.
-- End-to-end email delivery depends on environment mail transport. Validate with a real SMTP provider before going live.
 
 ## Management Portal
 
-The web portal at `/housz` is for **managers only** (role `housz_admin`). Staff book via the mobile app.
+Web portal for managers at `/housz` (role `housz_admin` required).
 
-| Page | URL | Access |
-|---|---|---|
-| Dashboard | `/housz` | `housz_admin` |
-| Bookings list | `/housz/bookings` | `housz_admin` |
-| Rooms list | `/housz/units` | `housz_admin` |
-| Settings | `/housz/settings` | `housz_admin` |
-| Login | `/user/login` | public |
-
-### Notification settings
-
-At `/housz/settings` a manager can configure:
-
-- **Notify role** — all active users with `housz_admin` receive booking emails automatically
-- **Additional emails** — extra recipients with no Drupal account required
-
-Both are cumulative. The fallback is `field_manager_email` on the room if nothing is configured.
-
-### Roles
-
-| Role | Purpose |
+| Page | URL |
 |---|---|
-| `administrator` | Full Drupal access |
-| `housz_admin` | Manager portal only — bookings, rooms, settings, email notifications |
+| Dashboard | `/housz` |
+| Bookings | `/housz/bookings` |
+| Rooms | `/housz/units` |
+| Settings | `/housz/settings` |
+
+### Notification settings (`/housz/settings`)
+
+- **Notify role** — all users with `housz_admin` receive booking emails automatically
+- **Additional emails** — extra recipients (no Drupal account required)
+
+Both lists are cumulative. Fallback is `field_manager_email` on the room.
+
+---
+
+## Email Notifications
+
+Triggered via `hook_mail()` in `hous_z_api.module` on booking insert and update.
+
+| Event | Recipients |
+|---|---|
+| Booking created | Manager(s) + requester |
+| Booking confirmed | Requester |
+| Booking cancelled | Requester |
+| Status changed | Manager(s) |
+
+Template: `web/modules/custom/hous_z_api/templates/email/hous-z-api-email.html.twig`
+
+---
+
+## Configuration
+
+### Minimum stay
+
+```bash
+ddev drush cset hous_z_api.settings min_stay 2
+ddev drush cr
+```
+
+Default is `2` nights. Returned in `GET /api/rooms` as `calendarData.minStay`.
+
+### Notification recipients
+
+```bash
+ddev drush cset hous_z_management.settings notify_role housz_admin
+ddev drush cr
+```
+
+---
+
+## Testing
+
+The Postman collection `hous-z-postman-collection.json` covers all endpoints.
+
+1. Import into Postman
+2. Run **Auth → Get Token** — token is saved automatically to `{{access_token}}`
+3. Run any other request
+
+See `FLUTTER_INTEGRATION.md` for the full Flutter integration guide and OAuth setup.
 
 ---
 
@@ -467,22 +267,27 @@ Both are cumulative. The fallback is `field_manager_email` on the room if nothin
 
 ### 2026-04
 
-- Fixed availability date boundary: check-out day is now correctly excluded from occupancy checks, allowing back-to-back bookings.
-- Fixed overlap query to use strict inequality (`<` / `>`), consistent with the date boundary rule.
-- Added ownership check to `DELETE /api/reservation/{id}`: only the booking owner or an admin can delete.
-- Moved `minStay` from hardcoded value to `hous_z_api.settings` config (`min_stay` key).
-- Added `hous_z_api` as declared dependency of `hous_z_management` to prevent container errors.
-- Created custom `hous_z_theme` (Starterkit-based) with Zoocha branding (`#3a11c8` purple, `#F04E37` coral).
-- Built management portal at `/housz` with dashboard, bookings list, rooms list, and settings pages.
-- Role `housz_admin` created with scoped permissions (no Drupal admin access).
-- Booking email notifications now driven by role or manually listed emails via `/housz/settings`.
-- Email templates migrated to Drupal Twig (`templates/email/hous-z-api-email.html.twig`).
-- Login page redesigned with split-screen layout (form left, brand panel right).
+- OAuth 2.0 configured with `simple_oauth` — Authorization Code + PKCE for production, Client Credentials for testing
+- Anonymous access removed from all REST resources
+- Basic auth removed from production REST resources
+- RSA keys added to `.gitignore`
+- `grant simple_oauth codes` permission granted to authenticated and `housz_admin` roles
+- `simple_oauth` upgraded from 6.0.0 to 6.1.0
+- Postman collection updated with OAuth token flow
+- `FLUTTER_INTEGRATION.md` created for the Flutter team
+- Management portal built at `/housz` (dashboard, bookings, rooms, settings)
+- Role `housz_admin` created with scoped permissions
+- Login page redesigned with split-screen layout (Zoocha branding)
+- Booking email notifications configurable by role or manual email list
+- Fixed availability date boundary — back-to-back bookings now allowed
+- Fixed `AvailabilityResource` stdClass array error
+
+---
 
 ## Recommended Next Steps
 
-1. Decide which reservation history endpoint is canonical (`/api/my-reservations` vs `/api/user/reservations`) and remove the other.
-2. Align REST authentication with the mobile app strategy (OAuth recommended).
-3. Test booking creation, confirmation, and cancellation with real email delivery.
-4. Review final copy for all outgoing emails in English or Portuguese as needed.
-5. Give the app team the final endpoint contract from this README.
+1. Regenerate OAuth RSA keys on the production server
+2. Update `client_secret` for production and store securely (not in git)
+3. Test full Authorization Code + PKCE flow with the Flutter app using `flutter_appauth`
+4. Validate email delivery with a real SMTP provider before go-live
+5. Remove legacy endpoint `GET /api/my-reservations/{email}` once app migrates to `POST /api/user/reservations`

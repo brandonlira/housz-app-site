@@ -136,7 +136,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"unit_id\": \"{{unit_id}}\",\n  \"bed_type\": \"{{bed_type}}\",\n  \"check_in\": \"{{check_in}}\",\n  \"check_out\": \"{{check_out}}\",\n  \"requester_email\": \"{{requester_email}}\",\n  \"notes\": \"Postman test booking\"\n}",
+              "raw": "{\n  \"unitId\": \"{{unit_id}}\",\n  \"bedType\": \"{{bed_type}}\",\n  \"checkInDate\": \"{{check_in}}\",\n  \"checkOutDate\": \"{{check_out}}\",\n  \"email\": \"{{requester_email}}\",\n  \"notes\": \"Postman test booking\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -172,7 +172,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"booking_id\": \"{{booking_id}}\",\n  \"status\": \"confirmed\"\n}",
+              "raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"status\": \"confirmed\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -190,7 +190,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"booking_id\": \"{{booking_id}}\",\n  \"status\": \"cancelled\"\n}",
+              "raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"status\": \"cancelled\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -208,7 +208,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"booking_id\": \"{{booking_id}}\"\n}",
+              "raw": "{\n  \"bookingId\": \"{{booking_id}}\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
