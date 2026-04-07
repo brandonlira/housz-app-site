@@ -4,6 +4,12 @@ status: true
 dependencies:
   config:
     - filter.format.basic_html
+    - rest.resource.availability_resource
+    - rest.resource.full_occupancy_resource
+    - rest.resource.hous_z_api_my_reservations
+    - rest.resource.reservation_resource
+    - rest.resource.rooms_resource
+    - rest.resource.user_reservations_resource
   module:
     - bee
     - comment
@@ -12,8 +18,10 @@ dependencies:
     - contact
     - file
     - filter
+    - rest
     - search
     - shortcut
+    - simple_oauth
     - system
 _core:
   default_config_hash: cFrlqjtkTfvY3RGccjJkPf1SGIfJ942IrxTLWAO4mgA
@@ -27,7 +35,15 @@ permissions:
   - 'access shortcuts'
   - 'access site-wide contact form'
   - 'delete own files'
+  - 'grant simple_oauth codes'
   - 'post comments'
+  - 'restful get availability_resource'
+  - 'restful get full_occupancy_resource'
+  - 'restful get hous_z_api_my_reservations'
+  - 'restful get rooms_resource'
+  - 'restful patch reservation_resource'
+  - 'restful post reservation_resource'
+  - 'restful post user_reservations_resource'
   - 'search content'
   - 'skip comment approval'
   - 'use text format basic_html'

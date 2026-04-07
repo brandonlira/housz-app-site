@@ -1,0 +1,29 @@
+uuid: 5c7b3291-9fcf-47df-9bf4-c38bffeb40b4
+langcode: en
+status: true
+dependencies: {  }
+id: api
+name: api
+description: 'Access to Hous-Z API endpoints'
+grant_types:
+  authorization_code:
+    status: true
+    description: 'Authorization Code'
+  client_credentials:
+    status: true
+    description: 'Client Credentials'
+  implicit:
+    status: false
+    description: ''
+  refresh_token:
+    status: true
+    description: 'Refresh Token'
+  password:
+    status: true
+    description: 'Resource owner password'
+umbrella: false
+parent: null
+granularity_id: permission
+granularity_configuration:
+  permission: ''
+  role: null

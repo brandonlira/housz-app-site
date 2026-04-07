@@ -1,13 +1,15 @@
-uuid: 15fef7d1-51e2-4746-9020-7d5d2920da0a
+uuid: cb159101-47ba-4fd7-9eb9-508bdf678fd2
 langcode: en
 status: true
 dependencies:
   module:
-    - rest
-    - hous_z_api
+    - basic_auth
+    - node
     - serialization
-id: reservation_resource
-plugin_id: reservation_resource
+_core:
+  default_config_hash: 6ONvVCbif1qZnRfa8XmPzMwNKLDhF6K7eTrTgIVtP5E
+id: entity.node
+plugin_id: 'entity:node'
 granularity: resource
 configuration:
   methods:
@@ -18,5 +20,4 @@ configuration:
   formats:
     - json
   authentication:
-    - cookie
-    - oauth2
+    - basic_auth

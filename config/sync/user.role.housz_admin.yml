@@ -2,11 +2,22 @@ uuid: 7a37a172-6e24-4885-833d-b0bc73f163b7
 langcode: en
 status: true
 dependencies:
+  config:
+    - rest.resource.availability_resource
+    - rest.resource.full_occupancy_resource
+    - rest.resource.hous_z_api_my_reservations
+    - rest.resource.houz_bookings
+    - rest.resource.reservation_resource
+    - rest.resource.reservation_status_resource
+    - rest.resource.rooms_resource
+    - rest.resource.user_reservations_resource
   module:
     - bat_booking
     - bat_event
     - bat_unit
     - hous_z_management
+    - rest
+    - simple_oauth
     - system
     - toolbar
 _core:
@@ -20,8 +31,19 @@ permissions:
   - 'access toolbar'
   - 'administer houz settings'
   - 'book units'
+  - 'grant simple_oauth codes'
   - 'manage houz bookings'
   - 'manage houz units'
+  - 'restful delete reservation_resource'
+  - 'restful get availability_resource'
+  - 'restful get full_occupancy_resource'
+  - 'restful get hous_z_api_my_reservations'
+  - 'restful get houz_bookings'
+  - 'restful get rooms_resource'
+  - 'restful patch reservation_resource'
+  - 'restful patch reservation_status_resource'
+  - 'restful post reservation_resource'
+  - 'restful post user_reservations_resource'
   - 'update any bat_booking entity'
   - 'update any bat_booking entity of bundle standard'
   - 'update any bat_event entity'
